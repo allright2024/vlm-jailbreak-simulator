@@ -1,40 +1,20 @@
-import importlib
-import sys
+"""Attack registration hub.
 
-_method_mapping = {
-    'FigStep': 'multi_attacks.figstep',
-    'Hades': 'multi_attacks.hades',
-    'JOOD': 'multi_attacks.JOOD',
-    'BestOfN': 'multi_attacks.best_of_n',
-    'Visual_Adv': 'image_attacks.visual_adv',
-    'ImgJP': 'image_attacks.imgjp',
-    'DeltaJP': 'image_attacks.deltajp'
-}
+The attack implementations live in per-method packages under ``multi_attacks/``
+(and ``image_attacks/visual_adv`` for the pure image attack). Importing this
+module imports each of them so their ``@register_attack`` decorators run; the
+pipeline keeps doing ``import core.attacks`` to make every attack resolvable via
+``core.get_attack(...)``.
+"""
 
-def get_method_class(method):
-    """
-    Returns the method class given the method name. This is used to access static methods.
-    """
-    if method not in _method_mapping:
-        raise ValueError(f"Can not find method {method}")
-    module_path = _method_mapping[method]
-    print("module_path")
-    print(module_path)
-    
-    # 기존 모듈이 로드되어 있다면 제거
-    if module_path in sys.modules:
-        del sys.modules[module_path]
-    
-    module = importlib.import_module(module_path)
-    method_class = getattr(module, method)  # Class name assumed to be the same as method name
-    print("method_class")
-    print(method_class)
-    return method_class    
+import image_attacks.delta_jp    # noqa: F401  (registers "DeltaJP")
+import image_attacks.visual_adv  # noqa: F401  (registers "VisualAdv")
+import multi_attacks.best_of_n   # noqa: F401  (registers "BestOfN")
+import multi_attacks.figstep     # noqa: F401  (registers "FigStep")
+import multi_attacks.force       # noqa: F401  (registers "FORCE")
+import multi_attacks.hades       # noqa: F401  (registers "HADES")
+import multi_attacks.jood        # noqa: F401  (registers "JOOD")
+import multi_attacks.jps         # noqa: F401  (registers "JPS")
+import multi_attacks.ultrabreak  # noqa: F401  (registers "UltraBreak")
 
-def init_method(method_class,method_config):
-
-    output = method_class(**method_config)
-    #output.get_model_and_tokenizer(model_name)
-    print("output")
-    print(output)
-    return output
+__all__: list[str] = []
