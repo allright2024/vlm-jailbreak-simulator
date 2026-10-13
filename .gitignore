@@ -4,3 +4,18 @@ __pycache__/
 completions/
 results/
 test_cases/
+
+*.ttf
+*.log
+*.pt
+
+# large benchmark data and run outputs (kept local)
+/data/
+runs/
+# run logs and ASR result dumps (regenerated; never a source of truth)
+*.out
+asr_results*.jsonl
+*.bak
+
+# secrets (never commit)
+.env
