@@ -23,6 +23,7 @@ import core.datasets  # noqa: F401  registers datasets
 from core import get_attack, get_dataset, list_attacks, list_datasets, write_jsonl
 from core.pipeline import build_test_cases, select_eligible
 from core.config import load_attack_config
+from core.data import require_data
 
 
 def parse_args():
@@ -44,6 +45,14 @@ def main():
     dataset = get_dataset(args.dataset)()
     attack_cls = get_attack(args.attack)
     config = load_attack_config(attack_cls.name, args.config)
+    # Data is distributed separately (for example via a mounted Drive). Fail
+    # before constructing attacks or writing partial outputs, with every missing
+    # path and the environment variable needed to resolve it.
+    require_data(
+        datasets=[dataset.name],
+        attacks=[attack_cls.name],
+        attack_configs={attack_cls.name: config},
+    )
     attack = attack_cls(config)
 
     cats = args.categories.split(",") if args.categories else None
