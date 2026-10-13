@@ -25,6 +25,7 @@ from .registry import (
     list_datasets,
 )
 from .dataset import Dataset, REPO_ROOT, DATA_ROOT
+from .paths import DATA_ROOT_ENV, portable_path, resolve_path
 from .attack import Attack
 from .model import TargetModel, Judge
 from .io import read_jsonl, write_jsonl, append_jsonl, iter_jsonl
@@ -50,6 +51,9 @@ __all__ = [
     # paths
     "REPO_ROOT",
     "DATA_ROOT",
+    "DATA_ROOT_ENV",
+    "portable_path",
+    "resolve_path",
     # io
     "read_jsonl",
     "write_jsonl",
