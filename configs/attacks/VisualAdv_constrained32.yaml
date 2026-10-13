@@ -1,0 +1,11 @@
+# VisualAdv constrained eps=32 ablation (L_inf-bounded), distinct from the
+# unconstrained official default in VisualAdv_official.yaml.
+experiment_profile: official
+surrogate: LLaVA_v1_5
+image_path: data/FORCE/clean.jpeg
+target_path: data/legacy/derogatory_corpus.csv
+epsilon: 32
+alpha: 1
+n_iters: 5000
+constrained: true
+batch_size: 8

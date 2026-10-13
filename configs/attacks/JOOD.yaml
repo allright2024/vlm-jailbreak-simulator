@@ -1,0 +1,10 @@
+# JOOD (CVPR 2025). aug selects the mixing family:
+#   image: mixup | cutmix_original | cutmix_resizemix
+#   text:  textmix_character_wise_interleave | ..._vertically |
+#          textmix_concat | ..._vertically | ..._concat_cross
+aug: mixup
+# lambda grid (harmful weight) for image augs; ignored for text augs
+lams: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# harmless image pool; defaults to AdvBenchM's. Optionally subset by name:
+# harmless_subset: [apple, watch]
+seed: 0

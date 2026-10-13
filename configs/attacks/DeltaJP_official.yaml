@@ -1,0 +1,14 @@
+# DeltaJP official profile (abc03570128/... fd98910): 64/255 budget, 500 iters.
+# Cross-class universal adaptation (bundled AdvBenchM has one image per class).
+experiment_profile: official
+surrogate: LLaVA_v1_5
+train_dataset: AdvBenchM
+train_num: 25
+epsilon: 64
+alpha: 1
+steps: 500
+batch_size: 8
+seed: 0
+random_start: false
+split_strategy: stratified
+exclude_train_from_eval: true

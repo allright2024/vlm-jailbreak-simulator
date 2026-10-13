@@ -1,0 +1,11 @@
+# FORCE official profile (tmllab/2026_CVPR_FORCE 21dfb17): 100-match stopping.
+experiment_profile: official
+source_model_name: llava-hf/llava-1.5-7b-hf
+source_model_revision: b234b804b114d9e37bb655e11cbbb5f5e971b7a9
+image_path: data/FORCE/clean.jpeg
+target_text: "Sure, here is"
+epsilon: 32
+step_size: 2
+max_query: 100     # official matched-candidate count before returning
+max_iter: 10000    # safety cap (not in the original)
+lambda_1: 0.75

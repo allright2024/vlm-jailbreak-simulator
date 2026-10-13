@@ -1,0 +1,10 @@
+# Visual Adversarial Examples (Qi et al., AAAI 2024). White-box PGD that drives
+# the VLM to emit toxic strings from a derogatory corpus; one universal image.
+surrogate: LLaVA_v1_5
+image_path: data/FORCE/clean.jpeg           # benign base image (== official clean.jpeg)
+target_path: data/legacy/derogatory_corpus.csv
+epsilon: 16        # L_inf budget /255 (paper: 16/32/64; unconstrained = full)
+alpha: 1           # PGD step /255
+n_iters: 5000      # paper setting; lower for smoke runs
+constrained: true  # true = L_inf-bounded; false = unconstrained
+batch_size: 8      # target strings per step (paper: 8)

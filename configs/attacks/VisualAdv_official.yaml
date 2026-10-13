@@ -1,0 +1,13 @@
+# VisualAdv official profile (Unispac ... 5fc9883): the pinned CLI default is the
+# UNCONSTRAINED attack (constrained=false); for the constrained eps=32 ablation
+# use VisualAdv_constrained32.yaml instead.
+# NB: still a model substitution (LLaVA-1.5 surrogate), so not an exact paper repro.
+experiment_profile: official
+surrogate: LLaVA_v1_5
+image_path: data/FORCE/clean.jpeg
+target_path: data/legacy/derogatory_corpus.csv
+epsilon: 32
+alpha: 1
+n_iters: 5000
+constrained: false
+batch_size: 8

@@ -1,0 +1,12 @@
+# DeltaJP in TRANSFER mode: fit the universal delta on a Qwen2-VL-7B surrogate
+# (teacher-forced CE toward affirmative targets), then evaluate on LLaVA.
+surrogate_backend: qwen2
+surrogate: Qwen/Qwen2-VL-7B-Instruct
+surrogate_revision: eed13092ef92e448dd6875b2a00151bd3f7db0ac
+train_dataset: AdvBenchM
+train_num: 25
+epsilon: 16          # L_inf budget /255
+alpha: 0.5           # PGD step /255
+steps: 100
+batch_size: 4        # Qwen2 loss is per-sample; keep the batch small
+seed: 0

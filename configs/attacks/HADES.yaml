@@ -1,0 +1,13 @@
+# HADES (ECCV 2024). Replays the released pre-optimized benchmark images.
+# step: which optimization-step image(s) to use per instruction.
+#   "last" = final optimized image (Pass@1, cheapest)
+#   "all"  = steps 0-5 (Pass@6; the paper's stated default)
+#   <int>  = a specific step 0..5
+step: last
+
+# Run on datasets that lack keyword_type (e.g. AdvBenchM): a missing type
+# defaults to "object", or set classify_missing_type to label it via GPT-4o
+# (needs .env OPENAI_API_KEY). Datasets that provide a type (HADES,
+# MM-SafetyBench) are unaffected.
+classify_missing_type: false
+classifier_model: gpt-4o-2024-11-20

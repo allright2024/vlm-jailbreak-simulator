@@ -1,0 +1,5 @@
+# HADES official profile (AoiDragon/HADES a2670b7): all six steps, Pass@6.
+experiment_profile: official
+step: all
+classify_missing_type: false
+classifier_model: gpt-4o-2024-11-20

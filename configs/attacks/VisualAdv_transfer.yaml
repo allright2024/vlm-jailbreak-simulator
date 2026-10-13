@@ -1,0 +1,13 @@
+# VisualAdv in TRANSFER mode: craft the universal image on a Qwen2-VL-7B
+# surrogate (teacher-forced CE on the derogatory corpus), then evaluate on LLaVA.
+# Same surrogate->target setup as UltraBreak/JPS.
+surrogate_backend: qwen2
+surrogate: Qwen/Qwen2-VL-7B-Instruct
+surrogate_revision: eed13092ef92e448dd6875b2a00151bd3f7db0ac
+epsilon: 16          # L_inf budget /255
+alpha: 1             # PGD step /255
+constrained: true
+# Qwen2 computes the loss per sample (no padded batching), so each iter is
+# ~batch_size forwards; use fewer iters than the LLaVA white-box default (5000).
+n_iters: 1000
+batch_size: 4

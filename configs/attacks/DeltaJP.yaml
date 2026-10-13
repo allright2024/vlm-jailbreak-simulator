@@ -1,0 +1,11 @@
+# DeltaJP (Niu et al., 2402.02309). Universal L_inf perturbation (delta) added to
+# each harmful behavior's own image; optimized over train_num behaviors toward
+# affirmative targets, then applied per behavior. White-box on the surrogate.
+surrogate: LLaVA_v1_5
+train_dataset: AdvBenchM   # behaviors with per-behavior images used to fit delta
+train_num: 25
+epsilon: 16        # L_inf budget /255
+alpha: 0.5         # PGD step /255
+steps: 100
+batch_size: 8
+seed: 0

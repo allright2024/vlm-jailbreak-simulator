@@ -1,0 +1,5 @@
+# FigStep (2311.05608) rendering settings. Matches the original repo defaults.
+font_size: 40     # Pillow default bitmap font, scaled
+steps: 3          # number of empty numbered list items
+wrap_width: 30    # textwrap width for the statement
+canvas: 760       # square image side in px
