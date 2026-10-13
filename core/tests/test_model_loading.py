@@ -23,7 +23,7 @@ import subprocess
 import sys
 import warnings
 from contextlib import contextmanager
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 from core import REPO_ROOT
 
@@ -111,6 +111,21 @@ def _patched(module, name, value):
         setattr(module, name, original)
 
 
+@contextmanager
+def _temporary_module(name, module):
+    """Replace a dependency in sys.modules for one loader call."""
+    missing = object()
+    original = sys.modules.get(name, missing)
+    sys.modules[name] = module
+    try:
+        yield
+    finally:
+        if original is missing:
+            del sys.modules[name]
+        else:
+            sys.modules[name] = original
+
+
 def check_centralized() -> None:
     hits = _scan_outside_hub()
     assert not hits, ("model loaded outside multimodalmodels/ -- route it through "
@@ -122,16 +137,32 @@ def check_centralized() -> None:
 
 def check_loader_arguments() -> None:
     import torch
-    import transformers as tf
 
     import multimodalmodels.loaders as L
     from multimodalmodels.registry import (HARMBENCH_CLS_REVISION, LLAVA_15_REVISION,
                                            QWEN2_VL_REVISION)
 
-    classes = (tf.LlavaForConditionalGeneration, tf.AutoProcessor,
-               tf.Qwen2VLForConditionalGeneration, tf.Qwen2_5_VLForConditionalGeneration,
-               tf.AutoModelForCausalLM, tf.AutoTokenizer)
-    with _fake_from_pretrained(*classes):
+    # Use dependency-independent stand-ins.  In particular, the LLaVA runtime
+    # may deliberately put transformers 4.37 on sys.path, which predates Qwen2
+    # classes; argument-forwarding tests must not depend on that installation.
+    class _FakeBitsAndBytesConfig:
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+
+    fake_classes = {
+        name: type(name, (), {})
+        for name in (
+            "LlavaForConditionalGeneration", "AutoProcessor",
+            "Qwen2VLForConditionalGeneration", "Qwen2_5_VLForConditionalGeneration",
+            "AutoModelForCausalLM", "AutoTokenizer", "LlavaNextProcessor",
+            "LlavaNextForConditionalGeneration", "BatchFeature",
+            "InstructBlipProcessor", "InstructBlipForConditionalGeneration",
+        )
+    }
+    fake_tf = ModuleType("transformers")
+    for name, value in {**fake_classes, "BitsAndBytesConfig": _FakeBitsAndBytesConfig}.items():
+        setattr(fake_tf, name, value)
+    with _temporary_module("transformers", fake_tf), _fake_from_pretrained(*fake_classes.values()):
         # LLaVA: pinned revision by default; eval-target settings
         model, proc = L.load_llava()
         assert model.name == "LlavaForConditionalGeneration"
@@ -180,7 +211,11 @@ def check_loader_arguments() -> None:
             image_mean=[0.5, 0.5, 0.5], image_std=[0.5, 0.5, 0.5]))
         return fake_model, fake_proc
 
-    import multimodalmodels.llava.llava_model as llava_model
+    # The legacy wrapper imports several transformers symbols at module import
+    # time. Import it against the same stand-in module so this remains a loader
+    # contract test rather than a transformers-version/weight-loading test.
+    with _temporary_module("transformers", fake_tf):
+        import multimodalmodels.llava.llava_model as llava_model
     with _patched(llava_model, "load_llava", fake_load_llava):
         wrapper = llava_model.LLaVA_v1_5()
     assert calls[-1] == ("load_llava", ("llava-hf/llava-1.5-7b-hf",), {

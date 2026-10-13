@@ -18,27 +18,46 @@ import os
 
 import pytest
 
-# model-free tests: exercise schema, loaders, attack construction, rendering
-MODEL_FREE = [
+# Code-only tests require neither benchmark data nor model weights.
+CODE_ONLY = [
     "test_core_contract",
-    "test_datasets",
     "test_pipeline",
     "test_figstep",
+    "test_force",
+    "test_best_of_n",
+    "test_jps",
+    "test_model_loading",
+    "test_external_data",
+]
+
+# These use no model, but validate the separately distributed benchmark tree.
+# They run automatically when the complete external data root is present.
+EXTERNAL_DATA = [
+    "test_datasets",
     "test_jood",
     "test_hades",
-    "test_force",
     "test_ultrabreak",
     "test_visual_adv",
     "test_delta_jp",
-    "test_best_of_n",
-    "test_jps",
     "test_provenance_split",
-    "test_model_loading",
 ]
 
+from core.data import all_data_available
 
-@pytest.mark.parametrize("module_name", MODEL_FREE)
-def test_model_free(module_name: str) -> None:
+DATA_READY = all_data_available()
+
+
+@pytest.mark.parametrize("module_name", CODE_ONLY)
+def test_code_only(module_name: str) -> None:
+    mod = importlib.import_module(f"core.tests.{module_name}")
+    mod.main()
+
+
+@pytest.mark.data
+@pytest.mark.skipif(not DATA_READY,
+                    reason="external benchmark data is not configured; run validate_data.py")
+@pytest.mark.parametrize("module_name", EXTERNAL_DATA)
+def test_external_data_suite(module_name: str) -> None:
     mod = importlib.import_module(f"core.tests.{module_name}")
     mod.main()
 
