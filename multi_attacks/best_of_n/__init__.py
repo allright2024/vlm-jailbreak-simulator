@@ -1,3 +1,1 @@
-from .best_of_n import BestOfN
-
-__all__ = ["BestOfN"]
+from . import best_of_n  # noqa: F401
