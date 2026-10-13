@@ -27,6 +27,7 @@ from torchvision.utils import save_image
 
 from core.attack import Attack
 from core.dataset import DATA_ROOT, REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 
@@ -69,7 +70,7 @@ class VisualAdvAttack(Attack):
         self._universal_rel = None
 
     def _rel(self, p):
-        return p if os.path.isabs(p) else os.path.join(REPO_ROOT, p)
+        return resolve_path(p)
 
     def _load_surrogate(self):
         if self._surrogate is None:
@@ -140,6 +141,7 @@ class VisualAdvAttack(Attack):
             os.path.join(os.path.dirname(__file__), "..", "ce_surrogate.py"),
             # both backends load their surrogate through multimodalmodels.loaders
             os.path.join(repo_root, "multimodalmodels", "loaders.py"),
+            os.path.join(repo_root, "multimodalmodels", "registry.py"),
         ]
         if self.surrogate_backend == "qwen2":
             files.extend([

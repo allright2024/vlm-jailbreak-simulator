@@ -30,6 +30,7 @@ from torchvision import transforms
 
 from core.attack import Attack, file_sha256
 from core.dataset import DATA_ROOT, REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from . import ultrabreak_utils as uu
@@ -107,10 +108,11 @@ class UltraBreakAttack(Attack):
             os.path.join(here, "ultrabreak_adapter.py"),
             os.path.join(here, "ultrabreak_utils.py"),
             os.path.join(repo_root, "multimodalmodels", "loaders.py"),
+            os.path.join(repo_root, "multimodalmodels", "registry.py"),
         ]
 
     def _rel(self, p):
-        return p if os.path.isabs(p) else os.path.join(REPO_ROOT, p)
+        return resolve_path(p)
 
     def _load_adapter(self):
         if self._adapter is None:

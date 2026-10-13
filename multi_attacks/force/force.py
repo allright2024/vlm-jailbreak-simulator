@@ -33,6 +33,7 @@ from torch import amp
 
 from core.attack import Attack, file_sha256
 from core.dataset import DATA_ROOT, REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from . import force_utils as fu
@@ -87,12 +88,8 @@ class FORCEAttack(Attack):
         return {
             "source_model": self.source_model,
             "source_model_revision": self.source_model_revision,
-            "image_path": self.image_path if os.path.isabs(self.image_path)
-            else os.path.join(REPO_ROOT, self.image_path),
-            "image_sha256": file_sha256(
-                self.image_path if os.path.isabs(self.image_path)
-                else os.path.join(REPO_ROOT, self.image_path)
-            ),
+            "image_path": resolve_path(self.image_path),
+            "image_sha256": file_sha256(resolve_path(self.image_path)),
             "target_text": self.target_text,
             "epsilon": self.epsilon, "step_size": self.step_size,
             "max_query": self.max_query, "max_iter": self.max_iter,
@@ -266,7 +263,7 @@ class FORCEAttack(Attack):
     def build(self, behavior: Behavior, out_dir: str) -> list[TestCase]:
         model, processor = self._load_surrogate()
         size = self._target_size(processor.image_processor)
-        img_path = self.image_path if os.path.isabs(self.image_path) else os.path.join(REPO_ROOT, self.image_path)
+        img_path = resolve_path(self.image_path)
         base_image = Image.open(img_path).convert("RGB").resize(size, Image.LANCZOS)
         tensor_image = fu.pil_to_tensor(base_image).unsqueeze(0).to(self.device)
 

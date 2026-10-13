@@ -24,6 +24,7 @@ from torchvision.utils import save_image
 
 from core.attack import Attack
 from core.dataset import REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 
@@ -75,7 +76,7 @@ class DeltaJPAttack(Attack):
         self._train_behaviors = None
 
     def _rel(self, p):
-        return p if os.path.isabs(p) else os.path.join(REPO_ROOT, p)
+        return resolve_path(p)
 
     def _load_surrogate(self):
         if self._surrogate is None:

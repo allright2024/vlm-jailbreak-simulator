@@ -31,6 +31,7 @@ import numpy as np
 
 from core.attack import Attack
 from core.dataset import DATA_ROOT, REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from . import jood_utils as ju
@@ -73,7 +74,7 @@ class JOODAttack(Attack):
             )
         # harmless pool (shared resource); default to AdvBenchM's.
         hd = self.config.get("harmless_dir", os.path.join(DATA_ROOT, "AdvBenchM", "images", "harmless"))
-        self.harmless_dir = hd if os.path.isabs(hd) else os.path.join(REPO_ROOT, hd)
+        self.harmless_dir = resolve_path(hd)
         subset = self.config.get("harmless_subset")  # None = all
         names = sorted(f for f in os.listdir(self.harmless_dir) if f.lower().endswith((".png", ".jpg", ".jpeg")))
         if subset:
@@ -125,7 +126,7 @@ class JOODAttack(Attack):
         return cases
 
     def _build_image(self, behavior: Behavior, out_dir: str) -> list[TestCase]:
-        harmful_path = os.path.join(REPO_ROOT, behavior.images[0])
+        harmful_path = resolve_path(behavior.images[0])
         mix_func = ju.MIX_FUNCS[self.aug]
         prompt = _IMG_PREFIX + behavior.meta["multimodal_prompt"]
         os.makedirs(out_dir, exist_ok=True)

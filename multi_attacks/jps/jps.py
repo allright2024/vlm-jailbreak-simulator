@@ -29,6 +29,7 @@ from torchvision import transforms
 
 from core.attack import Attack
 from core.dataset import DATA_ROOT, REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from .jps_prompts import JB_PROMPT_TEMPLATE
@@ -92,7 +93,7 @@ class JPSAttack(Attack):
         self._train_behaviors = None
 
     def _rel(self, p):
-        return p if os.path.isabs(p) else os.path.join(REPO_ROOT, p)
+        return resolve_path(p)
 
     def _load(self):
         if self._adapter is None:
@@ -283,6 +284,7 @@ class JPSAttack(Attack):
             os.path.join(ultra, "ultrabreak_adapter.py"),
             os.path.join(ultra, "ultrabreak_utils.py"),
             os.path.join(here, "..", "..", "multimodalmodels", "loaders.py"),
+            os.path.join(here, "..", "..", "multimodalmodels", "registry.py"),
         ]
 
     def prepare(self, out_dir: str) -> None:

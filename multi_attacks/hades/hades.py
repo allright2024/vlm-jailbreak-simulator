@@ -26,6 +26,7 @@ import os
 
 from core.attack import Attack
 from core.dataset import REPO_ROOT
+from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 
@@ -114,7 +115,7 @@ class HadesAttack(Attack):
         cases = []
         for k, (step_idx, img) in enumerate(self._select_images(behavior)):
             # images are already repo-root-relative in the loader
-            assert os.path.isfile(os.path.join(REPO_ROOT, img)), img
+            assert os.path.isfile(resolve_path(img)), img
             cases.append(
                 TestCase(
                     test_case_id=self.test_case_id(self.name, behavior.behavior_id, k),
