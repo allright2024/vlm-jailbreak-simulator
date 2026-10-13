@@ -16,6 +16,7 @@ from .schema import Behavior, EvalType
 
 # Repository root (…/vlm-jailbreak-simulator), so loaders can resolve data paths
 # regardless of the caller's working directory.
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_ROOT = os.path.join(REPO_ROOT, "data")
 
