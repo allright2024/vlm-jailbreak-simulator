@@ -13,12 +13,7 @@ import os
 from typing import Iterable, Optional
 
 from .schema import Behavior, EvalType
-
-# Repository root (…/vlm-jailbreak-simulator), so loaders can resolve data paths
-# regardless of the caller's working directory.
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_ROOT = os.path.join(REPO_ROOT, "data")
+from .paths import DATA_ROOT, REPO_ROOT, portable_path
 
 
 class Dataset:
@@ -40,8 +35,8 @@ class Dataset:
         return os.path.join(self.data_dir, *parts)
 
     def rel(self, abs_path: str) -> str:
-        """Repo-root-relative path, the form stored in Behavior.images."""
-        return os.path.relpath(abs_path, REPO_ROOT)
+        """Portable path for JSONL: repo-relative locally, absolute externally."""
+        return portable_path(abs_path)
 
     def load(self) -> list[Behavior]:
         """Return all behaviors. Subclasses must implement."""
