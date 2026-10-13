@@ -14,7 +14,7 @@ import os
 from collections import Counter
 
 import core.datasets  # noqa: F401  (registers loaders)
-from core import REPO_ROOT, EvalType, get_dataset, list_datasets
+from core import resolve_path, EvalType, get_dataset, list_datasets
 
 # Expected shape of each dataset: count, images per behavior, and which optional
 # fields must be filled for every behavior.
@@ -44,7 +44,7 @@ def check(name: str) -> list:
             assert filled == 0, f"{name}: unexpected {f} on {filled} behaviors"
 
     assert all(len(b.images) == exp["images"] for b in bs), f"{name}: image count"
-    missing = [p for b in bs for p in b.images if not os.path.isfile(os.path.join(REPO_ROOT, p))]
+    missing = [p for b in bs for p in b.images if not os.path.isfile(resolve_path(p))]
     assert not missing, f"{name}: {len(missing)} missing images, e.g. {missing[:3]}"
 
     et = Counter(b.eval_type.value for b in bs)
