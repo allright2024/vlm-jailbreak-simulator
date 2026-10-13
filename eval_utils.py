@@ -1,10 +1,11 @@
 import re
 import itertools
 from ast import literal_eval
-import spacy
-from datasketch import MinHash
 from tqdm import tqdm
 import copy
+# spacy / datasketch are only needed for the copyright hash check and are
+# imported lazily there, so the classifier prompt and AdvBench prefixes can be
+# imported without them installed.
 
 # ============================== UTILS FOR EXPANDING EXPERIMENT TEMPLATES ============================== #
 
@@ -212,12 +213,18 @@ def get_experiment_config(experiment_name, model_configs, method_configs):
 
 # ============================== UTILS FOR COPYRIGHT CLASSIFIER ============================== #
 
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")  # TODO: move this somewhere nicer
-nlp.max_length = 10000000
+_nlp = None
+
+def _get_nlp():
+    global _nlp
+    if _nlp is None:
+        from multimodalmodels.loaders import load_spacy
+        _nlp = load_spacy("en_core_web_sm")
+        _nlp.max_length = 10000000
+    return _nlp
 
 def tokenize(text):
-    doc = nlp(text)
+    doc = _get_nlp()(text)
     return [token.text for token in doc]
 
 def compute_hashes_with_sliding_window(text, window_size=300, overlap=200):
@@ -229,6 +236,8 @@ def compute_hashes_with_sliding_window(text, window_size=300, overlap=200):
     :param overlap: the amount of overlap between windows
     :return: a list of MinHashes for the string
     """
+    from datasketch import MinHash
+
     words = tokenize(text)
     num_windows = max(1, len(words) - overlap)
 
