@@ -11,11 +11,20 @@ from PIL import Image
 import tqdm
 
 
+from ..loaders import load_llava
+from ..registry import LLAVA_15_HF_ID, LLAVA_15_REVISION  # noqa: F401  (re-exported)
+
+
 class LLaVA_v1_5(MultiModalModel):
-    def __init__(self):
-        self.model = LlavaForConditionalGeneration.from_pretrained("llava-hf/llava-1.5-7b-hf", device_map="auto")#.to(self.device)
+    def __init__(self, revision=LLAVA_15_REVISION):
+        # loaded through multimodalmodels.loaders (pinned id/revision in registry.py)
+        self.model, self.processor = load_llava(
+            LLAVA_15_HF_ID, revision=revision, torch_dtype="float16", device_map="auto",
+            processor_kwargs={"num_additional_image_tokens": 1},
+        )
+        self.model.gradient_checkpointing_enable()   # 이 줄 추가
+        self.model.config.use_cache = False           # gradient checkpointing 쓸 땐 이것도 같이 꺼줘야 함 (충돌 방지)
         self.device = self.model.device #torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
-        self.processor = AutoProcessor.from_pretrained("llava-hf/llava-1.5-7b-hf", num_additional_image_tokens=1)#, device_map="balanced")
         self.normalize = transforms.Normalize(mean=self.processor.image_processor.image_mean, std=self.processor.image_processor.image_std)
         self.preprocess = lambda x: self.processor.image_processor.preprocess(x, do_normalize=False, return_tensors='pt')['pixel_values'][0]
         self.tokenizer_kwargs = {"padding": False, "truncation": None, "max_length": None}
