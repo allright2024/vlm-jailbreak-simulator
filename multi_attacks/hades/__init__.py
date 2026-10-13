@@ -1,1 +1,1 @@
-from .hades import Hades
+from . import hades  # noqa: F401
