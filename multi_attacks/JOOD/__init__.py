@@ -1,1 +1,1 @@
-from .jood_wrapper import JOOD
+from . import jood  # noqa: F401
