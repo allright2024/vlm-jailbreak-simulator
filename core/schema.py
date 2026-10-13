@@ -62,8 +62,8 @@ class Behavior:
     statement: Optional[str] = None      # declarative rephrase, "Steps to ..." (FigStep)
     target: Optional[str] = None         # desired-prefix string, "Sure, here is ..." (FORCE, optimization attacks)
 
-    # Images that *ship with the dataset* for this behavior (dataset-root-relative
-    # paths). HADES provides 6, MM-SafetyBench up to 3, text-only datasets none.
+    # Images supplied by the external dataset. Paths are repo-relative when the
+    # data root is local and absolute when it is mounted outside the repository.
     images: list[str] = field(default_factory=list)
 
     # Anything dataset-specific an attack might want but the schema doesn't name.
@@ -94,7 +94,7 @@ class TestCase:
     behavior_id: str                 # which Behavior this scores toward
     attack: str                      # attack name that produced it
     text: str                        # the text prompt sent to the target model
-    images: list[str] = field(default_factory=list)  # repo-root-relative image paths (0..N)
+    images: list[str] = field(default_factory=list)  # repo-relative or absolute paths (0..N)
     attempt: int = 0                 # 0-based attempt index (Pass@k attacks)
     parent_id: Optional[str] = None  # test case this one enhances (ASO plug-in)
     meta: dict[str, Any] = field(default_factory=dict)
