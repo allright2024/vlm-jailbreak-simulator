@@ -1,1 +1,1 @@
-from .figstep import FigStep
+from . import figstep  # noqa: F401
