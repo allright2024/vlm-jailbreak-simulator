@@ -1,1 +1,1 @@
-from .visual_adv import Visual_Adv
+from . import visual_adv  # noqa: F401
