@@ -27,3 +27,8 @@ Pillow
 PyYAML  
 beautifulsoup4
 anthropic
+python-dotenv
+qwen-vl-utils
+
+# testing
+pytest>=7.0
