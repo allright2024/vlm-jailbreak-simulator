@@ -1,0 +1,3 @@
+"""
+CIDER models package
+"""
