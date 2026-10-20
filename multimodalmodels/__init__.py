@@ -18,9 +18,20 @@ from __future__ import annotations
 import importlib
 
 from .registry import (HARMBENCH_CLS_HF_ID, HARMBENCH_CLS_REVISION,  # noqa: F401
-                       LLAVA_15_HF_ID, LLAVA_15_REVISION, MODEL_SPECS,
-                       QWEN25_VL_HF_ID, QWEN2_VL_HF_ID, QWEN2_VL_REVISION,
-                       VIT_BASE_HF_ID, ModelSpec, default_revision, get_spec)
+                       CLIP_VIT_L14_336_HF_ID, CLIP_VIT_L14_336_REVISION,
+                       CLIP_VIT_L14_ST_HF_ID, CLIP_VIT_L14_ST_REVISION,
+                       INTERNVL3_2B_HF_ID, INTERNVL3_2B_REVISION,
+                       INTERNVL3_8B_HF_ID, INTERNVL3_8B_REVISION,
+                       LLAVA_15_HF_ID, LLAVA_15_REVISION,
+                       LLAVA_16_HF_ID, LLAVA_16_REVISION, MODEL_ALIASES, MODEL_SPECS,
+                       QWEN25_3B_HF_ID, QWEN25_3B_REVISION,
+                       QWEN25_14B_HF_ID, QWEN25_14B_REVISION,
+                       QWEN25_VL_HF_ID, QWEN25_VL_REVISION,
+                       QWEN2_VL_HF_ID, QWEN2_VL_REVISION,
+                       QWEN3_VL_2B_HF_ID, QWEN3_VL_2B_REVISION,
+                       QWEN3_VL_8B_HF_ID, QWEN3_VL_8B_REVISION,
+                       VIT_BASE_HF_ID, ModelSpec, default_revision, get_spec,
+                       resolve_model_id)
 
 # name -> (module, attribute, optional). Optional wrappers need heavy or
 # environment-specific dependencies (LAVIS-style InstructBLIP, Qwen-VL custom
@@ -35,6 +46,13 @@ _LAZY: dict[str, tuple[str, str, bool]] = {
     "MiniGPT4": (".minigpt4.minigpt4_model", "MiniGPT4", True),
     "load_llava": (".loaders", "load_llava", False),
     "load_qwen2vl": (".loaders", "load_qwen2vl", False),
+    "load_native_vlm": (".loaders", "load_native_vlm", False),
+    "load_llava_next": (".loaders", "load_llava_next", False),
+    "load_qwen3vl": (".loaders", "load_qwen3vl", False),
+    "load_internvl": (".loaders", "load_internvl", False),
+    "load_causal_lm_agent": (".loaders", "load_causal_lm_agent", False),
+    "load_sentence_transformer": (".loaders", "load_sentence_transformer", False),
+    "load_clip_image_encoder": (".loaders", "load_clip_image_encoder", False),
     "load_causal_lm_classifier": (".loaders", "load_causal_lm_classifier", False),
     "load_pretraining_encoder": (".loaders", "load_pretraining_encoder", False),
     "load_image_classifier": (".loaders", "load_image_classifier", False),
