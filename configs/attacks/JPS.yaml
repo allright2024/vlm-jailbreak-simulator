@@ -1,19 +1,33 @@
-# JPS (ACM MM 2025). Co-optimizes a visual PGD perturbation (Qwen2-VL surrogate)
-# and a multi-agent textual steer prompt. Substitutions (documented): the agent
-# LLM is an OpenAI model (paper: local Qwen2.5-14B); the PGD reuses this repo's
-# Qwen2-VL adapter. The steer prompt is prepended to each query at attack time.
-experiment_profile: official   # uses the paper's PGD steps / rounds / momentum
+# Released Qwen2-VL experiment (thu-coai/JPS @ beacbc58). The upstream repo
+# references but does not distribute advbench_subset.csv or clean.jpeg; this
+# profile fails closed until those exact files are supplied under data/JPS/.
+experiment_profile: official
 surrogate: Qwen/Qwen2-VL-7B-Instruct
 surrogate_revision: eed13092ef92e448dd6875b2a00151bd3f7db0ac
-agent_model: gpt-4o-2024-11-20
-base_image: data/UltraBreak/images/white.jpeg
-train_dataset: AdvBench      # use train_csv for the official advbench_subset.csv
-# train_csv: /path/to/advbench_subset.csv
+agent_model: Qwen/Qwen2.5-14B-Instruct
+agent_backend: huggingface
+agent_revision: cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8
+base_image: data/JPS/clean.jpeg
+train_dataset: AdvBench
+train_csv: data/JPS/advbench_subset.csv
 attack_data_num: 50
 exclude_train_from_eval: true
 image_size: 448
 epsilon: "32/255"
 alpha: "1/255"
 attack_steps: 300
-rounds: 5                    # revision_iteration_num
+batch_size: 4
+min_loss_limit: 0.01
+rounds: 5
 momentum_decay: 0.9
+response_max_new_tokens: 256
+strict_agents: true
+# Retry only the revision agent's required @@...@@ output format. Every raw
+# attempt is recorded under the run's images/jps_agent_trace.jsonl.
+revision_retries: 2
+
+official_target_model: qwen2_vl_7b
+official_target_max_tokens: 256
+official_judges:
+  - meta-llama/Llama-Guard-3-8B
+  - cais/HarmBench-Llama-2-13b-cls
