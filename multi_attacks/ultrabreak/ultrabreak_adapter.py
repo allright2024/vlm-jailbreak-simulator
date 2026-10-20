@@ -25,7 +25,7 @@ from .ultrabreak_utils import (OPENAI_CLIP_MEAN, OPENAI_CLIP_STD,
 class Qwen2Adapter:
     def __init__(self, model_id="Qwen/Qwen2-VL-7B-Instruct", device="cuda",
                  image_size=(336, 336), patch_size=(224, 224), patch_only=False,
-                 revision=None):
+                 revision=None, processor_kwargs=None):
         from multimodalmodels.loaders import load_qwen2vl
         self.device = device
         self.model_id = model_id
@@ -35,7 +35,10 @@ class Qwen2Adapter:
         self.patch_only = patch_only
         # all surrogate loading goes through multimodalmodels (one place for
         # model ids / pinned revisions / dtype / device placement)
-        self.model, self.processor = load_qwen2vl(model_id, revision=revision)
+        loader_kwargs = {"revision": revision}
+        if processor_kwargs is not None:
+            loader_kwargs["processor_kwargs"] = processor_kwargs
+        self.model, self.processor = load_qwen2vl(model_id, **loader_kwargs)
 
     def process_target(self, image_path, prompt_text, target_text, keywords=()):
         from qwen_vl_utils import process_vision_info
@@ -82,6 +85,69 @@ class Qwen2Adapter:
             if "".join(c for c in tok if c.isalpha()) in keywords:
                 weights[prompt_len + i] += 1.0
         return input_ids, labels, pixel_values, image_grid_thw, attention_mask, weights
+
+    def process_jps_target(self, image_path, prompt_text, target_text):
+        """Tokenize JPS's exact user(image+prompt) -> assistant(target) chat.
+
+        Unlike UltraBreak's line-wise target appending, official JPS locates the
+        assistant-role boundary in Qwen's full chat template and supervises only
+        assistant target tokens before ``<|im_end|>``.
+        """
+        from qwen_vl_utils import process_vision_info
+
+        with Image.open(image_path) as img:
+            resized = img.convert("RGB").resize(self.image_size)
+            buffer = io.BytesIO()
+            resized.save(buffer, format="PNG")
+            encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        user = {
+            "role": "user",
+            "content": [
+                {"type": "image", "image": f"data:image/png;base64,{encoded}"},
+                {"type": "text", "text": prompt_text},
+            ],
+        }
+        user_messages = [user]
+        full_messages = [user, {
+            "role": "assistant",
+            "content": [{"type": "text", "text": target_text}],
+        }]
+        prefix_text = self.processor.apply_chat_template(
+            user_messages, tokenize=False, add_generation_prompt=True
+        )
+        full_text = self.processor.apply_chat_template(
+            full_messages, tokenize=False, add_generation_prompt=False
+        )
+        image_inputs, video_inputs = process_vision_info(full_messages)
+        prefix = self.processor(
+            text=[prefix_text], images=image_inputs, videos=video_inputs,
+            padding=True, return_tensors="pt",
+        ).to(self.device)
+        full = self.processor(
+            text=[full_text], images=image_inputs, videos=video_inputs,
+            padding=True, return_tensors="pt",
+        ).to(self.device)
+
+        prefix_len = prefix["input_ids"].size(1)
+        eos_id = self.processor.tokenizer.eos_token_id
+        eos_positions = torch.nonzero(
+            full["input_ids"][0, prefix_len:] == eos_id, as_tuple=False
+        )
+        if eos_positions.numel() == 0:
+            raise RuntimeError("JPS target chat has no assistant <|im_end|> token")
+        target_stop = prefix_len + int(eos_positions[0].item())
+        input_ids = full["input_ids"][:, :target_stop]
+        attention_mask = full["attention_mask"][:, :target_stop]
+        labels = torch.full_like(input_ids, -100)
+        labels[:, prefix_len:target_stop] = input_ids[:, prefix_len:target_stop]
+        return (
+            input_ids,
+            labels,
+            full["pixel_values"],
+            full["image_grid_thw"],
+            attention_mask,
+        )
 
     def preprocess_patched(self, patched_tensor, image_grid_thw, temporal_patch_size=2, patch_size=14, merge_size=2):
         grid_t, grid_h, grid_w = image_grid_thw
@@ -142,6 +208,16 @@ class Qwen2Adapter:
         image_inputs, video_inputs = process_vision_info(messages)
         inputs = self.processor(text=[text], images=image_inputs, videos=video_inputs,
                                 padding=True, return_tensors="pt").to(self.device)
-        out = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        # Some checkpoints persist sampling-only values in generation_config.
+        # Explicit greedy defaults silence Transformers' invalid-flag warning
+        # without changing deterministic decoding.
+        out = self.model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            temperature=1.0,
+            top_p=1.0,
+            top_k=50,
+        )
         gen = out[:, inputs["input_ids"].shape[1]:]
         return self.processor.batch_decode(gen, skip_special_tokens=True)[0]
