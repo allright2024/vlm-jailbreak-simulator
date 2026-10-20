@@ -1,0 +1,46 @@
+# JailBound paper-method profile (arXiv:2505.19610v3 / NeurIPS 2025).
+#
+# The authors have not released the promised code. The published crossing
+# hyperparameters below are preserved, but LLaVA-1.5, last-token activation
+# pooling, MM-SafetyBench safe/unsafe pair construction, and suffix NLL are
+# documented clean-room choices. Consequently this run is always `adapted`,
+# never an official-code or paper-number reproduction.
+experiment_profile: paper_settings
+
+backend: llava
+source_model: llava-hf/llava-1.5-7b-hf
+source_model_revision: b234b804b114d9e37bb655e11cbbb5f5e971b7a9
+# FP16 overflows on the all-layer squared-distance backward pass. BF16 keeps
+# the same raw-gradient equations with FP32's exponent range.
+torch_dtype: bfloat16
+
+# Algorithm 1: reserve a deterministic, category-balanced probe split. Those
+# behavior IDs and prompt hashes are excluded from evaluation.
+probe_dataset: MM-SafetyBench
+probe_rows: 64
+probe_split: stratified
+probe_image_type: SD
+probe_unsafe_field: rephrased_question_sd
+probe_safe_field: changed_question
+attack_image_type: SD
+layers: all
+p0: 0.3
+classifier_max_iter: 1000
+classifier_c: 1.0
+
+# Algorithm 2 / Section 4.1 paper settings.
+lambda_1: 2.0
+lambda_2: 1.0
+eta_v: 0.001
+eta_t: 0.0005
+suffix_length: 20
+epsilon: 8
+iterations: 100
+vocab_chunk_size: 4096
+seed: 0
+source_step: 0
+exclude_train_from_eval: true
+
+# To reuse a previously fitted boundary, uncomment this only with its matching
+# .lineage.json sidecar. A missing/stale sidecar fails closed.
+# boundary_artifact: runs/JailBound_MM-SafetyBench/images/jailbound_boundaries.pt
