@@ -1,6 +1,6 @@
-"""Attack base class: the single interface all eight attacks implement.
+"""Attack base class: the single interface all registered attacks implement.
 
-The eight methods we target fall into three families with different control
+The supported methods fall into three families with different control
 flow, but they all map one ``Behavior`` to one or more ``TestCase`` objects. The
 base class captures that, plus a declaration of what each attack *requires* so
 the runner can skip incompatible (attack, dataset) pairs with a clear message
