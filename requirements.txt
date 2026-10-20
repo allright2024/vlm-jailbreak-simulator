@@ -1,9 +1,12 @@
 torch
 torchvision
 torchaudio
-transformers==4.54.1
+transformers==4.57.1
+sentence-transformers==5.1.2
+scikit-learn
 accelerate
-spacy
+spacy==3.7.2
+nltk==3.8.1
 datasketch
 protobuf
 sentencepiece
@@ -18,7 +21,7 @@ wandb
 matplotlib
 scikit-image
 visual_genome
-git+https://github.com/openai/CLIP.git
+clip @ git+https://github.com/openai/CLIP.git@a1d071733d7111c9c014f024669f959182114e33
 pandas
 diffusers
 openai
@@ -28,7 +31,7 @@ PyYAML
 beautifulsoup4
 anthropic
 python-dotenv
-qwen-vl-utils
+qwen-vl-utils==0.0.14
 
 # testing
 pytest>=7.0
