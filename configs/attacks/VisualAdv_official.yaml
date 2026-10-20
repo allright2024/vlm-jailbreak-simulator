@@ -5,7 +5,7 @@
 experiment_profile: official
 surrogate: LLaVA_v1_5
 image_path: data/FORCE/clean.jpeg
-target_path: data/legacy/derogatory_corpus.csv
+target_path: data/VisualAdv/derogatory_corpus.csv
 epsilon: 32
 alpha: 1
 n_iters: 5000
