@@ -25,9 +25,45 @@ from .registry import (
     list_datasets,
 )
 from .dataset import Dataset, REPO_ROOT, DATA_ROOT
+from .dataset_policy import (
+    JAILBREAK_EVAL_TYPES,
+    eval_type_counts,
+    parse_eval_type_spec,
+    require_harmful_only,
+    select_eval_types,
+)
 from .paths import DATA_ROOT_ENV, portable_path, resolve_path
 from .attack import Attack
 from .model import TargetModel, Judge
+from .metrics import (
+    attack_budget_curve,
+    attack_success_metrics,
+    binary_detection_metrics,
+    bootstrap_mean_interval,
+    continuous_detection_metrics,
+    efficiency_metrics,
+    efficiency_overhead_metrics,
+    evaluation_coverage_metrics,
+    grouped_attack_metrics,
+    judge_agreement_metrics,
+    mcnemar_exact_test,
+    paired_binary_utility_metrics,
+    paired_defense_metrics,
+    pass_at_k_curve,
+    response_quality_metrics,
+    seed_stability_metrics,
+    success_efficiency_metrics,
+    transfer_attack_metrics,
+    wilson_confidence_interval,
+)
+from .multimodal_metrics import (
+    aggregate_image_pair_metrics,
+    cosine_similarity,
+    image_perturbation_metrics,
+    modality_ablation_metrics,
+    transformation_robustness_metrics,
+    variant_robustness_metrics,
+)
 from .io import read_jsonl, write_jsonl, append_jsonl, iter_jsonl
 
 __all__ = [
@@ -45,9 +81,40 @@ __all__ = [
     "list_datasets",
     # base classes
     "Dataset",
+    "JAILBREAK_EVAL_TYPES",
+    "parse_eval_type_spec",
+    "select_eval_types",
+    "require_harmful_only",
+    "eval_type_counts",
     "Attack",
     "TargetModel",
     "Judge",
+    # metrics
+    "attack_success_metrics",
+    "binary_detection_metrics",
+    "wilson_confidence_interval",
+    "bootstrap_mean_interval",
+    "pass_at_k_curve",
+    "attack_budget_curve",
+    "grouped_attack_metrics",
+    "transfer_attack_metrics",
+    "response_quality_metrics",
+    "success_efficiency_metrics",
+    "continuous_detection_metrics",
+    "paired_defense_metrics",
+    "paired_binary_utility_metrics",
+    "mcnemar_exact_test",
+    "evaluation_coverage_metrics",
+    "judge_agreement_metrics",
+    "seed_stability_metrics",
+    "efficiency_metrics",
+    "efficiency_overhead_metrics",
+    "cosine_similarity",
+    "image_perturbation_metrics",
+    "aggregate_image_pair_metrics",
+    "modality_ablation_metrics",
+    "variant_robustness_metrics",
+    "transformation_robustness_metrics",
     # paths
     "REPO_ROOT",
     "DATA_ROOT",
