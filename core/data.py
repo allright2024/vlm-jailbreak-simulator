@@ -19,7 +19,9 @@ DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
         "AdvBenchM/images/harmful",
         "AdvBenchM/images/harmless",
     ),
+    "CS-DJ": ("CS-DJ/instructions",),
     "HADES": ("HADES/hades.csv",),
+    "HarmBench": ("HarmBench/harmbench_standard.json",),
     "MM-SafetyBench": ("MM-SafetyBench",),
     "SafeBench": ("SafeBench/safebench.csv",),
 }
@@ -27,7 +29,9 @@ DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
 EXPECTED_COUNTS = {
     "AdvBench": 520,
     "AdvBenchM": 170,
+    "CS-DJ": 750,
     "HADES": 750,
+    "HarmBench": 200,
     "MM-SafetyBench": 1680,
     "SafeBench": 500,
 }
@@ -45,7 +49,7 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
     if name == "VisualAdv":
         return [
             resolve_path(c.get("image_path", "data/FORCE/clean.jpeg")),
-            resolve_path(c.get("target_path", "data/legacy/derogatory_corpus.csv")),
+            resolve_path(c.get("target_path", "data/VisualAdv/derogatory_corpus.csv")),
         ]
     if name == "UltraBreak":
         return [
@@ -56,7 +60,7 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
             resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg")),
         ]
     if name == "JPS":
-        paths = [resolve_path(c.get("base_image", "data/FORCE/clean.jpeg"))]
+        paths = [resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg"))]
         train_csv = c.get("train_csv")
         if train_csv:
             paths.append(resolve_path(train_csv))
@@ -64,8 +68,36 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
             train_name = str(c.get("train_dataset", "AdvBench"))
             paths.extend(_data_path(p) for p in DATASET_LAYOUT.get(train_name, ()))
         return paths
+    if name == "CS-DJ":
+        paths = [resolve_path(c.get("image_dir", "data/CS-DJ/llava_images"))]
+        if c.get("strict_font") and c.get("font_path"):
+            paths.append(resolve_path(c["font_path"]))
+        return paths
+    if name == "JailbreakInPieces":
+        paths = [resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg"))]
+        if str(c.get("target_mode", "behavior")).lower() == "fixed":
+            paths.append(resolve_path(c.get(
+                "target_image", "data/JailbreakInPieces/meth_pill.png"
+            )))
+        return paths
+    if name == "JailBound":
+        artifact = c.get("boundary_artifact")
+        if artifact:
+            return [resolve_path(artifact)]
+        train_name = str(c.get("probe_dataset", "MM-SafetyBench"))
+        return [_data_path(path) for path in DATASET_LAYOUT.get(train_name, ())]
+    if name == "MML" and str(c.get("input_mode", "generated")).lower() == "precomputed":
+        paths = [resolve_path(c.get("precomputed_root", "data/MML"))]
+        if str(c.get("prompt_source", "clean_room")).lower() == "upstream":
+            paths.append(resolve_path(c.get(
+                "upstream_const_path", "data/MML/upstream/const.py"
+            )))
+        return paths
     if name == "DeltaJP":
         train_name = str(c.get("train_dataset", "AdvBenchM"))
+        return [_data_path(p) for p in DATASET_LAYOUT.get(train_name, ())]
+    if name == "HADES" and str(c.get("mode", "white_box")).lower() == "white_box":
+        train_name = str(c.get("train_dataset", "HADES"))
         return [_data_path(p) for p in DATASET_LAYOUT.get(train_name, ())]
     if name == "JOOD":
         return [resolve_path(c.get("harmless_dir", "data/AdvBenchM/images/harmless"))]
@@ -100,7 +132,7 @@ def require_data(
     raise FileNotFoundError(
         "Required benchmark data is missing. Data is not distributed in this Git "
         f"repository. Set {DATA_ROOT_ENV} to the downloaded Drive directory "
-        f"(current: {DATA_ROOT}) and run `python validate_data.py`.\n{shown}"
+        f"(current: {DATA_ROOT}) and run `python -m core.validation.data`.\n{shown}"
     )
 
 
