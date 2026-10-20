@@ -8,8 +8,10 @@ the published attack; only packaging/formatting is changed.
 
 from __future__ import annotations
 
+import random
+
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 
 # --------------------------------------------------------------------------- #
@@ -85,6 +87,99 @@ MIX_FUNCS = {
     "cutmix_original": cutmix_original_images,
     "cutmix_resizemix": cutmix_resizemix_images,
 }
+
+
+class RandAug:
+    """Released JOOD RandAug implementation with an isolated seeded RNG."""
+
+    def __init__(self, n: int, strength: float):
+        self.n = n
+        self.strength = strength
+
+    def apply(self, image_path: str, seed: int) -> Image.Image:
+        image = Image.open(image_path).convert("RGB")
+        rng = random.Random(seed)
+        operations = [
+            self.gaussian_blur, self.rotation, self.lower_brightness,
+            self.upper_brightness, self.lower_contrast, self.upper_contrast,
+            self.upper_colorjitter, self.lower_colorjitter, self.solarize,
+            self.posterize, self.cutout, self.random_crop, self.shear_x,
+            self.shear_y,
+        ]
+        for operation in rng.sample(operations, self.n):
+            image = operation(image, rng)
+        return image
+
+    def gaussian_blur(self, image, _rng):
+        return image.filter(ImageFilter.GaussianBlur(self.strength * 10))
+
+    def rotation(self, image, _rng):
+        return image.rotate(self.strength * 180, expand=True)
+
+    def lower_brightness(self, image, _rng):
+        return ImageEnhance.Brightness(image).enhance(1 - self.strength * 0.9)
+
+    def upper_brightness(self, image, _rng):
+        return ImageEnhance.Brightness(image).enhance(1 + self.strength * 2)
+
+    def lower_contrast(self, image, _rng):
+        return ImageEnhance.Contrast(image).enhance(1 - self.strength * 0.9)
+
+    def upper_contrast(self, image, _rng):
+        return ImageEnhance.Contrast(image).enhance(1 + self.strength * 4)
+
+    def upper_colorjitter(self, image, _rng):
+        return ImageEnhance.Color(image).enhance(1 + self.strength * 49)
+
+    def lower_colorjitter(self, image, _rng):
+        return ImageEnhance.Color(image).enhance(1 - self.strength * 0.9)
+
+    def solarize(self, image, _rng):
+        if self.strength == 0:
+            return image.convert("RGB")
+        return ImageOps.solarize(
+            image.convert("RGB"), 255 - int(self.strength * 255)
+        )
+
+    def posterize(self, image, _rng):
+        if self.strength == 0:
+            return image.convert("RGB")
+        bits = int(1 + 3 * (1 - self.strength))
+        return ImageOps.posterize(image.convert("RGB"), bits)
+
+    def cutout(self, image, rng):
+        if self.strength == 0:
+            return image
+        image = image.copy()
+        width, height = image.size
+        size = int(self.strength * int(0.75 * min(width, height)))
+        if size == 0:
+            return image
+        x = rng.randint(0, width - size)
+        y = rng.randint(0, height - size)
+        ImageDraw.Draw(image).rectangle([x, y, x + size, y + size], fill=(0, 0, 0))
+        return image
+
+    def random_crop(self, image, rng):
+        if self.strength == 0:
+            return image
+        width, height = image.size
+        size = int((1 - 0.75 * self.strength) * min(width, height))
+        if size == 0:
+            return image
+        left = rng.randint(0, width - size)
+        top = rng.randint(0, height - size)
+        return image.crop((left, top, left + size, top + size)).resize((width, height))
+
+    def shear_x(self, image, _rng):
+        return image.transform(
+            image.size, Image.AFFINE, (1, self.strength, 0, 0, 1, 0)
+        )
+
+    def shear_y(self, image, _rng):
+        return image.transform(
+            image.size, Image.AFFINE, (1, 0, 0, self.strength, 1, 0)
+        )
 
 
 # --------------------------------------------------------------------------- #
