@@ -5,17 +5,53 @@ completions/
 results/
 test_cases/
 
+# Local test sources and configuration (kept on disk)
+/core/tests/
+/pytest.ini
+
+# Optional local analysis and requirements-audit tools (kept on disk)
+/audit_requirements_3_1.py
+/analyze_benchmark_datasets.py
+/compliance/
+
+# Compatibility shim for the already-running pre-migration worker
+/validate_composed_dataset.py
+
+# Test execution artifacts (runner scripts remain tracked)
+.pytest_cache/
+/pytest-tmp/
+/test_runs/
+/test_outputs/
+/test_results/
+/test-results/
+/smoke_runs/
+/smoke_outputs/
+/htmlcov/
+/.coverage
+/.coverage.*
+/coverage.xml
+
 *.ttf
 *.log
 *.pt
+defenses/asd_assets/*.png
 
 # large benchmark data and run outputs (kept local)
 /data/
 runs/
+# Generated analysis, audit, and experiment reports (kept local)
+/reports/
+# Local project requirements document (archived separately)
+/requirements.pdf
 # run logs and ASR result dumps (regenerated; never a source of truth)
 *.out
 asr_results*.jsonl
+asr_results*.txt
 *.bak
 
 # secrets (never commit)
 .env
+/configs/api_keys.yaml
+
+# Optional local agent instructions (not part of the simulator)
+/CLAUDE.md
