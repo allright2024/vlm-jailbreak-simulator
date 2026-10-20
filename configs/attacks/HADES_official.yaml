@@ -1,5 +1,7 @@
-# HADES official profile (AoiDragon/HADES a2670b7): all six steps, Pass@6.
+# Released HADES image replay (no new white-box optimization).
+# This is an official-data evaluation profile, not a white-box reproduction.
 experiment_profile: official
+mode: replay
 step: all
 classify_missing_type: false
 classifier_model: gpt-4o-2024-11-20
