@@ -33,7 +33,8 @@ from core.schema import Behavior, TestCase
 
 _CLIP_MEAN = [0.48145466, 0.4578275, 0.40821073]
 _CLIP_STD = [0.26862954, 0.26130258, 0.27577711]
-from multimodalmodels.registry import LLAVA_15_REVISION, QWEN2_VL_REVISION  # pinned in multimodalmodels/registry.py
+from multimodalmodels.registry import default_revision
+from multimodalmodels.surrogates import default_surrogate_for_backend
 
 
 @register_attack("VisualAdv")
@@ -54,13 +55,14 @@ class VisualAdvAttack(Attack):
         # surrogate_backend: "llava" (white-box, optimize+eval on LLaVA) or
         # "qwen2" (optimize on Qwen2-VL-7B, transfer to the LLaVA eval target).
         self.surrogate_backend = c.get("surrogate_backend", "llava")
-        self.surrogate = c.get("surrogate", "LLaVA_v1_5")
+        default_surrogate = default_surrogate_for_backend(self.surrogate_backend)
+        self.surrogate = c.get("surrogate", default_surrogate.model_id)
         self.surrogate_revision = c.get(
             "surrogate_revision",
-            QWEN2_VL_REVISION if self.surrogate_backend == "qwen2" else LLAVA_15_REVISION,
+            default_revision(self.surrogate),
         )
         self.image_path = c.get("image_path", os.path.join(DATA_ROOT, "FORCE", "clean.jpeg"))
-        self.target_path = c.get("target_path", os.path.join(DATA_ROOT, "legacy", "derogatory_corpus.csv"))
+        self.target_path = c.get("target_path", os.path.join(DATA_ROOT, "VisualAdv", "derogatory_corpus.csv"))
         self.epsilon = float(c.get("epsilon", 32)) / 255.0
         self.alpha = float(c.get("alpha", 1)) / 255.0
         self.n_iters = int(c.get("n_iters", 5000))
@@ -143,12 +145,12 @@ class VisualAdvAttack(Attack):
             os.path.join(repo_root, "multimodalmodels", "loaders.py"),
             os.path.join(repo_root, "multimodalmodels", "registry.py"),
         ]
-        if self.surrogate_backend == "qwen2":
+        if self.surrogate_backend in {"qwen2", "qwen2-vl", "qwen"}:
             files.extend([
                 os.path.join(repo_root, "multi_attacks", "ultrabreak", "ultrabreak_adapter.py"),
                 os.path.join(repo_root, "multi_attacks", "ultrabreak", "ultrabreak_utils.py"),
             ])
-        else:
+        elif self.surrogate_backend == "llava":
             files.extend([
                 os.path.join(repo_root, "multimodalmodels", "llava", "llava_model.py"),
                 os.path.join(repo_root, "multimodalmodels", "multimodalmodel.py"),
