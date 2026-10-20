@@ -1,0 +1,19 @@
+# Released fixed drug-concept demo (erfanshayegani/Jailbreak-In-Pieces @
+# b7b2bce8). This is the official demo, not a behavior-specific adaptation.
+experiment_profile: official
+model_id: openai/clip-vit-large-patch14-336
+model_revision: ce19dc912ca5cd21c8a653c79e251e808ccabcd1
+device: auto
+base_image: data/JailbreakInPieces/white.jpeg
+target_mode: fixed
+target_image: data/JailbreakInPieces/meth_pill.png
+learning_rate: 0.1
+num_epochs: 5000
+prompt_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+save_loss_history: true
+
+official_target_model: llava_v1_5
+official_target_max_tokens: 100
+official_target_do_sample: true
+official_target_temperature: 0.6
+official_target_top_p: 0.9
