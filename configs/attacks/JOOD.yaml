@@ -1,10 +1,19 @@
-# JOOD (CVPR 2025). aug selects the mixing family:
-#   image: mixup | cutmix_original | cutmix_resizemix
-#   text:  textmix_character_wise_interleave | ..._vertically |
-#          textmix_concat | ..._vertically | ..._concat_cross
-aug: mixup
-# lambda grid (harmful weight) for image augs; ignored for text augs
+# Released multimodal JOOD experiment (naver-ai/JOOD @ 4ca1368).
+# run_jood.sh executes every augmentation below as a separate experiment, as
+# upstream attack_gpt4.sh does. `aug` is the single-run default.
+experiment_profile: official
+aug: cutmix_original
+augs: [cutmix_original, mixup, cutmix_resizemix, randaug1]
 lams: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-# harmless image pool; defaults to AdvBenchM's. Optionally subset by name:
-# harmless_subset: [apple, watch]
-seed: 0
+# CutMix/ResizeMix use NumPy's unseeded process RNG upstream. RandAug remains
+# deterministically seeded per request by the official implementation.
+seed: null
+harmless_dir: data/AdvBenchM/images/harmless
+
+official_target_model: gpt-4-turbo-2024-04-09
+official_target_temperature: 1.0
+official_target_max_tokens: 4096
+official_retry_limit: 10
+official_judges:
+  - meta-llama/Meta-Llama-Guard-2-8B
+  - gpt-4-turbo-2024-04-09
