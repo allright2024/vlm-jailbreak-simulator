@@ -30,7 +30,8 @@ from core.schema import Behavior, TestCase
 
 _CLIP_MEAN = [0.48145466, 0.4578275, 0.40821073]
 _CLIP_STD = [0.26862954, 0.26130258, 0.27577711]
-from multimodalmodels.registry import LLAVA_15_REVISION, QWEN2_VL_REVISION  # pinned in multimodalmodels/registry.py
+from multimodalmodels.registry import default_revision
+from multimodalmodels.surrogates import default_surrogate_for_backend
 
 
 def _affirmative_target(instruction: str) -> str:
@@ -54,10 +55,11 @@ class DeltaJPAttack(Attack):
         # surrogate_backend: "llava" (white-box) or "qwen2" (optimize delta on
         # Qwen2-VL-7B, transfer to the LLaVA eval target).
         self.surrogate_backend = c.get("surrogate_backend", "llava")
-        self.surrogate = c.get("surrogate", "LLaVA_v1_5")
+        default_surrogate = default_surrogate_for_backend(self.surrogate_backend)
+        self.surrogate = c.get("surrogate", default_surrogate.model_id)
         self.surrogate_revision = c.get(
             "surrogate_revision",
-            QWEN2_VL_REVISION if self.surrogate_backend == "qwen2" else LLAVA_15_REVISION,
+            default_revision(self.surrogate),
         )
         self.train_dataset = c.get("train_dataset", "AdvBenchM")
         self.train_num = int(c.get("train_num", 25))
@@ -70,7 +72,10 @@ class DeltaJPAttack(Attack):
         self.split_strategy = c.get("split_strategy", "stratified")
         # optimizing on a different model than the eval target (qwen2) is a
         # model substitution that blocks exact paper reproduction
-        self.substitutes_model = self.surrogate_backend == "qwen2"
+        self.substitutes_model = not (
+            self.surrogate_backend == "llava"
+            and self.surrogate in {"LLaVA_v1_5", "llava-hf/llava-1.5-7b-hf"}
+        )
         self._surrogate = None
         self._delta = None  # universal perturbation in [0,1] image space, [1,3,H,W]
         self._train_behaviors = None
