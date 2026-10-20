@@ -13,13 +13,13 @@ Design notes
   class of bug where a masked / rephrased prompt is used for scoring.
 
 * Optional fields (``keyword``, ``statement``, ``images``, ``target``) cover the
-  union of what the eight attacks need. A dataset fills in whatever it natively
+  union of what the registered attacks need. A dataset fills in whatever it natively
   provides; a field that an attack needs but the dataset lacks is produced in a
   separate, cached enrichment step (not here).
 
 * A ``TestCase`` holds a *list* of image paths and an ``attempt`` index, so it
   can represent single-image attacks (FigStep), multi-image attacks (DMN,
-  CS-DJ), text-only baselines, and multi-attempt attacks (JOOD, BestOfN Pass@N).
+  CS-DJ), text-only baselines, and multi-attempt attacks (JOOD, MML Pass@N).
   ``parent_id`` lets a plug-in attack (ASO) reference the test case it enhances.
 """
 
