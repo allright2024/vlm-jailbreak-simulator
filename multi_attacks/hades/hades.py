@@ -1,12 +1,12 @@
-"""HADES (ECCV 2024 Oral) ported to the core interface.
+"""HADES (ECCV 2024) black-box replay and white-box attack.
 
 HADES hides and amplifies a harmful request's intent inside a crafted image: a
 diffusion image of the harmful concept with the harmful keyword typeset at the
 bottom (and, for the white-box variant, an adversarial perturbation). The
-released HADES benchmark already ships these optimized images (optimization
-steps 0-5), so this port replays them rather than re-running the generation
-pipeline (PixArt + LLM amplification + white-box optimization), which is exactly
-what the official dataset-card evaluation does.
+released HADES benchmark ships optimized images (steps 0-5), which remain
+available through ``mode=replay``.  ``mode=white_box`` additionally runs the
+official top-quarter patch update toward an affirmative response beginning in
+"Sure"; see :mod:`multi_attacks.hades.white_box`.
 
 Prompt construction follows that evaluation: the harmful keyword in the
 instruction is masked and the text points the model at the image, e.g.
@@ -25,10 +25,10 @@ from __future__ import annotations
 import os
 
 from core.attack import Attack
-from core.dataset import REPO_ROOT
 from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
+from .white_box import HadesWhiteBoxMixin
 
 
 _VALID_TYPES = ("behavior", "object", "concept")
@@ -57,21 +57,28 @@ def _masked_prompt(behavior: Behavior) -> str:
 
 
 @register_attack("HADES")
-class HadesAttack(Attack):
+class HadesAttack(HadesWhiteBoxMixin, Attack):
     official_repo = "https://github.com/AoiDragon/HADES"
-    official_commit = "a2670b7"
-    algorithm_fidelity = "replay"
+    official_commit = "a2670b76e42448831c86d44dec02a8fa3a12d468"
+    # The top-patch mechanics match upstream. The explicit held-out training
+    # split and fixed Sure target are benchmark-safety/reproducibility changes.
+    algorithm_fidelity = "adapted"
     requires_images = True
     requires_keyword = True  # needed to mask the instruction
+    requires_surrogate = True
 
     def __init__(self, config=None):
         super().__init__(config)
+        self.mode = str(self.config.get("mode", "white_box")).lower()
+        if self.mode not in {"white_box", "replay"}:
+            raise ValueError("HADES mode must be 'white_box' or 'replay'")
         self.step = self.config.get("step", "all")
         # Enrich a missing keyword_type via GPT-4o (for datasets like AdvBenchM).
         self.classify_missing_type = bool(self.config.get("classify_missing_type", False))
         self.classifier_model = self.config.get("classifier_model", "gpt-4o-2024-11-20")
         self._kt_cache: dict[str, str] = {}
         self._refiner = None
+        self._init_white_box(self.config)
 
     def _classify_keyword_type(self, keyword: str, instruction: str) -> str:
         """Classify a keyword as behavior/object/concept (HADES's 3 categories)."""
@@ -96,6 +103,15 @@ class HadesAttack(Attack):
             return self._classify_keyword_type(behavior.keyword, behavior.instruction)
         return "object"                                 # safe default (never "None")
 
+    def _prompt(self, behavior: Behavior) -> str:
+        """Resolve the exact masked prompt consumed by both attack modes."""
+        official = behavior.meta.get("official_prompt")
+        if official:
+            return official
+        return _build_masked_prompt(
+            behavior.instruction, behavior.keyword or "", self._resolve_type(behavior)
+        )
+
     def _select_images(self, behavior: Behavior) -> list[tuple[int, str]]:
         """Return [(step_index, image_path)] per the step config."""
         imgs = behavior.images  # ordered step0..stepN as stored by the loader
@@ -103,19 +119,25 @@ class HadesAttack(Attack):
             return list(enumerate(imgs))
         if self.step == "last":
             return [(len(imgs) - 1, imgs[-1])]
-        idx = int(self.step)
+        idx = self._step_index(self.step, len(imgs))
         return [(idx, imgs[idx])]
 
-    def build(self, behavior: Behavior, out_dir: str) -> list[TestCase]:
+    def provenance(self):
+        provenance = super().provenance()
+        # One class intentionally exposes two materially different paths.
+        provenance["algorithm_fidelity"] = "replay" if self.mode == "replay" else "adapted"
+        provenance["paper_reproduction"] = False
+        return provenance
+
+    def _build_replay(self, behavior: Behavior) -> list[TestCase]:
         # Use the loader's official_prompt if present, else build it with a
         # resolved keyword_type (dataset value -> GPT-4o classification -> default).
-        official = behavior.meta.get("official_prompt")
-        prompt = official if official else _build_masked_prompt(
-            behavior.instruction, behavior.keyword, self._resolve_type(behavior))
+        prompt = self._prompt(behavior)
         cases = []
         for k, (step_idx, img) in enumerate(self._select_images(behavior)):
             # images are already repo-root-relative in the loader
-            assert os.path.isfile(resolve_path(img)), img
+            if not os.path.isfile(resolve_path(img)):
+                raise FileNotFoundError(resolve_path(img))
             cases.append(
                 TestCase(
                     test_case_id=self.test_case_id(self.name, behavior.behavior_id, k),
@@ -124,7 +146,12 @@ class HadesAttack(Attack):
                     text=prompt,
                     images=[img],
                     attempt=k,
-                    meta={"step": step_idx},
+                    meta={"mode": "replay", "step": step_idx},
                 )
             )
         return cases
+
+    def build(self, behavior: Behavior, out_dir: str) -> list[TestCase]:
+        if self.mode == "replay":
+            return self._build_replay(behavior)
+        return self._build_white_box(behavior, out_dir)
