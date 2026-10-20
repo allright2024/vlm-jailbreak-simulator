@@ -159,12 +159,38 @@ class FORCEAttack(Attack):
         new_delta = torch.fft.ifft2(torch.fft.ifftshift(masked_fft, dim=(-2, -1)), dim=(-2, -1), norm="ortho").real
         return new_delta.unsqueeze(0).clamp(-epsilon, epsilon).detach().to(torch.float16)
 
-    def _pgd_attack(self, image_tensor, instruction):
+    def _pgd_attack(self, image_tensor, instruction, update_mask=None):
+        """Run FORCE PGD, optionally restricting perturbations to a pixel mask.
+
+        ``update_mask=None`` is the official standalone path and is bit-for-bit
+        unchanged.  The composition pipeline supplies a broadcastable 0/1 mask
+        when a preceding spatial component (for example a HADES top patch) must
+        remain untouched.  Masked runs are composition adaptations and are never
+        reported as official FORCE reproduction.
+        """
         model, processor = self._model, self._processor
         device = image_tensor.device
         img_tensor = image_tensor.clone().detach().to(device).half()
         step_size, epsilon = self.step_size / 255.0, self.epsilon / 255.0
         delta = (torch.rand_like(img_tensor) * 2 - 1) * epsilon
+        if update_mask is not None:
+            update_mask = torch.as_tensor(
+                update_mask, device=device, dtype=img_tensor.dtype
+            )
+            if update_mask.ndim == 2:
+                update_mask = update_mask.unsqueeze(0).unsqueeze(0)
+            elif update_mask.ndim == 3:
+                update_mask = update_mask.unsqueeze(0)
+            try:
+                update_mask = torch.broadcast_to(update_mask, img_tensor.shape)
+            except RuntimeError as exc:
+                raise ValueError(
+                    f"FORCE update_mask {tuple(update_mask.shape)} is not broadcastable "
+                    f"to image {tuple(img_tensor.shape)}"
+                ) from exc
+            if not bool(((update_mask == 0) | (update_mask == 1)).all()):
+                raise ValueError("FORCE update_mask must contain only 0/1 values")
+            delta = delta * update_mask
 
         conv = [{"role": "user", "content": [{"type": "text", "text": instruction}, {"type": "image"}]}]
         prompt = processor.apply_chat_template(conv, add_generation_prompt=True)
@@ -193,12 +219,16 @@ class FORCEAttack(Attack):
         for it in range(self.max_iter):
             if self.num_band > 0:
                 delta = self._band_select(delta, img_tensor, masks, base, img_proc, epsilon)
+                if update_mask is not None:
+                    delta = delta * update_mask
 
             noisy_losses = noisy_feats = None
             if self.num_noise > 0:
                 with torch.no_grad():
                     ds = (torch.rand((self.num_noise,) + img_tensor.shape[1:], device=device, dtype=img_tensor.dtype) * 2 - 1)
                     ds = ds * epsilon * self.lambda_3
+                    if update_mask is not None:
+                        ds = ds * update_mask
                     dn = delta.expand(self.num_noise, -1, -1, -1) + ds
                     xn = (img_tensor.expand(self.num_noise, -1, -1, -1) + dn).clamp(0, 1)
                     pvn = fu.normalize_pixel_values_on_gpu(xn, img_proc, out_dtype=torch.float16)
@@ -251,6 +281,8 @@ class FORCEAttack(Attack):
 
             (output_loss + loss_reg).backward()
             delta = torch.clamp(delta - step_size * pixel_values.grad.sign(), -epsilon, epsilon).detach()
+            if update_mask is not None:
+                delta = delta * update_mask
             model.zero_grad()
             for h in handles:
                 h.remove()
