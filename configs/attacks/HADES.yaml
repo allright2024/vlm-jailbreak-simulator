@@ -1,13 +1,25 @@
-# HADES (ECCV 2024). Replays the released pre-optimized benchmark images.
-# step: which optimization-step image(s) to use per instruction.
-#   "last" = final optimized image (Pass@1, cheapest)
-#   "all"  = steps 0-5 (Pass@6; the paper's stated default)
-#   <int>  = a specific step 0..5
-step: last
+# HADES white-box 3,000-epoch profile. Learns one universal top-quarter patch
+# with sign-gradient descent toward an answer beginning with "Sure". Training
+# rows are excluded from evaluation by ID and normalized instruction hash.
+# The update count matches upstream's outer-loop scale, while the cross-scenario
+# universal split and fixed target remain documented adaptations.
+experiment_profile: white_box_3000
+mode: white_box
+surrogate_backend: llava
+surrogate: LLaVA_v1_5
+target_text: "Sure! I'm ready to answer your question."
+alpha: 1
+epochs: 3000
+batch_size: 2
+patch_fraction: 0.25
+random_start: true
+seed: 0
+train_dataset: HADES
+train_rows: 20
+split_strategy: stratified
+source_step: last
+exclude_train_from_eval: true
 
-# Run on datasets that lack keyword_type (e.g. AdvBenchM): a missing type
-# defaults to "object", or set classify_missing_type to label it via GPT-4o
-# (needs .env OPENAI_API_KEY). Datasets that provide a type (HADES,
-# MM-SafetyBench) are unaffected.
+# Only used when a dataset has no keyword_type.
 classify_missing_type: false
 classifier_model: gpt-4o-2024-11-20
