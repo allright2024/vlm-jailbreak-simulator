@@ -35,15 +35,31 @@ class OpenAIRefiner:
         self.max_tokens = max_tokens
         self._client = OpenAI(api_key=key, base_url=base_url or os.environ.get("OPENAI_BASE_URL"))
 
-    def refine(self, refine_prompt: str, user_prompt: str) -> str | None:
-        """Return the rewritten prompt, or None on API error (matches the official)."""
+    def chat(self, system_prompt: str, user_prompt: str, *,
+             max_tokens: int | None = None, temperature: float = 0) -> str | None:
+        """Chat with distinct system/user roles using deterministic decoding.
+
+        JPS's official agents rely on the system role rather than prepending the
+        system instruction to a user message.  ``refine`` below deliberately
+        retains its historical one-user-message contract for the other attacks.
+        """
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
         try:
             resp = self._client.chat.completions.create(
                 model=self.model,
-                messages=[{"role": "user", "content": f"{refine_prompt}\n\n{user_prompt}"}],
-                max_tokens=self.max_tokens,
+                messages=messages,
+                max_tokens=max_tokens or self.max_tokens,
+                temperature=temperature,
             )
             return resp.choices[0].message.content.strip()
         except Exception as exc:  # noqa: BLE001
             print(f"Error calling auxiliary refiner: {exc}")
             return None
+
+    def refine(self, refine_prompt: str, user_prompt: str) -> str | None:
+        """Return the rewritten prompt, or None on API error."""
+        return self.chat("", f"{refine_prompt}\n\n{user_prompt}",
+                         max_tokens=self.max_tokens, temperature=1)
