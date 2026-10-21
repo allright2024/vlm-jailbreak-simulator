@@ -682,8 +682,6 @@ python analyze_benchmark_datasets.py
 | [core/README.md](core/README.md) | 스키마·인터페이스·registry·개발용 테스트 |
 | [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md) | 공식 소스 revision, 재현 수준, 대체 사항 |
 | [multi_attacks/mml/README.md](multi_attacks/mml/README.md) | MML replay·공통 CLI의 MML 프로토콜 세부사항 |
-| `compliance/SECTION_3_1_ITEMS_1_2.md` (로컬 전용) | requirements.pdf 3.1 항목 1–2 수용 기준과 근거. Git 배포에서 제외 |
-| `reports/benchmark_dataset_analysis.md` (로컬 전용) | 데이터 구조·위험 유형·프롬프트 집계 분석. 원문 내용은 출력하지 않으며 Git 배포에서 제외 |
 | [THIRD_PARTY.md](THIRD_PARTY.md) | 코드·데이터·가중치·폰트·API의 별도 라이선스 |
 
 ## Acknowledgement and citation
