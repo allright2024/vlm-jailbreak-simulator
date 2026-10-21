@@ -36,7 +36,7 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ## Code and workflow guide
 
-이 문서는 데이터 원본을 제외한 코드 구조, 데이터 로딩, 단일 공격, 방어,
+이 문서는 코드 구조, 데이터 로딩, 단일 공격, 방어,
 공격 조합 생성 및 평가 실행 방법을 정리합니다. 데이터·모델 가중치는 별도 준비하며,
 아래 목록은 **코드의 지원 범위**이지 모든 조합의 실행 성공이나 논문 성능 재현을 뜻하지 않습니다.
 실험별 재현 수준은 설정과 생성된 manifest를 함께 확인해야 합니다.
@@ -50,7 +50,7 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 - [7. Jailbreak defenses](#7-jailbreak-defenses)
 - [8. Composed jailbreak generation](#8-composed-jailbreak-generation)
 - [9. Evaluation and metrics](#9-evaluation-and-metrics)
-- [10. Validation and tests](#10-validation-and-tests)
+- [10. Validation](#10-validation)
 - [11. Related documentation](#11-related-documentation)
 
 모든 예제는 저장소 루트에서 실행합니다. GPU 최적화, 가중치 다운로드, 외부 API 호출이
@@ -58,7 +58,7 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ## 1. Repository layout
 
-데이터 원본, 다운로드한 가중치, 생성된 실험 결과의 내부 내용은 아래 구조에서 생략했습니다.
+주요 코드와 실행 진입점은 다음과 같습니다.
 
 ```text
 vlm-jailbreak-simulator/
@@ -72,8 +72,7 @@ vlm-jailbreak-simulator/
 │   ├── composition*.py             # 조합 실행, 단계 연결, 체크포인트
 │   ├── targets/, judges/           # 평가 대상 모델과 응답 판정기
 │   ├── metrics.py, multimodal_metrics.py
-│   ├── validation/                 # 데이터·재현 조건·조합·캐시 검증
-│   └── tests/                      # 로컬 검증용; Git 배포에서 제외
+│   └── validation/                 # 데이터·재현 조건·조합·캐시 검증
 ├── multi_attacks/                   # 방법론별 멀티모달 공격
 ├── image_attacks/                   # VisualAdv, DeltaJP, 공통 CE surrogate
 ├── defenses/                       # 방어 구현과 보조 모듈
@@ -88,14 +87,11 @@ vlm-jailbreak-simulator/
 ├── run_generate_completions.py      # Stage 2: 방어 선택 가능
 ├── run_evaluate_completions.py      # Stage 3
 ├── run_generate_composed_dataset.py # 조합 데이터셋 생성
-├── run_extended_metrics.py          # 평가 JSONL의 지표 집계
-└── compliance/, reports/            # 로컬 보조 자료; Git 배포에서 제외
+└── run_extended_metrics.py          # 평가 JSONL의 지표 집계
 ```
 
 실행은 `run_*.py`의 통합 JSONL 파이프라인을 기준으로 합니다.
-구형 JSON/CSV 진입점·공격 패키지·설정은 제거했으며, 이 문서의 CLI와
-`attack_scripts/`, `defense_scripts/` 래퍼를 사용합니다.
-`eval_utils.py`는 현재 HarmBench judge의 분류 프롬프트 의존성이므로 유지합니다.
+쉘 래퍼는 `attack_scripts/`, `defense_scripts/`에서 제공합니다.
 개발 인터페이스는 [core/README.md](core/README.md)를 참고하세요.
 
 ## 2. Installation and environment
@@ -122,14 +118,14 @@ PyTorch/CUDA 조합과 GPU 여유 메모리는 실행 서버에 맞게 확인해
 | `CUDA_VISIBLE_DEVICES` | 사용할 GPU 선택 |
 | `NLTK_DATA` | MML 등에서 사용하는 NLTK 자산 경로 |
 
-키 설정 형식은 [.env.example](.env.example)을 참고하고 실제 키는 커밋하지 않습니다.
+API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
 일부 API 컴포넌트는 프로젝트 `.env`를 읽지만, 데이터 루트는 그 자동 로딩에 의존하지 말고
 **Python 프로세스 시작 전에 export**하세요. 방어별 추가 자산 준비는 [7절](#7-jailbreak-defenses)에 있습니다.
 
 ## 3. Dataset loading
 
-데이터 파일은 Git에 포함하지 않습니다. 여기서는 원본 데이터 내용이 아니라 로더와
-경로 계약만 다룹니다. 전체 디렉터리 계약은 [DATA_LAYOUT.md](DATA_LAYOUT.md)에 있습니다.
+데이터를 준비한 뒤 `VLM_JAILBREAK_DATA_ROOT`로 데이터 루트를 지정합니다.
+필요한 파일과 디렉터리 구조는 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
 ```bash
 export VLM_JAILBREAK_DATA_ROOT=/absolute/path/to/vlm-jailbreak-data
@@ -166,8 +162,8 @@ harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니�
 
 `CS-DJ`는 공격 이름인 동시에 데이터셋 등록 이름입니다.
 데이터셋 로딩에 필요한 자산과 공격 최적화에 필요한 추가 자산은 서로 다를 수 있습니다.
-VisualAdv의 최적화 목표 코퍼스는 `data/VisualAdv/derogatory_corpus.csv`에 둡니다.
-기존 `data/legacy/` 묶음 전체는 필요하지 않으며, 기저 이미지는 `data/FORCE/clean.jpeg`를 사용합니다.
+VisualAdv의 최적화 목표 코퍼스는 `data/VisualAdv/derogatory_corpus.csv`에 두고,
+기저 이미지는 `data/FORCE/clean.jpeg`를 사용합니다.
 
 ### Schema and harmful-only policy
 
@@ -220,7 +216,7 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 ### Configs and reproduction scope
 
 CS-DJ, JOOD, MML, JPS, JailbreakInPieces는 공식 설정을 지향하는 단일 기본 YAML을 사용합니다.
-다른 공격에는 `*_official.yaml`, transfer 등 별도 프로필이 남아 있습니다.
+다른 공격에는 `*_official.yaml`, transfer 등 별도 프로필을 제공합니다.
 특히 다음은 구분해야 합니다.
 
 - JPS 기본 설정이 요구하는 upstream `advbench_subset.csv`와 `clean.jpeg`는
@@ -338,7 +334,7 @@ ASR 로그 위치는 Stage 3의 `--asr_results_file`로 바꿀 수 있습니다.
 기존 결과 경로를 재사용하면 일반 Stage 2/3 출력이 덮어써질 수 있습니다.
 
 MML의 CLAS 판정이 다음 시도를 제어하는 공식 평가 루프는 일반 3단계 평가와 다릅니다.
-별도 루트 실행기 대신 공통 Stage 2의 `--protocol mml_official` 옵션이나
+공통 Stage 2의 `--protocol mml_official` 옵션이나
 [run_mml.sh](attack_scripts/run_mml.sh)를 사용합니다.
 
 ```bash
@@ -444,7 +440,6 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 
 사용하는 개별 방법론은 **9개**:
 CS-DJ, FigStep, MML, JOOD, UltraBreak, HADES, JailbreakInPieces, JailBound, JPS입니다.
-FORCE·DeltaJP·VisualAdv는 **현재 조합에서 제외**되어 있지만 개별 실행 코드는 유지합니다.
 
 ### Recipe plan
 
@@ -497,7 +492,7 @@ python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot
 `--per-recipe`를 생략하면 설정된 전체 쿼터를 사용합니다.
 소수 행이어도 JIP 5,000 epochs, HADES 3,000 epochs, UltraBreak 5,000 epochs,
 JPS 300 steps·5 rounds, JailBound 100 joint iterations 등 설정된 최적화 루프를 수행합니다.
-**pilot도 수 분짜리 스모크라고 가정하면 안 됩니다.**
+최적화가 포함된 pilot도 장시간이 걸릴 수 있습니다.
 
 | 실행 스크립트 | 역할 / 주요 변수 |
 | --- | --- |
@@ -528,14 +523,13 @@ tail -f "$OUTPUT_ROOT/nohup.log"
 ```
 
 `nohup`은 SSH·VS Code 연결 종료 후에도 실행을 유지하지만 서버 재부팅·프로세스 종료를 막지는 않습니다.
-PID는 서버 로컬 값입니다. 공유 폴더가 보이더라도 다른 서버에서 PID가 없다는 이유만으로
+PID는 실행 서버마다 다릅니다. 공유 폴더가 보이더라도 다른 서버에서 PID가 없다는 이유만으로
 작업 종료를 단정하면 안 됩니다. 완료 표식은 `<OUTPUT_ROOT>/SUCCESS`입니다.
 
 worker는 `nohup.pid`, 로그와 중복 실행 lock을 관리합니다.
 완료 그룹은 config hash·recipe ID가 일치할 때만 재사용하고,
 유효한 incomplete 그룹은 검증 후 재개합니다.
 manifest 없는 부분 출력이나 설정이 다른 기존 폴더를 강제로 덮어쓰지 않습니다.
-기존 v1/v2 출력과 v3 출력을 섞지 마세요.
 
 ### Checkpoints, fidelity and outputs
 
@@ -630,56 +624,34 @@ python run_extended_metrics.py \
 배치 target latency는 행별 실측값이 아니라 배치 시간의 균등 분배 추정치입니다.
 입력 형식 전체는 `python run_extended_metrics.py --help`를 참고하세요.
 
-## 10. Validation and tests
+## 10. Validation
 
-`core/tests/`와 `pytest.ini`는 로컬 검증용 소스·설정으로 Git에서 제외되어 있습니다.
-아래 pytest 명령은 해당 테스트 소스와 설정을 별도로 보유한 환경에서만 실행할 수 있습니다.
-`audit_requirements_3_1.py`, `analyze_benchmark_datasets.py`, `compliance/`,
-`reports/` 및 ASR 결과 로그도 로컬 보조 자료로 Git 배포에서 제외합니다.
-실행 데이터·조합 결과·아티팩트 검증 CLI는 저장소에 유지합니다.
+[core/validation/](core/validation/)에서 데이터 경로, 공식 프로필의 준비 조건,
+생성된 조합 결과와 캐시 계보를 검증합니다.
 
 ```bash
-# 데이터/모델을 요구하지 않는 코드 테스트.
-# 외부 데이터 테스트는 완전한 데이터 묶음이 있을 때 자동 실행
-PYTHONNOUSERSITE=1 python -m pytest -q
-
-# 실제 GPU/가중치 테스트는 명시적으로 활성화
-RUN_GPU_TESTS=1 PYTHONNOUSERSITE=1 python -m pytest -q -m gpu
+# 데이터셋 필수 경로 검사
+python -m core.validation.data --layout-only
 
 # 공식 프로필의 자산·설정·credential 존재 여부 검사(키 값은 출력하지 않음)
 python -m core.validation.official_reproduction
 
 # 조합 결과의 harmful-only, 수량, 중복, 아티팩트·단계 연결·split 검사
 python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot
-
-# 로컬 보조 스크립트를 별도로 보유한 경우: 요구사항 점검·데이터셋 분석
-python audit_requirements_3_1.py --deep
-python analyze_benchmark_datasets.py
 ```
 
 캐시 계보는 `python -m core.validation.artifact_lineage`로 별도 검사할 수 있습니다
 (`--attack`, `--config`, `--artifact` 필요).
-테스트의 skipped는 해당 데이터·GPU 실행 조건 등이 충족되지 않았다는 의미이며,
-실제 모델 실행이나 논문 성능을 검증했다는 의미가 아닙니다.
-통과 수치는 환경에 따라 달라지므로 고정된 최신 상태로 기재하지 않습니다.
-
-검증 구현은 [core/validation/](core/validation/)에 모았습니다.
-루트의 `validate_composed_dataset.py`는 이전 경로를 기억한 실행 중 작업을 위한
-로컬 호환 진입점으로 Git 배포에서 제외하며, 새 코드·명령은 모두 위의 모듈 경로를 사용합니다.
-이전 작업 종료 후에는 해당 호환 파일도 제거할 수 있습니다.
-
-단일 공격과 방어 비교는 [run_generate_completions.py](run_generate_completions.py)와
-[run_evaluate_completions.py](run_evaluate_completions.py)를 사용하고,
-방어 전후 지표는 [run_extended_metrics.py](run_extended_metrics.py)로 집계합니다.
-과거 smoke 확인용 실행기와 특정 날짜·임시 설정 경로에 묶인 실행 큐는 정리했으며,
-핵심 생성·평가·검증 기능은 위의 공통 진입점으로 유지합니다.
+이 검사는 자산·설정·산출물의 무결성을 확인합니다.
+실제 공격 성능은 [6절](#6-single-attack-pipeline)의 응답 생성·평가와
+[9절](#9-evaluation-and-metrics)의 지표 집계로 측정합니다.
 
 ## 11. Related documentation
 
 | 문서 | 내용 |
 | --- | --- |
 | [DATA_LAYOUT.md](DATA_LAYOUT.md) | 별도 배포 데이터와 공격 자산의 경로 계약 |
-| [core/README.md](core/README.md) | 스키마·인터페이스·registry·개발용 테스트 |
+| [core/README.md](core/README.md) | 스키마·인터페이스·registry |
 | [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md) | 공식 소스 revision, 재현 수준, 대체 사항 |
 | [multi_attacks/mml/README.md](multi_attacks/mml/README.md) | MML replay·공통 CLI의 MML 프로토콜 세부사항 |
 | [THIRD_PARTY.md](THIRD_PARTY.md) | 코드·데이터·가중치·폰트·API의 별도 라이선스 |
