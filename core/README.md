@@ -1,7 +1,7 @@
 # `core/` — unified pipeline contract
 
 The shared interface every attack, dataset, target model, and judge agrees on,
-so adding an attack (FigStep, HADES, JOOD, ASO, FORCE, DMN, CS-DJ, …)
+so adding an attack (FigStep, HADES, JOOD, CS-DJ, …)
 does not require editing the pipeline.
 
 ## Concepts (`core/schema.py`)
@@ -25,7 +25,7 @@ does not require editing the pipeline.
 
 ## Model loading (`multimodalmodels/`)
 Every model the repo uses — the eval target, the HarmBench judge, attack
-surrogates (FORCE, UltraBreak, JPS, JailBound, VisualAdv, DeltaJP) and defense models
+surrogates (UltraBreak, JPS, JailBound, VisualAdv, DeltaJP) and defense models
 (CIDER, JailGuard) — is loaded through `multimodalmodels/loaders.py`; nothing
 else calls `from_pretrained` / `torch.load` / `spacy.load`.
 - `multimodalmodels/registry.py` pins each HF model id to an exact revision
@@ -39,7 +39,7 @@ else calls `from_pretrained` / `torch.load` / `spacy.load`.
   2B/8B, and native-HF InternVL3 2B/8B targets. `multimodalmodels/surrogates.py`
   exposes the same families to the shared CE contract used by VisualAdv,
   DeltaJP, and HADES white-box via `--surrogate-profile`. Model-specific
-  JPS/UltraBreak/FORCE/JailBound adapters are deliberately not inferred from
+  JPS/UltraBreak/JailBound adapters are deliberately not inferred from
   target compatibility.
 
 ## Datasets (`core/datasets/`)
@@ -80,7 +80,6 @@ Import `core.attacks` to register them. Ported so far:
 | `FigStep` | — | Renders the declarative `statement` (falls back to `instruction`) above an empty numbered list; fixed incitement prompt. Config: `configs/attacks/FigStep.yaml`. |
 | `JOOD` | AdvBenchM | OOD-mixes the harmful item with a benign one. `aug` picks image mixing (`mixup`/`cutmix_original`/`cutmix_resizemix`) or text mixing (`textmix_*`). Builds one test case per (harmless item × λ); Pass@k scores "succeed on any mix". Config: `configs/attacks/JOOD.yaml`. |
 | `HADES` | HADES | The default runs 3,000 white-box epochs to learn a universal top-quarter patch toward a `Sure...` target, then applies it with the keyword-masked prompt. `HADES_official.yaml` instead replays released image steps 0–5 (`step: all`, Pass@6). |
-| `FORCE` | any (+ clean base image) | **White-box.** PGD-optimizes a perturbation on a benign image (`requires_surrogate`; loads LLaVA) to force the target prefix, with frequency-band rescaling and noise-based feature correction. `build` runs the optimization; `max_iter` caps it. Config: `configs/attacks/FORCE.yaml`, base image `data/FORCE/clean.jpeg`. Judge-based ASR is the reliable metric (the exact-prefix `matched` flag is stricter and may need more iterations to trigger at the default settings). |
 | `UltraBreak` | any (+ white base image) | **White-box, universal, transferable.** Optimizes ONE adversarial image on a Qwen2-VL-7B surrogate (`requires_surrogate`) with a semantic embedding-space loss + random patch transforms + TV, then pairs it with every query + Targeted Prompt Guidance. Optimized once and cached; `epochs` controls cost. Config: `configs/attacks/UltraBreak.yaml`, data under `data/UltraBreak/`. Needs `qwen-vl-utils`. |
 | `VisualAdv` | any (+ benign base image) | **White-box (foundational).** PGD-optimizes a perturbation on a benign image (`requires_surrogate`; LLaVA) so the model emits toxic strings from a derogatory corpus (CE loss); one universal image reused per behavior. `constrained` = L_inf-bounded. Config: `configs/attacks/VisualAdv.yaml`. |
 | `DeltaJP` | datasets with per-behavior images (AdvBenchM/HADES/MM-SafetyBench) | **White-box.** A universal L_inf perturbation (delta) added to each behavior's own image (`requires_surrogate`+`requires_images`), fit over a training subset toward affirmative targets, then applied per behavior. Paper: Niu et al. 2402.02309 (deltaJP). Config: `configs/attacks/DeltaJP.yaml`. |
@@ -106,7 +105,7 @@ UltraBreak inserts its trained patch into
 a protected side strip, CS-DJ contrast tile, or disjoint bottom region. A
 lineage-verified cache shares training across the eight execution groups.
 JOOD-Aug generates its configured candidates and chooses one by deterministic
-hash, not ASR. FORCE, DeltaJP and VisualAdv are excluded by config validation.
+hash, not ASR. DeltaJP and VisualAdv are excluded by config validation.
 Periodic transactional checkpoints persist cases and lineage every 10 candidates
 and at recipe boundaries; an incomplete checkpoint is eligible for strict resume.
 `core.validation.composed_dataset` independently checks harmful-only
@@ -155,8 +154,6 @@ gated by `RUN_GPU_TESTS=1`.
   text-mix construction, reproducibility, requirement gating (no model).
 - `python -m core.tests.test_hades` — HADES masked-prompt construction and step
   selection against the real HADES data (no model).
-- `python -m core.tests.test_force` — FORCE registration, config, and the
-  vendored frequency-mask / CE-loss utilities (no model; the PGD runs on GPU).
 - `python -m core.tests.test_ultrabreak` — UltraBreak config/TPG and the
   vendored semantic-loss / transform / TV utilities (no model; the optimization
   runs on GPU with the Qwen2-VL surrogate).
