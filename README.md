@@ -124,19 +124,67 @@ API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
 
 ## 3. Dataset loading
 
-데이터를 준비한 뒤 `VLM_JAILBREAK_DATA_ROOT`로 데이터 루트를 지정합니다.
-필요한 파일과 디렉터리 구조는 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
+### Download and extract
+
+데이터 묶음은 [Google Drive의 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)에서
+다운로드합니다. 압축 파일은 약 1.19 GB이며, 다운로드 파일과 압축 해제본을
+함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
+
+ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에서 압축을 해제**하여
+`vlm-jailbreak-simulator/data/`에 배치합니다. `data/` 안에서 다시 압축을 풀어
+`data/data/`가 되지 않도록 주의하세요.
+
+브라우저에서 다운로드한 파일을 저장소의 상위 폴더에 `data.zip`으로 두거나,
+저장소 루트에서 아래 명령으로 다운로드합니다. `curl`과 `unzip`이 필요합니다.
 
 ```bash
-export VLM_JAILBREAK_DATA_ROOT=/absolute/path/to/vlm-jailbreak-data
+# vlm-jailbreak-simulator/에서 실행: ZIP은 상위 폴더에 저장
+curl --fail --location --retry 3 \
+  'https://drive.usercontent.google.com/download?id=1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i&export=download&confirm=t' \
+  --output ../data.zip
 
-# 사용할 데이터셋부터 확인
-python -m core.validation.data --dataset SafeBench
+# 다운로드한 ZIP의 무결성 검사
+unzip -tq ../data.zip
 
-# 전체 데이터셋의 필수 경로만 확인 / 행 수와 참조 이미지까지 확인
-python -m core.validation.data --layout-only
-python -m core.validation.data
+# 기존 파일은 덮어쓰지 않고, ZIP의 data/ 폴더를 저장소 루트에 배치
+unzip -n ../data.zip -d .
+
+export VLM_JAILBREAK_DATA_ROOT="$PWD/data"
 ```
+
+Drive의 다운로드 확인 화면이나 용량 제한 안내가 나오면 위 공유 링크를 브라우저에서 열어 다운로드하세요.
+
+완료 후 주요 경로는 다음과 같습니다.
+
+```text
+vlm-jailbreak-simulator/
+├── README.md
+├── run_generate_test_cases.py
+└── data/
+    ├── SafeBench/safebench.csv
+    ├── advbench/harmful_behaviors.csv
+    ├── HADES/hades.csv
+    └── ...
+```
+
+기본 데이터 경로는 `<repo>/data`입니다. 위의 `export`는 이미 설정된 다른 데이터 루트가
+있더라도 방금 압축을 해제한 폴더를 사용하도록 지정합니다.
+다른 위치에 압축을 풀었다면 `VLM_JAILBREAK_DATA_ROOT`를 그 안의 `data/` 폴더로 지정하세요.
+
+### Validate the data
+
+```bash
+# 기본 데이터셋의 필수 경로 확인
+python -m core.validation.data --dataset SafeBench --dataset AdvBench --layout-only
+
+# 행 수, ID 중복, 참조 이미지까지 확인
+python -m core.validation.data --dataset SafeBench --dataset AdvBench
+```
+
+`--dataset NAME`을 반복하여 사용할 데이터셋을 선택합니다.
+전체 등록 데이터셋의 자산을 준비한 경우에는 `--dataset`을 생략하여 모두 검사할 수 있습니다.
+개별 공격의 공식 설정에 필요한 추가 이미지·폰트·프롬프트는
+[4절](#4-jailbreak-attacks)의 준비 조건과 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 함께 확인하세요.
 
 [core/paths.py](core/paths.py)는 설정의 논리 경로 `data/foo`를
 `$VLM_JAILBREAK_DATA_ROOT/foo`로 해석합니다. 절대 경로는 그대로 사용하고,
