@@ -96,18 +96,108 @@ vlm-jailbreak-simulator/
 
 ## 2. Installation and environment
 
+설치 기준은 **Linux x86_64, Python 3.11.11, NVIDIA GPU, CUDA 13.0 빌드**입니다.
+[requirements.txt](requirements.txt)는 실행 패키지와 전이 의존성을 동일한 기준 환경의
+설치 버전으로 고정합니다. 모델 가중치와 데이터는 설치 후 별도로 준비합니다.
+
+| 구성 요소 | 기준 버전 |
+| --- | --- |
+| Python | 3.11.11 |
+| PyTorch / TorchVision / TorchAudio | 2.9.1 / 0.24.1 / 2.9.1, 모두 `+cu130` |
+| Transformers / sentence-transformers | 4.57.1 / 5.1.2 |
+| NumPy / SciPy / scikit-learn | 1.26.4 / 1.17.1 / 1.9.1 |
+| spaCy / NLTK | 3.7.2 / 3.8.1 |
+| qwen-vl-utils | 0.0.14 |
+
+CUDA 13.x는 [NVIDIA 호환성 문서](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)에
+따라 580 계열 이상의 호환 드라이버가 필요합니다. 먼저 `nvidia-smi`로 드라이버와
+GPU를 확인하고, 사용할 모델에 맞는 GPU 여유 메모리를 확보하세요.
+
+### Create and install
+
+아래 명령은 저장소 루트에서 **새 환경을 구성할 때** 실행합니다.
+`jb_env`가 이미 사용 중이면 다른 이름의 환경을 만들고, 실행 중인 실험의 패키지는 변경하지 마세요.
+
+`PYTHONNOUSERSITE=1`은 [Python의 사용자 패키지 경로를 비활성화](https://docs.python.org/3.11/using/cmdline.html#envvar-PYTHONNOUSERSITE)하여
+`~/.local`의 다른 버전이 섞이지 않게 합니다. Conda 환경 변수로 저장한 뒤 재활성화합니다.
+
 ```bash
-conda create -n jb_env python=3.11
+conda create -n jb_env python=3.11.11 -y
 conda activate jb_env
+conda env config vars set PYTHONNOUSERSITE=1
+conda deactivate
+conda activate jb_env
+
+# CLIP 소스 빌드에 사용할 도구를 먼저 설치
+python -m pip install "pip==24.3.1" "setuptools==75.8.0" "wheel==0.45.1"
+
+# PyTorch의 공식 CUDA 13.0 인덱스에서 GPU 빌드를 먼저 설치
+python -m pip install \
+  "torch==2.9.1+cu130" "torchvision==0.24.1+cu130" "torchaudio==2.9.1+cu130" \
+  --index-url https://download.pytorch.org/whl/cu130
+
 python -m pip install --no-build-isolation -r requirements.txt
 ```
 
-이미 환경이 있으면 생성 단계는 생략합니다.
-[requirements.txt](requirements.txt)는 `transformers==4.57.1`,
-`spacy==3.7.2`, `nltk==3.8.1` 등을 지정합니다.
-PyTorch/CUDA 조합과 GPU 여유 메모리는 실행 서버에 맞게 확인해야 합니다.
-모델은 [multimodalmodels/loaders.py](multimodalmodels/loaders.py)를 통해 로딩하며,
+PyTorch 설치 순서는 [공식 2.9.1 설치 안내](https://pytorch.org/get-started/previous-versions/#v291)를 따릅니다.
+CLIP은 지정된 Git 커밋에서 빌드하므로 `git`이 필요하고,
+JailGuard의 spaCy 벡터 모델 `en_core_web_md==3.7.1`도 고정된 공개 wheel로 설치합니다.
+
+### Verify the environment
+
+```bash
+python -m pip check
+python - <<'PY'
+import importlib.metadata as metadata
+import platform
+import site
+import sys
+import torch
+
+assert platform.python_version() == "3.11.11"
+assert site.ENABLE_USER_SITE is False
+expected = {
+    "torch": "2.9.1+cu130", "torchvision": "0.24.1+cu130",
+    "torchaudio": "2.9.1+cu130", "transformers": "4.57.1",
+    "sentence-transformers": "5.1.2", "numpy": "1.26.4",
+    "spacy": "3.7.2", "nltk": "3.8.1", "qwen-vl-utils": "0.0.14",
+    "en-core-web-md": "3.7.1",
+}
+for package, version in expected.items():
+    assert metadata.version(package) == version, package
+assert torch.version.cuda == "13.0"
+assert torch.cuda.is_available(), "NVIDIA GPU와 드라이버 설정을 확인하세요."
+print("Python:", sys.executable)
+print("Environment OK")
+PY
+```
+
+VS Code·노트북에서도 위 환경의 Python 인터프리터·커널을 선택하고,
+환경 변수를 설정한 뒤에는 기존 커널을 재시작하세요.
+모델 로딩은 [multimodalmodels/loaders.py](multimodalmodels/loaders.py),
 체크포인트 revision은 [multimodalmodels/registry.py](multimodalmodels/registry.py)에서 관리합니다.
+
+### Data, defense assets and optional metrics
+
+데이터는 [3절](#3-dataset-loading), 방어용 이미지·확산 모델 자산은
+[7절](#7-jailbreak-defenses)에 따라 준비합니다.
+MML의 NLTK 자산은 `data.zip`의 `nltk_data/`를 사용하거나 아래 명령으로 준비합니다.
+
+```bash
+export NLTK_DATA="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/nltk_data"
+python -m nltk.downloader -d "$NLTK_DATA" averaged_perceptron_tagger
+```
+
+SSIM·LPIPS 이미지 품질 지표를 사용할 때는 다음 패키지를 추가 설치합니다.
+기준 패키지 버전은 `-c requirements.txt`로 유지합니다.
+
+```bash
+python -m pip install -c requirements.txt "scikit-image==0.25.2" "lpips==0.1.4"
+python -m pip check
+```
+
+LPIPS·CLIP 유사도에는 해당 모델 가중치도 필요합니다.
+실제 계산 여부와 옵션은 [9절](#9-evaluation-and-metrics)을 참고하세요.
 
 | 환경 변수 | 용도 |
 | --- | --- |
@@ -116,6 +206,7 @@ PyTorch/CUDA 조합과 GPU 여유 메모리는 실행 서버에 맞게 확인해
 | `HF_TOKEN` | 접근 승인이 필요한 Hugging Face 모델 |
 | `PYTHON` | 쉘 래퍼가 사용할 Python 실행 파일 |
 | `CUDA_VISIBLE_DEVICES` | 사용할 GPU 선택 |
+| `PYTHONNOUSERSITE` | `1`로 설정하여 사용자 site-packages 혼입 방지 |
 | `NLTK_DATA` | MML 등에서 사용하는 NLTK 자산 경로 |
 
 API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
