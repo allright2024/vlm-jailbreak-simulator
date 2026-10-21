@@ -372,10 +372,6 @@ ASR/RSR/query 요약을 한 번에 기록합니다. 작은 실험은 Stage 1에�
 | `JailGuard` | [jailguard.py](defenses/jailguard.py) / [YAML](configs/defense_configs/JailGuard.yaml) | 이미지 변형별 응답 불일치로 탐지 | [setup_jailguard.sh](defense_scripts/setup_jailguard.sh) / [run_jailguard.sh](defense_scripts/run_jailguard.sh) |
 | `CIDER` | [cider.py](defenses/cider.py) / [YAML](configs/defense_configs/CIDER.yaml) | diffusion denoising 전후 이미지·질문 유사도 변화로 탐지 | [setup_cider.sh](defense_scripts/setup_cider.sh) / [run_cider.sh](defense_scripts/run_cider.sh) |
 
-[HiddenDetect](defenses/hiddendetect.py)는 legacy `apply()` 구현과 설정·등록 코드는 있지만,
-통합 파이프라인이 호출하는 `apply_core()` 연결이 없습니다.
-따라서 위 5개와 같은 통합 실행 지원으로 보지 않습니다.
-
 ### Setup and paired evaluation
 
 필요한 방어의 setup만 실행하세요. setup은 자산을 다운로드하거나 패키지를 설치합니다.
