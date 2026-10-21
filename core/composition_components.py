@@ -561,59 +561,6 @@ class DeltaJPComponent(AttackBackedComponent):
         )
 
 
-class FORCERefineComponent(AttackBackedComponent):
-    component_name = "force_refine"
-    attack_name = "FORCE"
-    algorithm_fidelity = "adapted_composition_stage"
-
-    def transform(self, artifact, behavior, out_dir):
-        import torch
-        from multi_attacks.force import force_utils as fu
-
-        source = _input_image(artifact, behavior)
-        _, processor = self.attack._load_surrogate()
-        size = self.attack._target_size(processor.image_processor)
-        image = Image.open(source).convert("RGB").resize(size, Image.LANCZOS)
-        tensor = fu.pil_to_tensor(image).unsqueeze(0).to(self.attack.device)
-        preserve_top = float(self.stage_spec.get("preserve_top_fraction", 0.0))
-        update_mask = None
-        if preserve_top:
-            update_mask = _bottom_update_mask_like(tensor, preserve_top)
-        elif not 0 <= preserve_top < 1:
-            # Keep standalone-equivalent ``None`` for zero while still failing
-            # closed on invalid negative values.
-            _bottom_update_mask_like(tensor, preserve_top)
-        # These fields describe one per-behavior search; do not carry a prior
-        # candidate's termination state into the next stage record.
-        self.attack._last_query_count = 0
-        self.attack._safety_cap_hit = False
-        matched, adversarial, iterations = self.attack._pgd_attack(
-            tensor, artifact.text, update_mask=update_mask
-        )
-        os.makedirs(out_dir, exist_ok=True)
-        path = os.path.join(out_dir, f"{_safe_stem(behavior.behavior_id)}_force.png")
-        fu.save_tensor_as_image(adversarial, path)
-        return ComponentResult(
-            artifact=artifact.with_payload(images=[portable_path(path)]),
-            iteration_plan={
-                "max_iter": self.attack.max_iter,
-                "max_query": self.attack.max_query,
-                "epsilon_255": self.attack.epsilon,
-            },
-            iteration_result={
-                "iterations_completed": iterations,
-                "matched": bool(matched),
-                "match_count": self.attack._last_query_count,
-                "safety_cap_hit": self.attack._safety_cap_hit,
-            },
-            metadata={
-                "preserve_top_fraction": preserve_top,
-                "spatial_region": "bottom" if preserve_top else "full",
-                "source_provenance": self._attack_provenance(),
-            },
-        )
-
-
 class JOODAugComponent(CompositionComponent):
     component_name = "jood_aug"
     source_attack = "JOOD"
@@ -687,7 +634,6 @@ COMPONENTS: dict[str, type[CompositionComponent]] = {
         JailbreakInPiecesEmbeddingComponent,
         HADESPatchComponent,
         DeltaJPComponent,
-        FORCERefineComponent,
         JOODAugComponent,
     )
 }
