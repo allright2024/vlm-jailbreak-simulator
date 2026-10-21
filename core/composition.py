@@ -33,7 +33,7 @@ from .schema import Behavior
 
 COMPOSITION_SCHEMA_VERSION = 1
 FINAL_ALGORITHM_FIDELITY = "adapted_composition"
-FORBIDDEN_COMPONENT_ATTACKS = {"bestofn", "deltajp", "visualadv", "force"}
+FORBIDDEN_COMPONENT_ATTACKS = {"bestofn", "deltajp", "visualadv"}
 KNOWN_COMPONENTS = {
     "cs_dj_split",
     "cs_dj_full",
@@ -44,7 +44,6 @@ KNOWN_COMPONENTS = {
     "hades_patch",
     "delta_jp",
     "jailbreak_in_pieces_embedding",
-    "force_refine",
     "jps_joint",
     "jailbound_joint",
 }
@@ -54,7 +53,7 @@ COMPONENT_ATTACKS = {
     "mml_layout": "MML", "jood_aug": "JOOD",
     "hades_patch": "HADES", "delta_jp": "DeltaJP",
     "jailbreak_in_pieces_embedding": "JailbreakInPieces",
-    "force_refine": "FORCE", "jps_joint": "JPS", "jailbound_joint": "JailBound",
+    "jps_joint": "JPS", "jailbound_joint": "JailBound",
 }
 
 
