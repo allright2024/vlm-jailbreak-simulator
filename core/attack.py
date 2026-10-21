@@ -9,7 +9,7 @@ instead of crashing deep inside the attack.
 Families (for reference; all use the same ``build`` entry point):
   * Offline generators (FigStep, CS-DJ, DMN, HADES-blackbox): produce test
     cases without touching the target model.
-  * Surrogate-optimization (FORCE, HADES-whitebox): optimize an image on a
+  * Surrogate-optimization (VisualAdv, HADES-whitebox): optimize an image on a
     white-box surrogate; ``requires_surrogate`` is True.
   * Target-in-the-loop (JOOD, ASO): query the target while attacking.
     These return multiple attempts; the runner scores Pass@k. ``interactive``
