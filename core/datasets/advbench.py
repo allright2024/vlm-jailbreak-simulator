@@ -1,7 +1,7 @@
 """AdvBench loader: data/advbench/harmful_behaviors.csv -> list[Behavior].
 
 520 harmful behaviors, each with a ``target`` affirmative prefix
-("Sure, here is ...") used by optimization attacks such as FORCE. Text-only and
+("Sure, here is ...") used by optimization attacks. Text-only and
 uncategorized: no images, keyword, statement, or category.
 """
 
