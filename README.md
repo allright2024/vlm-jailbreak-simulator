@@ -494,30 +494,32 @@ CS-DJ, FigStep, MML, JOOD, UltraBreak, HADES, JailbreakInPieces, JailBound, JPS�
 
 ### Recipe plan
 
+총 **3,000개**의 데이터셋을 목표로 생성하며, 아래 수량은 조합별 최종 샘플 수입니다.
+
 화살표는 적용 순서입니다. Split/Full/Patch/Aug 같은 접미사는
 원래 방법론 전체와 분해된 구성요소를 구분하며 새로운 개별 공격 이름은 아닙니다.
 
-| ID | 순서 | 최종 / 원시 후보 |
+| ID | 순서 | 샘플 수 |
 | --- | --- | ---: |
-| P01 | CS-DJ-Split → FigStep | 200 / 240 |
-| P02 | CS-DJ-Split → MML | 200 / 240 |
-| P03 | FigStep → JOOD | 200 / 240 |
-| P04 | MML → UltraBreak-Patch | 200 / 240 |
-| P05 | HADES → JailBound | 200 / 240 |
-| P06 | Jailbreak-In-Pieces → UltraBreak-Patch | 200 / 240 |
-| P07 | Jailbreak-In-Pieces → JailBound | 200 / 240 |
-| P08 | JPS → JailBound | 200 / 240 |
-| P09 | CS-DJ-Full → UltraBreak-Patch | 200 / 240 |
-| T01 | CS-DJ-Split → FigStep → JailBound | 150 / 180 |
-| T02 | CS-DJ-Split → MML → JailBound | 150 / 180 |
-| T03 | Jailbreak-In-Pieces → HADES → UltraBreak-Patch | 150 / 180 |
-| T04 | JPS → JailBound → JOOD | 150 / 180 |
-| T05 | Jailbreak-In-Pieces → CS-DJ-Split → JailBound | 150 / 180 |
-| T06 | JPS → HADES → UltraBreak-Patch | 150 / 180 |
-| Q01 | CS-DJ-Split → MML → JailBound → UltraBreak-Patch | 100 / 120 |
-| Q02 | Jailbreak-In-Pieces → CS-DJ-Split → HADES → JailBound | 100 / 120 |
-| Q03 | CS-DJ-Split → FigStep → JailBound → UltraBreak-Patch | 100 / 120 |
-| **합계** | **2개 조합 1,800 + 3개 조합 900 + 4개 조합 300** | **3,000 / 3,600** |
+| P01 | CS-DJ-Split → FigStep | 200 |
+| P02 | CS-DJ-Split → MML | 200 |
+| P03 | FigStep → JOOD | 200 |
+| P04 | MML → UltraBreak-Patch | 200 |
+| P05 | HADES → JailBound | 200 |
+| P06 | Jailbreak-In-Pieces → UltraBreak-Patch | 200 |
+| P07 | Jailbreak-In-Pieces → JailBound | 200 |
+| P08 | JPS → JailBound | 200 |
+| P09 | CS-DJ-Full → UltraBreak-Patch | 200 |
+| T01 | CS-DJ-Split → FigStep → JailBound | 150 |
+| T02 | CS-DJ-Split → MML → JailBound | 150 |
+| T03 | Jailbreak-In-Pieces → HADES → UltraBreak-Patch | 150 |
+| T04 | JPS → JailBound → JOOD | 150 |
+| T05 | Jailbreak-In-Pieces → CS-DJ-Split → JailBound | 150 |
+| T06 | JPS → HADES → UltraBreak-Patch | 150 |
+| Q01 | CS-DJ-Split → MML → JailBound → UltraBreak-Patch | 100 |
+| Q02 | Jailbreak-In-Pieces → CS-DJ-Split → HADES → JailBound | 100 |
+| Q03 | CS-DJ-Split → FigStep → JailBound → UltraBreak-Patch | 100 |
+| **합계** | **2개 조합 1,800 + 3개 조합 900 + 4개 조합 300** | **3,000** |
 
 JOOD는 최종 350개(11.67%), UltraBreak는 1,100개(36.67%)에 포함됩니다.
 원본은 harmful-only로 선택하고, 같은 `source_behavior_id` 파생물은
@@ -529,7 +531,7 @@ JOOD는 최종 350개(11.67%), UltraBreak는 1,100개(36.67%)에 포함됩니다
 # 설정 검사만: 데이터·모델 로딩 없음
 python run_generate_composed_dataset.py --dry-run
 
-# 데이터·설정·원시 후보 용량 검사: 모델 로딩 없음
+# 데이터·설정·생성 가능 수량 검사: 모델 로딩 없음
 python run_generate_composed_dataset.py --preflight
 
 # 레시피별 최종 3개: 전체 18개면 최종 54개
@@ -602,9 +604,8 @@ manifest 없는 부분 출력이나 설정이 다른 기존 폴더를 강제로 
 - 조합 결과는 항상 `algorithm_fidelity: adapted_composition`,
   `paper_reproduction: false`입니다. JailBound 단계는 앞선 최적화의 픽셀 완전 보존을 보장하지 않습니다.
 
-출력은 `raw_test_cases.jsonl`/`raw_behaviors.jsonl`,
-최종 `test_cases.jsonl`/`behaviors.jsonl`,
-`composition_manifest.json`, `composition_qc.json` 및 이미지입니다.
+평가에 사용하는 데이터는 `test_cases.jsonl`/`behaviors.jsonl`과 이미지이며,
+구성·검증 정보는 `composition_manifest.json`, `composition_qc.json`에 기록합니다.
 QC에는 단계별 입력·출력 hash와 연결 정보를 남깁니다.
 [merge_composed_runs.py](merge_composed_runs.py)가 그룹을 검증·병합합니다.
 
