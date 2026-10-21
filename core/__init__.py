@@ -1,8 +1,8 @@
 """Unified core for the VLM jailbreak simulator.
 
 This package defines the shared contract that every attack, dataset loader, and
-evaluator agrees on, so that adding a new attack (FigStep, HADES, JOOD, ASO,
-FORCE, DMN, CS-DJ, ...) does not require touching the pipeline.
+evaluator agrees on, so that adding a new attack (FigStep, HADES, JOOD, CS-DJ,
+...) does not require touching the pipeline.
 
 Three concepts:
   - Behavior:  one harmful request drawn from a benchmark (the unit we score).
