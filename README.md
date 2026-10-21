@@ -256,27 +256,37 @@ CS-DJ, JOOD, MML, JPS, JailbreakInPieces는 공식 설정을 지향하는 단일
 ## 5. Target and surrogate models
 
 Target은 생성된 공격을 **평가할 모델**, surrogate는 공격 생성 시 사용하는
-**미분 가능한 최적화 모델**입니다. 대상 모델 지원과 해당 모델용 공격 최적화 지원은 별개입니다.
+**미분 가능한 최적화 모델**입니다. 용도별로 아래 모델을 선택합니다.
 
-| 대표 target CLI 이름 | 체크포인트 / 서비스 | 공통 CE surrogate 프로필 |
-| --- | --- | --- |
-| `llava_v1_5` | `llava-hf/llava-1.5-7b-hf` | 지원 |
-| `llava_v1_6` | `llava-hf/llava-v1.6-mistral-7b-hf` | 지원 |
-| `qwen2_vl_7b` | `Qwen/Qwen2-VL-7B-Instruct` | 지원 |
-| `qwen2_5_vl_7b` | `Qwen/Qwen2.5-VL-7B-Instruct` | 미등록 |
-| `qwen3_vl_2b`, `qwen3_vl_8b` | `Qwen/Qwen3-VL-{2B,8B}-Instruct` | 지원 |
-| `internvl3_2b`, `internvl3_8b` | `OpenGVLab/InternVL3-{2B,8B}-hf` | 지원 |
-| `gpt-4o-mini`, `gpt-4o`, `gpt-4o-2024-08-06`, `gpt-4-turbo-2024-04-09` | OpenAI API 등록 이름 | 미지원 |
+### Target models
+
+| 대표 target CLI 이름 | 체크포인트 / 서비스 |
+| --- | --- |
+| `llava_v1_5` | `llava-hf/llava-1.5-7b-hf` |
+| `llava_v1_6` | `llava-hf/llava-v1.6-mistral-7b-hf` |
+| `qwen2_vl_7b` | `Qwen/Qwen2-VL-7B-Instruct` |
+| `qwen2_5_vl_7b` | `Qwen/Qwen2.5-VL-7B-Instruct` |
+| `qwen3_vl_2b`, `qwen3_vl_8b` | `Qwen/Qwen3-VL-{2B,8B}-Instruct` |
+| `internvl3_2b`, `internvl3_8b` | `OpenGVLab/InternVL3-{2B,8B}-hf` |
+| `gpt-4o-mini`, `gpt-4o`, `gpt-4o-2024-08-06`, `gpt-4-turbo-2024-04-09` | OpenAI API |
 
 위 API 이름은 코드 등록값이며 현재 서비스 가용성을 보장하지 않습니다.
-전체 alias는 [core/targets/__init__.py](core/targets/__init__.py),
-surrogate 목록은 [multimodalmodels/surrogates.py](multimodalmodels/surrogates.py)를 참고하세요.
+전체 alias는 [core/targets/__init__.py](core/targets/__init__.py)를 참고하세요.
 
 ```bash
 # 평가 대상 변경: 기존 test cases를 그대로 사용
 python run_generate_completions.py \
   --run_dir runs/example --model internvl3_2b --batch_size 1
+```
 
+### Surrogate models
+
+VisualAdv, DeltaJP, HADES white-box의 공통 CE 최적화에는
+`llava_v1_5`, `llava_v1_6`, `qwen2_vl_7b`,
+`qwen3_vl_2b`, `qwen3_vl_8b`, `internvl3_2b`, `internvl3_8b`를 선택할 수 있습니다.
+프로필 정의는 [multimodalmodels/surrogates.py](multimodalmodels/surrogates.py)에 있습니다.
+
+```bash
 # 최적화 surrogate 변경: VisualAdv / DeltaJP / HADES white_box 공통 CE 경로
 python run_generate_test_cases.py \
   --attack VisualAdv --dataset SafeBench --limit 3 \
@@ -284,9 +294,8 @@ python run_generate_test_cases.py \
 ```
 
 공통 CE 프로필은 원본 RGB 텐서를 각 모델의 미분 가능한 전처리에 통과시킵니다.
-JPS/UltraBreak는 전용 Qwen2 adapter, FORCE/JailBound는 LLaVA-1.5 전용 내부 adapter를 사용하므로
-target 옵션만 바꿔 이들의 surrogate까지 바꿀 수는 없습니다.
-CIDER도 현재 LLaVA-1.5 encoder 경로에 제한됩니다.
+JPS/UltraBreak는 전용 Qwen2 adapter, FORCE/JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
+CIDER는 LLaVA-1.5 target의 encoder를 사용합니다.
 
 ## 6. Single-attack pipeline
 
@@ -423,9 +432,8 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
   spaCy 유사도/KL threshold 0.025를 사용합니다.
   통과한 입력은 원본에 대한 후속 질의 1회가 추가됩니다.
   setup의 `en_core_web_md`가 필요하며 `en_core_web_sm`만으로 대체하지 않습니다.
-- **CIDER:** 약 2.21 GB의 공식 guided-diffusion 체크포인트와 LLaVA-1.5 encoder가 필요합니다.
+- **CIDER:** LLaVA-1.5 target과 약 2.21 GB의 공식 guided-diffusion 체크포인트를 사용합니다.
   denoising 0/50/…/350, threshold `-0.003936767578125`를 사용합니다.
-  Qwen3/InternVL target은 지원하지 않습니다.
   VisualAdv/DeltaJP 같은 최적화 perturbation이 주 위협 모델이며 FigStep 성능과 동일시하지 않습니다.
 
 공식 알고리즘을 이식했더라도 simulator의 HF LLaVA-1.5-7B는
