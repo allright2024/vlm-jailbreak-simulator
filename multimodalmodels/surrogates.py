@@ -3,7 +3,7 @@
 These profiles describe *implemented* differentiable interfaces, not every VLM
 that can merely be loaded.  The modern profiles currently support the shared
 teacher-forced CE contract used by VisualAdv, DeltaJP, and HADES white-box.
-Algorithm-specific adapters (JPS, UltraBreak, FORCE, JailBound) intentionally
+Algorithm-specific adapters (JPS, UltraBreak, JailBound) intentionally
 remain separate and must not silently consume these profiles.
 """
 
