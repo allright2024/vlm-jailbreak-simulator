@@ -238,7 +238,7 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 
 ## 4. Jailbreak attacks
 
-[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 12개입니다.
+[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 11개입니다.
 기본 설정 경로는 `configs/attacks/<CLI 이름>.yaml`이며,
 실행 시 `--config`로 다른 프로필을 명시할 수 있습니다.
 
@@ -250,7 +250,6 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 | `MML` | [multi_attacks/mml/](multi_attacks/mml/) | 공개 이미지·프롬프트 replay. 공통 Stage 2의 MML 프로토콜로 CLAS 조기 종료 | [run_mml.sh](attack_scripts/run_mml.sh) |
 | `HADES` | [multi_attacks/hades/](multi_attacks/hades/) | 기본 white-box 상단 패치 3,000 epochs. 별도 official 설정은 공개 이미지 6단계 replay | [run_hades.sh](attack_scripts/run_hades.sh) |
 | `JOOD` | [multi_attacks/jood/](multi_attacks/jood/) | benign 항목과 Mixup/CutMix/ResizeMix/RandAug. 개별 runner는 AdvBenchM 대상 | [run_jood.sh](attack_scripts/run_jood.sh) |
-| `FORCE` | [multi_attacks/force/](multi_attacks/force/) | LLaVA 기반 주파수·특징 보정 최적화. 반복 상한 도달 여부 기록 | [run_force.sh](attack_scripts/run_force.sh) |
 | `UltraBreak` | [multi_attacks/ultrabreak/](multi_attacks/ultrabreak/) | Qwen2-VL universal 이미지 최적화, 의미 손실·변환·TV·TPG | [run_ultrabreak.sh](attack_scripts/run_ultrabreak.sh) |
 | `JPS` | [multi_attacks/jps/](multi_attacks/jps/) | Qwen2 시각 최적화와 Qwen2.5-14B 에이전트의 피드백·수정. 공식 CSV·기저 이미지 별도 필요 | [run_jps.sh](attack_scripts/run_jps.sh) |
 | `JailBound` | [multi_attacks/jailbound/](multi_attacks/jailbound/) | 안전 경계 probe 학습 후 이미지·20-token suffix 공동 최적화. 논문 기반 adapted 구현 | [run_jailbound.sh](attack_scripts/run_jailbound.sh) |
@@ -286,7 +285,7 @@ CS-DJ, JOOD, MML, JPS, JailbreakInPieces는 공식 설정을 지향하는 단일
 
 | 스크립트 계열 | 추가 옵션 / 주의점 |
 | --- | --- |
-| FigStep·HADES·FORCE·VisualAdv·DeltaJP·UltraBreak | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
+| FigStep·HADES·VisualAdv·DeltaJP·UltraBreak | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
 | `run_cs_dj.sh` | 기본 `MODEL=gpt-4o-mini`, `DATASETS=CS-DJ` |
 | `run_jood.sh` | 기본 GPT-4 Turbo 대상, AdvBenchM, 네 `AUGS`를 각각 실행 |
 | `run_jps.sh` | 기본 `MODEL=qwen2_vl_7b`, `CONFIG` 지정 가능 |
@@ -342,7 +341,7 @@ python run_generate_test_cases.py \
 ```
 
 공통 CE 프로필은 원본 RGB 텐서를 각 모델의 미분 가능한 전처리에 통과시킵니다.
-JPS/UltraBreak는 전용 Qwen2 adapter, FORCE/JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
+JPS/UltraBreak는 전용 Qwen2 adapter, JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
 CIDER는 LLaVA-1.5 target의 encoder를 사용합니다.
 
 ## 6. Single-attack pipeline
