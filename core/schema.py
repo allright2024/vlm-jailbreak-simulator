@@ -60,7 +60,7 @@ class Behavior:
     keyword: Optional[str] = None        # harmful keyword to mask/typeset (HADES, CS-DJ, JOOD)
     keyword_type: Optional[str] = None   # e.g. HADES "behavior"/"object"/"concept"
     statement: Optional[str] = None      # declarative rephrase, "Steps to ..." (FigStep)
-    target: Optional[str] = None         # desired-prefix string, "Sure, here is ..." (FORCE, optimization attacks)
+    target: Optional[str] = None         # desired-prefix string for optimization attacks
 
     # Images supplied by the external dataset. Paths are repo-relative when the
     # data root is local and absolute when it is mounted outside the repository.
