@@ -1,6 +1,6 @@
 """Centralized model loading: every model this repo uses is loaded here.
 
-The eval target, the judge, attack surrogates (FORCE, UltraBreak, JPS,
+The eval target, the judge, attack surrogates (UltraBreak, JPS, JailBound,
 VisualAdv, DeltaJP) and defense models (CIDER, JailGuard) all call these
 helpers instead of ``*.from_pretrained`` / ``torch.load`` / ``spacy.load``
 directly, so model ids, pinned revisions, dtype and device placement live in
@@ -9,7 +9,7 @@ one place. ``core/tests/test_model_loading.py`` enforces that no code outside
 
 When ``revision`` is None, the pinned revision from ``registry.py`` is used for
 registered model ids (local paths and unregistered ids load as given).
-Attack-specific machinery (FORCE's layer hooks, UltraBreak's patchify and
+Attack-specific machinery (JailBound's layer hooks, UltraBreak's patchify and
 semantic loss) stays in the attacks; only the loading lives here.
 
 Heavy imports (torch, transformers, spacy) are deferred to call time so that
@@ -53,7 +53,7 @@ def load_llava(
 
     ``device_map="auto"`` shards across visible GPUs (inference: the eval target
     and the CE surrogate). Pass ``device_map=None`` with ``to_device`` for a
-    single-device white-box attack that installs forward hooks (FORCE).
+    single-device white-box attack that installs forward hooks.
     """
     from transformers import AutoProcessor, LlavaForConditionalGeneration
 
