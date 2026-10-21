@@ -44,8 +44,6 @@ def _data_path(relative: str) -> str:
 def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list[str]:
     """Concrete files/directories needed before an attack can build cases."""
     c = config or {}
-    if name == "FORCE":
-        return [resolve_path(c.get("image_path", "data/FORCE/clean.jpeg"))]
     if name == "VisualAdv":
         return [
             resolve_path(c.get("image_path", "data/FORCE/clean.jpeg")),
@@ -137,4 +135,4 @@ def require_data(
 
 
 def all_data_available() -> bool:
-    return not missing_data(DATASET_LAYOUT, ("FORCE", "VisualAdv", "UltraBreak", "JPS", "DeltaJP", "JOOD"))
+    return not missing_data(DATASET_LAYOUT, ("VisualAdv", "UltraBreak", "JPS", "DeltaJP", "JOOD"))
