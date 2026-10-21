@@ -63,7 +63,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
     spec.hf_id: spec
     for spec in (
         ModelSpec(LLAVA_15_HF_ID, LLAVA_15_REVISION, "llava",
-                  "eval target; white-box surrogate (FORCE, VisualAdv, DeltaJP); "
+                  "eval target; white-box surrogate (VisualAdv, DeltaJP, HADES); "
                   "CIDER encoder; ECSO target and text-only generator"),
         ModelSpec(LLAVA_16_HF_ID, LLAVA_16_REVISION, "llava-next",
                   "eval target; optional CE surrogate (VisualAdv, DeltaJP, HADES)"),
