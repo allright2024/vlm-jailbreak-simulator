@@ -5,6 +5,9 @@
 # pooling, MM-SafetyBench safe/unsafe pair construction, and suffix NLL are
 # documented clean-room choices. Consequently this run is always `adapted`,
 # never an official-code or paper-number reproduction.
+# Audit 2026-10-24: Changed Question is not a verified safe input. This legacy
+# config now fails validation instead of fitting mislabeled probes. The paper
+# pilot uses response-derived labels: attack_scripts/jailbound_table3_pilot.py.
 experiment_profile: paper_settings
 
 backend: llava

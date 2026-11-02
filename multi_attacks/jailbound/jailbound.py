@@ -34,7 +34,11 @@ from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from multimodalmodels.registry import LLAVA_15_HF_ID, LLAVA_15_REVISION
 
-from .jailbound_utils import boundary_losses, fit_linear_boundaries, parse_layer_selection
+from .jailbound_utils import (
+    boundary_losses,
+    fit_linear_boundaries,
+    parse_layer_selection,
+)
 
 
 @register_attack("JailBound")
@@ -91,6 +95,12 @@ class JailBoundAttack(Attack):
             raise ValueError("JailBound probe_rows must be positive (reserve a train split)")
         if self.probe_split not in {"stratified", "first"}:
             raise ValueError("JailBound probe_split must be stratified or first")
+        if self.probe_dataset == "MM-SafetyBench" and self.probe_safe_field == "changed_question":
+            raise ValueError(
+                "MM-SafetyBench Changed Question is a rephrased harmful request, not an annotated safe input. "
+                "It cannot be assigned probe label 0. Supply verified safe/unsafe fields from a labeled corpus "
+                "or use attack_scripts/jailbound_table3_pilot.py for the response-labeled Qwen paper pilot."
+            )
         if not 0.0 < self.p0 < 1.0:
             raise ValueError("JailBound p0 must be in (0, 1)")
         if any(value <= 0 for value in (

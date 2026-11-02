@@ -53,6 +53,17 @@ authors.
 | `defenses/asd.py`, `defenses/asd_assets/` | [AngelAlita/AsD](https://github.com/AngelAlita/AsD) at `ba71efe0972c92e38da156ec76911f9122bbe12f`; upstream notice preserved at `defenses/asd_assets/UPSTREAM_LICENSE` | **MIT** |
 | `defenses/ecso.py`, `defenses/ecso_assets/` | [gyhdog99/ECSO](https://github.com/gyhdog99/ECSO) at `3878522f3a59ccb5f0edaa019086b3e954130719`; upstream license preserved at `defenses/ecso_assets/UPSTREAM_LICENSE` | **Apache-2.0** |
 
+The VLMShield detector in `defenses/vlmshield.py` and `defenses/vlmshield_utils.py`
+follows [pgqihere/VLMShield](https://github.com/pgqihere/VLMShield) at
+`344ca14778383aef57315229118f7669454fb4bb` under **Apache-2.0**. The original
+license is preserved at `defenses/vlmshield_assets/UPSTREAM_LICENSE`.
+`defense_scripts/setup_vlmshield.sh` obtains the released classifier separately;
+the model weights and evaluation images are not included in this repository.
+
+Historical reproduction metadata and project-written run wrappers are indexed
+under `reproductions/`. References to external source files, checkpoints, fonts
+and data in those records do not redistribute those assets or change their terms.
+
 The AdaShield defense adapter in `defenses/adashield.py` follows
 [SaFo-Lab/AdaShield](https://github.com/SaFo-Lab/AdaShield) at
 `b6d02c6747bd6984a99ee2e1db1e52736a6a05cc`. The upstream repository had no

@@ -1,0 +1,61 @@
+{
+  "status": "complete",
+  "optimization_performed": true,
+  "training_updates": 1300,
+  "comparison": [
+    {
+      "dataset": "safebench",
+      "model": "Qwen/Qwen2-VL-7B-Instruct",
+      "protocol": "official_extraction",
+      "n": 315,
+      "successes": 79,
+      "asr_percent": 25.07936507936508,
+      "paper_asr_percent": 81.59,
+      "gap_to_paper_pp": -56.51063492063493,
+      "released_image_asr_percent": 83.4920634920635,
+      "gap_to_released_image_pp": -58.41269841269842
+    },
+    {
+      "dataset": "safebench",
+      "model": "Qwen/Qwen2-VL-7B-Instruct",
+      "protocol": "assistant_tokens_only",
+      "n": 315,
+      "successes": 73,
+      "asr_percent": 23.174603174603174,
+      "paper_asr_percent": 81.59,
+      "gap_to_paper_pp": -58.415396825396826,
+      "released_image_asr_percent": 79.68253968253968,
+      "gap_to_released_image_pp": -56.507936507936506
+    },
+    {
+      "dataset": "safebench",
+      "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "protocol": "official_extraction",
+      "n": 315,
+      "successes": 86,
+      "asr_percent": 27.3015873015873,
+      "paper_asr_percent": 60.32,
+      "gap_to_paper_pp": -33.0184126984127,
+      "released_image_asr_percent": 60.63492063492063,
+      "gap_to_released_image_pp": -33.33333333333333
+    },
+    {
+      "dataset": "safebench",
+      "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "protocol": "assistant_tokens_only",
+      "n": 315,
+      "successes": 80,
+      "asr_percent": 25.396825396825395,
+      "paper_asr_percent": 60.32,
+      "gap_to_paper_pp": -34.9231746031746,
+      "released_image_asr_percent": 55.87301587301587,
+      "gap_to_released_image_pp": -30.476190476190478
+    }
+  ],
+  "limitations": [
+    "This follows the released executable math with the paper's update count; discrepancies are recorded in paper_code_audit.json",
+    "No author-provided seed or exact training checkpoint for the released image",
+    "CUDA kernels may be numerically nondeterministic",
+    "Official response extraction includes prompt text; assistant-only scores are also reported"
+  ]
+}

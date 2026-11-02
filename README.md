@@ -36,6 +36,11 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ## Code and workflow guide
 
+**논문 재현 결과:** [공격 10종·방어 6종의 실험 기록](reproductions/README.md)에
+24개 실험의 측정값, 논문 비교, 평가 모델, 남은 차이와 실행 코드를 정리했습니다.
+공식 산출물 평가와 직접 최적화, 자동 평가 대체와 인간 평가를 구분합니다.
+집계 파일은 `python reproductions/verify.py`로 모델 실행 없이 검증할 수 있습니다.
+
 이 문서는 코드 구조, 데이터 로딩, 단일 공격, 방어,
 공격 조합 생성 및 평가 실행 방법을 정리합니다. 데이터·모델 가중치는 별도 준비하며,
 아래 목록은 **코드의 지원 범위**이지 모든 조합의 실행 성공이나 논문 성능 재현을 뜻하지 않습니다.
@@ -508,6 +513,7 @@ ASR/RSR/query 요약을 한 번에 기록합니다. 작은 실험은 Stage 1에�
 | `AsD` | [asd.py](defenses/asd.py) / [YAML](configs/defense_configs/AsD.yaml) | 공식 protective patch와 안전 프롬프트 | [setup_asd.sh](defense_scripts/setup_asd.sh) / [run_asd.sh](defense_scripts/run_asd.sh) |
 | `ECSO` | [ecso.py](defenses/ecso.py) / [YAML](configs/defense_configs/ECSO.yaml) | 직접 응답 → 자기 평가 → 필요시 caption과 이미지 없는 재응답 | [run_ecso.sh](defense_scripts/run_ecso.sh) |
 | `JailGuard` | [jailguard.py](defenses/jailguard.py) / [YAML](configs/defense_configs/JailGuard.yaml) | 이미지 변형별 응답 불일치로 탐지 | [setup_jailguard.sh](defense_scripts/setup_jailguard.sh) / [run_jailguard.sh](defense_scripts/run_jailguard.sh) |
+| `VLMShield` | [vlmshield.py](defenses/vlmshield.py) / [YAML](configs/defense_configs/VLMShield.yaml) | CLIP 특징과 공개 MLP로 입력 쌍의 안전성 판정 | [setup_vlmshield.sh](defense_scripts/setup_vlmshield.sh) / [run_vlmshield.sh](defense_scripts/run_vlmshield.sh) |
 | `CIDER` | [cider.py](defenses/cider.py) / [YAML](configs/defense_configs/CIDER.yaml) | diffusion denoising 전후 이미지·질문 유사도 변화로 탐지 | [setup_cider.sh](defense_scripts/setup_cider.sh) / [run_cider.sh](defense_scripts/run_cider.sh) |
 
 ### Setup and paired evaluation

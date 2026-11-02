@@ -14,12 +14,30 @@ from ..model import TargetModel
 from ..paths import resolve_path
 
 
+LLAVA_QWEN_15_CHAT_TEMPLATE = (
+    "{% for message in messages %}"
+    "{{'<|im_start|>' + message['role'] + '\\n'}}"
+    "{% for content in message['content'] | selectattr('type', 'equalto', 'image') %}"
+    "{{ '<image>\\n' }}"
+    "{% endfor %}"
+    "{% for content in message['content'] | selectattr('type', 'equalto', 'text') %}"
+    "{{ content['text'] }}"
+    "{% endfor %}"
+    "{{'<|im_end|>\\n'}}"
+    "{% endfor %}"
+    "{% if add_generation_prompt %}{{ '<|im_start|>assistant\\n' }}{% endif %}"
+)
+
+
 class NativeHFVLMTarget(TargetModel):
     """Shared deterministic generation path for modern native-HF VLMs."""
 
     model_id: str = ""
     revision: str | None = None
     max_images: int | None = None
+    torch_dtype: str = "auto"
+    processor_kwargs: dict | None = None
+    chat_template: str | None = None
 
     def __init__(self, max_new_tokens: int = 256):
         from multimodalmodels.loaders import load_native_vlm
@@ -27,9 +45,10 @@ class NativeHFVLMTarget(TargetModel):
         self.model, self.processor = load_native_vlm(
             self.model_id,
             revision=self.revision,
-            torch_dtype="auto",
+            torch_dtype=self.torch_dtype,
             device_map="auto",
             eval_mode=True,
+            processor_kwargs=self.processor_kwargs,
         )
         self.max_new_tokens = max_new_tokens
         self.do_sample = False
@@ -62,12 +81,16 @@ class NativeHFVLMTarget(TargetModel):
         import torch
 
         messages = self._messages(text, self._images(image_paths))
+        template_kwargs = {}
+        if self.chat_template is not None:
+            template_kwargs["chat_template"] = self.chat_template
         inputs = self.processor.apply_chat_template(
             messages,
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
             return_tensors="pt",
+            **template_kwargs,
         ).to(self.model.device)
 
         generation = {
@@ -105,6 +128,41 @@ class LlavaNextTarget(NativeHFVLMTarget):
     max_images = 1
 
 
+class LlavaOneVision7BChatTarget(NativeHFVLMTarget):
+    from multimodalmodels.registry import (LLAVA_ONEVISION_7B_CHAT_HF_ID,
+                                           LLAVA_ONEVISION_7B_CHAT_REVISION)
+
+    name = "llava_onevision_7b_chat"
+    model_id = LLAVA_ONEVISION_7B_CHAT_HF_ID
+    revision = LLAVA_ONEVISION_7B_CHAT_REVISION
+    max_images = 1
+    # The converted checkpoint declares float16 at the composite-model level
+    # but bfloat16 inside text_config. ``auto`` consequently loads mixed
+    # weights and fails at lm_head (BF16 activations x FP16 weights).  The HF
+    # model card's generation example explicitly loads the whole model in FP16.
+    torch_dtype = "float16"
+    # The fast processor is pathologically slow for CS-DJ's 1500x2120 collage
+    # under Transformers 4.57.1.  The slow processor is pixel-equivalent here
+    # and matches the conversion validation path.
+    processor_kwargs = {"use_fast": False}
+    chat_template = LLAVA_QWEN_15_CHAT_TEMPLATE
+
+    @staticmethod
+    def _messages(text: str, images) -> list[dict]:
+        """Match the original LLaVA Qwen conversation's default system turn."""
+        content = [{"type": "image", "image": image} for image in images]
+        content.append({"type": "text", "text": text})
+        return [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "You are a helpful assistant."}
+                ],
+            },
+            {"role": "user", "content": content},
+        ]
+
+
 class Qwen3VL2BTarget(NativeHFVLMTarget):
     from multimodalmodels.registry import QWEN3_VL_2B_HF_ID, QWEN3_VL_2B_REVISION
 
@@ -140,6 +198,7 @@ class InternVL3_8BTarget(NativeHFVLMTarget):
 __all__ = [
     "NativeHFVLMTarget",
     "LlavaNextTarget",
+    "LlavaOneVision7BChatTarget",
     "Qwen3VL2BTarget",
     "Qwen3VL8BTarget",
     "InternVL3_2BTarget",

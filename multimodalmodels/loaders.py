@@ -20,9 +20,11 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from .registry import (BEAVER_DAM_HF_ID, CLIP_VIT_L14_336_HF_ID, CLIP_VIT_L14_ST_HF_ID,
+from .registry import (BEAVER_DAM_HF_ID, CLIP_VIT_L14_336_HF_ID, CLIP_VIT_L14_HF_ID,
+                       CLIP_VIT_L14_ST_HF_ID,
                        HARMBENCH_CLS_HF_ID, INTERNVL3_8B_HF_ID,
                        LLAVA_15_HF_ID, LLAVA_16_HF_ID,
+                       LLAVA_ONEVISION_7B_CHAT_HF_ID,
                        QWEN25_VL_HF_ID, QWEN2_VL_HF_ID, QWEN3_VL_8B_HF_ID,
                        default_revision, get_spec, resolve_model_id)
 
@@ -124,15 +126,18 @@ def load_native_vlm(
     model_id = resolve_model_id(model_id)
     spec = get_spec(model_id)
     kind = spec.kind if spec is not None else None
-    if kind not in {"llava-next", "qwen3-vl", "internvl"}:
+    if kind not in {"llava-next", "llava-onevision", "qwen3-vl", "internvl"}:
         raise ValueError(
             f"{model_id!r} is not a registered native VLM; expected a "
-            "LLaVA-NeXT, Qwen3-VL, or native-HF InternVL checkpoint"
+            "LLaVA-NeXT/OneVision, Qwen3-VL, or native-HF InternVL checkpoint"
         )
 
     if kind == "llava-next":
         from transformers import LlavaNextForConditionalGeneration
         model_cls = LlavaNextForConditionalGeneration
+    elif kind == "llava-onevision":
+        from transformers import LlavaOnevisionForConditionalGeneration
+        model_cls = LlavaOnevisionForConditionalGeneration
     elif kind == "qwen3-vl":
         try:
             from transformers import Qwen3VLForConditionalGeneration
@@ -171,6 +176,11 @@ def load_native_vlm(
 def load_llava_next(**kwargs):
     """Convenience loader for the pinned Apache-2.0 LLaVA-1.6 checkpoint."""
     return load_native_vlm(LLAVA_16_HF_ID, **kwargs)
+
+
+def load_llava_onevision(**kwargs):
+    """Load the pinned HF conversion of LLaVA-OneVision Chat 7B."""
+    return load_native_vlm(LLAVA_ONEVISION_7B_CHAT_HF_ID, **kwargs)
 
 
 def load_qwen3vl(model_id: str = QWEN3_VL_8B_HF_ID, **kwargs):
@@ -248,6 +258,41 @@ def load_clip_image_encoder(
     processor = CLIPImageProcessor.from_pretrained(model_id, **load_kwargs)
     processor.do_normalize = do_normalize
     return model, processor
+
+
+def load_clip_model(
+    model_id: str = CLIP_VIT_L14_HF_ID,
+    revision: Optional[str] = None,
+    device=None,
+    local_files_only: Optional[bool] = None,
+):
+    """CLIP model + full processor (image processor and tokenizer) used by the
+    VLMShield detector, loaded in fp32 exactly like the upstream script."""
+    from transformers import CLIPModel, CLIPProcessor
+
+    revision = _revision(model_id, revision)
+    load_kwargs: dict[str, Any] = {"revision": revision}
+    if local_files_only is not None:
+        load_kwargs["local_files_only"] = local_files_only
+    model = CLIPModel.from_pretrained(model_id, **load_kwargs)
+    if device is not None:
+        model = model.to(device)
+    model = model.eval()
+    processor = CLIPProcessor.from_pretrained(model_id, **load_kwargs)
+    return model, processor
+
+
+def load_clip_tokenizer(
+    model_id: str = CLIP_VIT_L14_336_HF_ID,
+    revision: Optional[str] = None,
+    local_files_only: bool = True,
+):
+    """Pinned CLIP text input for the paper's textual embedding target."""
+    from transformers import CLIPTokenizerFast
+
+    return CLIPTokenizerFast.from_pretrained(
+        model_id, revision=_revision(model_id, revision), local_files_only=local_files_only,
+    )
 
 
 def load_causal_lm_classifier(

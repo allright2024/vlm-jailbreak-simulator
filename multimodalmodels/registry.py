@@ -29,6 +29,7 @@ class ModelSpec:
 
 LLAVA_15_HF_ID = "llava-hf/llava-1.5-7b-hf"
 LLAVA_16_HF_ID = "llava-hf/llava-v1.6-mistral-7b-hf"
+LLAVA_ONEVISION_7B_CHAT_HF_ID = "llava-hf/llava-onevision-qwen2-7b-ov-chat-hf"
 QWEN2_VL_HF_ID = "Qwen/Qwen2-VL-7B-Instruct"
 QWEN25_VL_HF_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
 QWEN3_VL_2B_HF_ID = "Qwen/Qwen3-VL-2B-Instruct"
@@ -39,6 +40,7 @@ QWEN25_14B_HF_ID = "Qwen/Qwen2.5-14B-Instruct"
 QWEN25_3B_HF_ID = "Qwen/Qwen2.5-3B-Instruct"
 CLIP_VIT_L14_ST_HF_ID = "sentence-transformers/clip-ViT-L-14"
 CLIP_VIT_L14_336_HF_ID = "openai/clip-vit-large-patch14-336"
+CLIP_VIT_L14_HF_ID = "openai/clip-vit-large-patch14"
 HARMBENCH_CLS_HF_ID = "cais/HarmBench-Llama-2-13b-cls"
 BEAVER_DAM_HF_ID = "PKU-Alignment/beaver-dam-7b"
 LLAMA_GUARD2_HF_ID = "meta-llama/Meta-Llama-Guard-2-8B"
@@ -47,6 +49,7 @@ VIT_BASE_HF_ID = "google/vit-base-patch16-224"
 
 LLAVA_15_REVISION = "b234b804b114d9e37bb655e11cbbb5f5e971b7a9"
 LLAVA_16_REVISION = "2424fdd47412fccc66d91719126b420e9fbd7065"
+LLAVA_ONEVISION_7B_CHAT_REVISION = "fa83f9361d2d053d9cfa12f2ceea23425762a8d3"
 QWEN2_VL_REVISION = "eed13092ef92e448dd6875b2a00151bd3f7db0ac"
 QWEN25_VL_REVISION = "cc594898137f460bfe9f0759e9844b3ce807cfb5"
 QWEN3_VL_2B_REVISION = "89644892e4d85e24eaac8bacfd4f463576704203"
@@ -57,6 +60,7 @@ QWEN25_14B_REVISION = "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
 QWEN25_3B_REVISION = "aa8e72537993ba99e69dfaafa59ed015b17504d1"
 CLIP_VIT_L14_ST_REVISION = "1b4b2e899178706d1b9905460ac21de1e0ba86a5"
 CLIP_VIT_L14_336_REVISION = "ce19dc912ca5cd21c8a653c79e251e808ccabcd1"
+CLIP_VIT_L14_REVISION = "32bd64288804d66eefd0ccbe215aa642df71cc41"
 HARMBENCH_CLS_REVISION = "bda705349d1144fa618770bea64d99ce54e3835b"
 
 MODEL_SPECS: dict[str, ModelSpec] = {
@@ -67,6 +71,10 @@ MODEL_SPECS: dict[str, ModelSpec] = {
                   "CIDER encoder; ECSO target and text-only generator"),
         ModelSpec(LLAVA_16_HF_ID, LLAVA_16_REVISION, "llava-next",
                   "eval target; optional CE surrogate (VisualAdv, DeltaJP, HADES)"),
+        ModelSpec(LLAVA_ONEVISION_7B_CHAT_HF_ID,
+                  LLAVA_ONEVISION_7B_CHAT_REVISION,
+                  "llava-onevision",
+                  "CS-DJ Table 6 approximate-reproduction eval target"),
         ModelSpec(QWEN2_VL_HF_ID, QWEN2_VL_REVISION, "qwen2-vl",
                   "transfer surrogate (UltraBreak, JPS, VisualAdv/DeltaJP qwen2)"),
         ModelSpec(QWEN25_VL_HF_ID, QWEN25_VL_REVISION, "qwen2-vl",
@@ -89,10 +97,14 @@ MODEL_SPECS: dict[str, ModelSpec] = {
                   "clip-image-encoder",
                   "JailbreakInPieces target-image embedding optimization; "
                   "optional benchmark CLIP image-similarity metric"),
+        ModelSpec(CLIP_VIT_L14_HF_ID, CLIP_VIT_L14_REVISION, "clip-model",
+                  "VLMShield detector image/text encoder (official checkpoint)"),
         ModelSpec(HARMBENCH_CLS_HF_ID, HARMBENCH_CLS_REVISION, "causal-lm-classifier",
                   "HarmBench judge"),
-        ModelSpec(BEAVER_DAM_HF_ID, None, "sequence-classifier",
-                  "CS-DJ official Beaver-Dam judge (not pinned upstream)"),
+        ModelSpec(BEAVER_DAM_HF_ID,
+                  "3a5b70888869f04336d0d8344185ed74268ef896",
+                  "sequence-classifier",
+                  "CS-DJ official Beaver-Dam judge; upstream did not pin a revision"),
         ModelSpec(LLAMA_GUARD2_HF_ID, None, "causal-lm-classifier",
                   "JOOD official ASR judge (not pinned upstream)"),
         ModelSpec(LLAMA_GUARD3_HF_ID, None, "causal-lm-classifier",
@@ -112,6 +124,7 @@ MODEL_ALIASES: dict[str, str] = {
     "LLaVA_v1_6": LLAVA_16_HF_ID,
     "llava_v1_6": LLAVA_16_HF_ID,
     "llava_next_7b": LLAVA_16_HF_ID,
+    "llava_onevision_7b_chat": LLAVA_ONEVISION_7B_CHAT_HF_ID,
     "qwen2_vl_7b": QWEN2_VL_HF_ID,
     "qwen2_5_vl_7b": QWEN25_VL_HF_ID,
     "qwen3_vl_2b": QWEN3_VL_2B_HF_ID,

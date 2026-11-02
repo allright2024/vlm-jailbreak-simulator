@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "n": 750,
+  "sha256": {
+    "test_cases.jsonl": "669bce5d9e2af708b492a5d5e601e80be8225d3e242b4c361e816c86290a84d8",
+    "responses.jsonl": "71c3879c36d52f1c2fa0dd62070c6164e0e2763139524b1e5403520defacb89c",
+    "judge_results.jsonl": "07f4240d951124d69de2b4aa281e55fe2604b89cec4f248ec2291afcf9e6ab48",
+    "summary.json": "f275f76e4ac487ea2e8c17fb4b387dc3c448b72f49ad3de54926e62bf298c070",
+    "comparison.csv": "e3ac1e64edcd49c9977a71425171d24e2a188ab8d3caf634d2e91f5ec89710b7"
+  }
+}

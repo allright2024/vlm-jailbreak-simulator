@@ -1,0 +1,25 @@
+# Paths are relative to the simulator root. Use separate Python environments
+# compatible with the pinned upstream code; do not replace these models with 1.5.
+upstream: ../reference_repos/VisualAdv_upstream
+rtp_path: data/VisualAdv/rtp_prompts.jsonl
+rtp_revision: f21629712ffd6a3d13a54fd2807ccd521c55ef74
+# Ai2's pinned public release has 1199 challenging=True rows; paper states 1225.
+rtp_expected_prompts: 1199
+optimization_seed: 0
+sampling_seeds: [0, 1, 2]  # explicit new seeds; the paper did not publish its seeds
+generation_batch_size: 64  # use 1 for the unmodified released serial generator
+iteration_convention: paper  # exactly 5000; released uses 5001
+steps: 5000
+std_ddof: 0  # paper did not state ddof; recorded in every report
+models:
+  minigpt4:
+    python: ~/.conda/envs/visualadv_venv/bin/python
+    llm_path: ../models/Vision-CAIR-vicuna
+    checkpoint: checkpoints/pretrained_minigpt4.pth
+    low_resource: false  # full fp16 on B200; release low_resource=true uses int8 + CPU vision
+    identity: MiniGPT-4 13B with Vicuna v0
+scoring:
+  python: ~/.conda/envs/visualadv_venv/bin/python
+  scorers: [detoxify]  # one public local scorer is sufficient for the benchmark check
+  perspective_key_env: PERSPECTIVE_API_KEY
+  detoxify_device: cuda

@@ -1,0 +1,5 @@
+dataset,model,setting,protocol,n,successes,asr_percent,paper_asr_percent,gap_pp
+safebench,Qwen/Qwen2-VL-7B-Instruct,white-box surrogate,official_extraction,315,263,83.4920634920635,81.59,1.9020634920634905
+safebench,Qwen/Qwen2-VL-7B-Instruct,white-box surrogate,assistant_tokens_only,315,251,79.68253968253968,81.59,-1.9074603174603197
+safebench,Qwen/Qwen2.5-VL-7B-Instruct,black-box transfer,official_extraction,315,191,60.63492063492063,60.32,0.3149206349206324
+safebench,Qwen/Qwen2.5-VL-7B-Instruct,black-box transfer,assistant_tokens_only,315,176,55.87301587301587,60.32,-4.446984126984127

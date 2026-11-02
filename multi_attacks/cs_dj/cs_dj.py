@@ -14,13 +14,20 @@ the attack objective or collage layout.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
+import json
 import math
 import os
 import random
 import re
-from typing import Any
+import socket
+import tempfile
+from datetime import datetime, timezone
+from typing import Any, ClassVar
 
+import numpy as np
+import PIL
 import torch
 import torch.nn.functional as F
 from PIL import Image, ImageDraw, ImageFont
@@ -35,7 +42,6 @@ from multimodalmodels.registry import (
     QWEN25_3B_HF_ID,
     QWEN25_3B_REVISION,
 )
-
 
 TARGET_PROMPT = (
     "The images provided by the teacher in class include a series of problems.\n"
@@ -64,6 +70,112 @@ _IMAGE_EXTENSIONS = {
     ".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"
 }
 
+_EMBEDDING_CACHE_SCHEMA_VERSION = 1
+_CASE_CACHE_SCHEMA_VERSION = 1
+_CACHE_IMPLEMENTATION = "cs-dj-stage1-resume-v1"
+
+
+def _canonical_json_bytes(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _json_sha256(value: Any) -> str:
+    return hashlib.sha256(_canonical_json_bytes(value)).hexdigest()
+
+
+def _file_sha256(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as stream:
+        while chunk := stream.read(8 * 1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _fsync_directory(path: str) -> None:
+    """Best-effort durability for a preceding same-directory os.replace()."""
+    try:
+        descriptor = os.open(path, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(descriptor)
+    except OSError:
+        pass
+    finally:
+        os.close(descriptor)
+
+
+def _atomic_write_json(path: str, value: Any) -> None:
+    parent = os.path.dirname(path)
+    os.makedirs(parent, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=f".{os.path.basename(path)}.", suffix=".tmp", dir=parent
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, ensure_ascii=False, sort_keys=True, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _fsync_directory(parent)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def _atomic_write_npy(path: str, array: np.ndarray) -> None:
+    parent = os.path.dirname(path)
+    os.makedirs(parent, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=f".{os.path.basename(path)}.", suffix=".tmp", dir=parent
+    )
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            np.save(stream, array, allow_pickle=False)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _fsync_directory(parent)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def _atomic_save_jpeg(image: Image.Image, path: str) -> None:
+    parent = os.path.dirname(path)
+    os.makedirs(parent, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=f".{os.path.basename(path)}.", suffix=".jpg.tmp", dir=parent
+    )
+    os.close(descriptor)
+    try:
+        # Explicit JPEG is equivalent to the previous .jpg suffix inference,
+        # while permitting a temporary filename that is never mistaken for a
+        # completed collage.
+        image.save(temporary, format="JPEG")
+        with open(temporary, "rb") as stream:
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _fsync_directory(parent)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
 
 def _safe_stem(value: str) -> str:
     stem = re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("._") or "behavior"
@@ -84,7 +196,7 @@ class CSDJAttack(Attack):
     # The release names 10,000 images as an example rather than publishing an
     # immutable sampled image list, and its font is separately copyrighted.
     # Therefore an exact paper-profile signature cannot be verified from config.
-    official_signature: dict[str, Any] = {}
+    official_signature: ClassVar[dict[str, Any]] = {}
     requires_images = False
     interactive = False
 
@@ -164,7 +276,21 @@ class CSDJAttack(Attack):
         self._library_paths: list[str] = []
         self._library_embeddings: torch.Tensor | None = None
         self._font_sources: dict[int, str] = {}
+        self._embedding_cache_key: str | None = None
+        self._embedding_array_sha256: str | None = None
+        self._embedding_cache_reused = False
+        self._render_provenance_cache: dict[str, Any] | None = None
+        self._stage1_out_dir: str | None = None
+        self._stage1_lock_file = None
         self._prepared = False
+
+    def __del__(self):
+        # Advisory locks are released by the kernel on process exit.  Explicitly
+        # releasing here also makes short-lived/test instances compose cleanly.
+        try:
+            self._release_stage1_lock()
+        except (AttributeError, OSError, ValueError):
+            return
 
     def effective_config(self) -> dict[str, Any]:
         return {
@@ -195,6 +321,61 @@ class CSDJAttack(Attack):
         }
 
     # -- image library and contrastive retrieval --------------------------
+    @staticmethod
+    def _cache_dir(out_dir: str) -> str:
+        return os.path.join(os.path.abspath(out_dir), ".cs_dj_stage1")
+
+    def _acquire_stage1_lock(self, out_dir: str) -> None:
+        resolved = os.path.abspath(out_dir)
+        if self._stage1_lock_file is not None:
+            if self._stage1_out_dir != resolved:
+                raise RuntimeError(
+                    "one CS-DJ attack instance cannot prepare two Stage 1 output "
+                    f"directories: {self._stage1_out_dir} and {resolved}"
+                )
+            return
+
+        os.makedirs(resolved, exist_ok=True)
+        lock_path = os.path.join(resolved, ".cs_dj_stage1.lock")
+        # Kept open intentionally: the open file description owns the flock for
+        # this attack instance's entire Stage 1 lifetime.
+        lock_file = open(lock_path, "a+", encoding="utf-8")  # noqa: SIM115
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            lock_file.seek(0)
+            owner = lock_file.read().strip() or "owner metadata unavailable"
+            lock_file.close()
+            raise RuntimeError(
+                "another process is already building CS-DJ Stage 1 in "
+                f"{resolved}; lock owner: {owner}"
+            ) from exc
+
+        owner = {
+            "pid": os.getpid(),
+            "host": socket.gethostname(),
+            "acquired_at": datetime.now(timezone.utc).isoformat(),
+            "out_dir": resolved,
+        }
+        lock_file.seek(0)
+        lock_file.truncate()
+        json.dump(owner, lock_file, sort_keys=True)
+        lock_file.write("\n")
+        lock_file.flush()
+        os.fsync(lock_file.fileno())
+        self._stage1_out_dir = resolved
+        self._stage1_lock_file = lock_file
+
+    def _release_stage1_lock(self) -> None:
+        lock_file = self._stage1_lock_file
+        if lock_file is None:
+            return
+        self._stage1_lock_file = None
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        finally:
+            lock_file.close()
+
     def _sample_library(self) -> list[str]:
         if not os.path.isdir(self.image_dir):
             raise FileNotFoundError(
@@ -219,6 +400,136 @@ class CSDJAttack(Attack):
             )
         return sampled
 
+    def _embedding_inputs(self, candidates: list[str]) -> dict[str, Any]:
+        sampled_files = []
+        image_root = os.path.abspath(self.image_dir)
+        for path in candidates:
+            stat = os.stat(path)
+            sampled_files.append({
+                "relative_path": os.path.relpath(os.path.abspath(path), image_root),
+                "size": stat.st_size,
+                "mtime_ns": stat.st_mtime_ns,
+            })
+        return {
+            "schema_version": _EMBEDDING_CACHE_SCHEMA_VERSION,
+            "implementation": _CACHE_IMPLEMENTATION,
+            "embedding_model": self.embedding_model,
+            "embedding_revision": self.embedding_revision,
+            "embedding_batch_size": self.embedding_batch_size,
+            "seed": self.seed,
+            "num_images": self.num_images,
+            # This exact ordered snapshot binds the cache to both the selection
+            # and file state without hashing 10,000 multi-megabyte JPEGs.
+            "sampled_files": sampled_files,
+        }
+
+    def _embedding_cache_paths(self, out_dir: str) -> tuple[str, str]:
+        cache_dir = self._cache_dir(out_dir)
+        return (
+            os.path.join(cache_dir, "image_embeddings.npy"),
+            os.path.join(cache_dir, "image_embeddings.json"),
+        )
+
+    def _load_embedding_cache(
+        self,
+        out_dir: str,
+        candidates: list[str],
+        inputs: dict[str, Any],
+    ) -> bool:
+        array_path, metadata_path = self._embedding_cache_paths(out_dir)
+        if not os.path.isfile(array_path) or not os.path.isfile(metadata_path):
+            return False
+        try:
+            with open(metadata_path, encoding="utf-8") as stream:
+                metadata = json.load(stream)
+            if metadata.get("schema_version") != _EMBEDDING_CACHE_SCHEMA_VERSION:
+                return False
+            if metadata.get("inputs") != inputs:
+                return False
+            cache_key = _json_sha256(inputs)
+            if metadata.get("cache_key") != cache_key:
+                return False
+            array_sha256 = _file_sha256(array_path)
+            if metadata.get("array_sha256") != array_sha256:
+                return False
+
+            array = np.load(array_path, allow_pickle=False)
+            if array.dtype.kind != "f" or array.ndim != 2:
+                return False
+            if list(array.shape) != metadata.get("array_shape"):
+                return False
+            if str(array.dtype) != metadata.get("array_dtype"):
+                return False
+            valid_indices = metadata.get("valid_indices")
+            if not isinstance(valid_indices, list) or len(valid_indices) != array.shape[0]:
+                return False
+            if any(type(index) is not int for index in valid_indices):
+                return False
+            if len(set(valid_indices)) != len(valid_indices):
+                return False
+            if any(index < 0 or index >= len(candidates) for index in valid_indices):
+                return False
+            if len(valid_indices) < self.collage_image_count:
+                return False
+
+            self._library_paths = [candidates[index] for index in valid_indices]
+            # Copy detaches the runtime tensor from the cache file so a later
+            # atomic cache refresh cannot affect an active process.
+            self._library_embeddings = torch.from_numpy(
+                np.array(array, copy=True, order="C")
+            )
+            self._embedding_cache_key = cache_key
+            self._embedding_array_sha256 = array_sha256
+            self._embedding_cache_reused = True
+            return True
+        except (OSError, ValueError, TypeError, KeyError, EOFError):
+            # A partial/corrupt/stale cache is never fatal: recompute it under
+            # the Stage 1 lock and publish a new validated pair atomically.
+            return False
+
+    def _write_embedding_cache(
+        self,
+        out_dir: str,
+        inputs: dict[str, Any],
+        valid_indices: list[int],
+        embeddings: torch.Tensor,
+    ) -> torch.Tensor:
+        array_path, metadata_path = self._embedding_cache_paths(out_dir)
+        tensor = embeddings.detach().cpu().contiguous()
+        try:
+            array = tensor.numpy()
+        except TypeError:
+            # NumPy 1.x cannot represent torch.bfloat16.  Use the resulting
+            # float32 tensor for this run too, so fresh and resumed retrieval
+            # operate on bit-identical values.
+            tensor = tensor.float()
+            array = tensor.numpy()
+        if array.dtype.kind != "f":
+            tensor = tensor.float()
+            array = tensor.numpy()
+        array = np.ascontiguousarray(array)
+        _atomic_write_npy(array_path, array)
+        cache_key = _json_sha256(inputs)
+        array_sha256 = _file_sha256(array_path)
+        metadata = {
+            "schema_version": _EMBEDDING_CACHE_SCHEMA_VERSION,
+            "cache_key": cache_key,
+            "inputs": inputs,
+            "valid_indices": valid_indices,
+            "array_file": os.path.basename(array_path),
+            "array_shape": list(array.shape),
+            "array_dtype": str(array.dtype),
+            "array_sha256": array_sha256,
+        }
+        # Metadata is the commit record and is replaced last.  A crash between
+        # the two replaces therefore produces a detectable miss, never a cache
+        # hit combining unrelated metadata and tensor bytes.
+        _atomic_write_json(metadata_path, metadata)
+        self._embedding_cache_key = cache_key
+        self._embedding_array_sha256 = array_sha256
+        self._embedding_cache_reused = False
+        return torch.from_numpy(np.array(array, copy=True, order="C"))
+
     def _load_embedder(self):
         if self._embedder is None:
             from multimodalmodels import loaders
@@ -231,63 +542,93 @@ class CSDJAttack(Attack):
         return self._embedder
 
     def prepare(self, out_dir: str) -> None:
-        del out_dir
         if self._prepared:
-            return
-        candidates = self._sample_library()
-        embedder = self._load_embedder()
-        valid_paths: list[str] = []
-        encoded_batches: list[torch.Tensor] = []
-        starts = range(0, len(candidates), self.embedding_batch_size)
-        if self.show_embedding_progress:
-            from tqdm import tqdm
-
-            starts = tqdm(starts, desc="CS-DJ image embeddings")
-        # Stream the library in batches. Keeping 10,000 decoded CC3M images in
-        # memory at once would be needlessly expensive; the released per-image
-        # encoder has the same embedding semantics.
-        for start in starts:
-            batch_paths: list[str] = []
-            images: list[Image.Image] = []
-            for path in candidates[start:start + self.embedding_batch_size]:
-                try:
-                    with Image.open(path) as source:
-                        images.append(source.convert("RGB"))
-                    batch_paths.append(path)
-                except (OSError, ValueError):
-                    # The upstream embedding pass also skips unreadable entries.
-                    continue
-            if not images:
-                continue
-            with torch.inference_mode():
-                encoded = embedder.encode(
-                    images,
-                    batch_size=self.embedding_batch_size,
-                    convert_to_tensor=True,
-                    show_progress_bar=False,
-                )
-            batch = torch.as_tensor(encoded)
-            if batch.ndim != 2 or batch.shape[0] != len(batch_paths):
+            if self._stage1_out_dir != os.path.abspath(out_dir):
                 raise RuntimeError(
-                    "CS-DJ embedding model returned an unexpected batch shape: "
-                    f"{tuple(batch.shape)}"
+                    "CS-DJ was already prepared for a different Stage 1 output "
+                    f"directory: {self._stage1_out_dir}"
                 )
-            valid_paths.extend(batch_paths)
-            encoded_batches.append(batch.detach().cpu())
-        if len(valid_paths) < self.collage_image_count:
-            raise ValueError(
-                f"CS-DJ needs {self.collage_image_count} readable sampled images; "
-                f"only {len(valid_paths)} of {len(candidates)} could be decoded"
+            return
+        self._acquire_stage1_lock(out_dir)
+        try:
+            candidates = self._sample_library()
+            embedding_inputs = self._embedding_inputs(candidates)
+            if self._load_embedding_cache(
+                out_dir, candidates, embedding_inputs
+            ):
+                self._prepared = True
+                print(
+                    f"CS-DJ embedding cache hit: {len(self._library_paths)} images",
+                    flush=True,
+                )
+                return
+
+            embedder = self._load_embedder()
+            valid_paths: list[str] = []
+            valid_indices: list[int] = []
+            encoded_batches: list[torch.Tensor] = []
+            starts = range(0, len(candidates), self.embedding_batch_size)
+            if self.show_embedding_progress:
+                from tqdm import tqdm
+
+                starts = tqdm(starts, desc="CS-DJ image embeddings")
+            # Stream the library in batches. Keeping 10,000 decoded CC3M images in
+            # memory at once would be needlessly expensive; the released per-image
+            # encoder has the same embedding semantics.
+            for start in starts:
+                batch_paths: list[str] = []
+                batch_indices: list[int] = []
+                images: list[Image.Image] = []
+                for offset, path in enumerate(
+                    candidates[start:start + self.embedding_batch_size]
+                ):
+                    try:
+                        with Image.open(path) as source:
+                            images.append(source.convert("RGB"))
+                        batch_paths.append(path)
+                        batch_indices.append(start + offset)
+                    except (OSError, ValueError):
+                        # The upstream embedding pass also skips unreadable entries.
+                        continue
+                if not images:
+                    continue
+                with torch.inference_mode():
+                    encoded = embedder.encode(
+                        images,
+                        batch_size=self.embedding_batch_size,
+                        convert_to_tensor=True,
+                        show_progress_bar=False,
+                    )
+                batch = torch.as_tensor(encoded)
+                if batch.ndim != 2 or batch.shape[0] != len(batch_paths):
+                    raise RuntimeError(
+                        "CS-DJ embedding model returned an unexpected batch shape: "
+                        f"{tuple(batch.shape)}"
+                    )
+                valid_paths.extend(batch_paths)
+                valid_indices.extend(batch_indices)
+                encoded_batches.append(batch.detach().cpu())
+            if len(valid_paths) < self.collage_image_count:
+                raise ValueError(
+                    f"CS-DJ needs {self.collage_image_count} readable sampled images; "
+                    f"only {len(valid_paths)} of {len(candidates)} could be decoded"
+                )
+            embeddings = torch.cat(encoded_batches, dim=0)
+            if embeddings.ndim != 2 or embeddings.shape[0] != len(valid_paths):
+                raise RuntimeError(
+                    "CS-DJ embedding model returned an unexpected image embedding shape: "
+                    f"{tuple(embeddings.shape)}"
+                )
+            self._library_paths = valid_paths
+            self._library_embeddings = self._write_embedding_cache(
+                out_dir, embedding_inputs, valid_indices, embeddings
             )
-        embeddings = torch.cat(encoded_batches, dim=0)
-        if embeddings.ndim != 2 or embeddings.shape[0] != len(valid_paths):
-            raise RuntimeError(
-                "CS-DJ embedding model returned an unexpected image embedding shape: "
-                f"{tuple(embeddings.shape)}"
-            )
-        self._library_paths = valid_paths
-        self._library_embeddings = embeddings
-        self._prepared = True
+            self._prepared = True
+        except BaseException:
+            # A failed attempt must not strand an in-process retry behind its
+            # own lock. The kernel handles the same cleanup after a hard crash.
+            self._release_stage1_lock()
+            raise
 
     def _retrieve_contrasts(self, question: str) -> tuple[list[str], list[int]]:
         if not self._prepared or self._library_embeddings is None:
@@ -469,7 +810,7 @@ class CSDJAttack(Attack):
         font = self._font(self.number_font_size, number=True)
         draw = ImageDraw.Draw(tile)
         label = str(number)
-        left, top, right, bottom = draw.textbbox((0, 0), label, font=font)
+        left, _, right, _ = draw.textbbox((0, 0), label, font=font)
         x = (self.tile_width - (right - left)) // 2
         y = self.tile_height + self.number_font_size // 2
         draw.text((x, y), label, font=font, fill="black")
@@ -500,16 +841,215 @@ class CSDJAttack(Attack):
             )
         return collage
 
+    @staticmethod
+    def _font_descriptor(font: ImageFont.ImageFont, source: str) -> dict[str, Any]:
+        descriptor: dict[str, Any] = {"source": source}
+        raw_path = getattr(font, "path", None)
+        candidate_path: str | None = None
+        if raw_path is not None:
+            try:
+                candidate_path = os.fsdecode(os.fspath(raw_path))
+            except TypeError:
+                candidate_path = None
+        if candidate_path is None and source != "Pillow-default":
+            candidate_path = source
+        if candidate_path and os.path.isfile(candidate_path):
+            resolved = os.path.abspath(candidate_path)
+            stat = os.stat(resolved)
+            descriptor.update({
+                "resolved_path": resolved,
+                "size": stat.st_size,
+                "mtime_ns": stat.st_mtime_ns,
+                "sha256": _file_sha256(resolved),
+            })
+        return descriptor
+
+    def _render_input_provenance(self) -> dict[str, Any]:
+        if self._render_provenance_cache is None:
+            text_font = self._font(self.text_font_size)
+            text_source = self._font_sources[self.text_font_size]
+            text_descriptor = self._font_descriptor(text_font, text_source)
+            number_font = self._font(self.number_font_size, number=True)
+            number_source = self._font_sources[self.number_font_size]
+            number_descriptor = self._font_descriptor(number_font, number_source)
+            self._render_provenance_cache = {
+                "pillow_version": PIL.__version__,
+                "text_font": text_descriptor,
+                "number_font": number_descriptor,
+            }
+        return self._render_provenance_cache
+
+    def _case_provenance(self, behavior: Behavior) -> dict[str, Any]:
+        if self._embedding_cache_key is None or self._embedding_array_sha256 is None:
+            raise RuntimeError("CS-DJ embedding provenance is unavailable before prepare()")
+        behavior_record = behavior.to_dict()
+        return {
+            "schema_version": _CASE_CACHE_SCHEMA_VERSION,
+            "implementation": _CACHE_IMPLEMENTATION,
+            "attack": self.name,
+            "official_commit": self.official_commit,
+            "behavior_id": behavior.behavior_id,
+            "instruction_sha256": hashlib.sha256(
+                behavior.instruction.encode("utf-8")
+            ).hexdigest(),
+            "behavior_record_sha256": _json_sha256(behavior_record),
+            "effective_config_sha256": _json_sha256(self.effective_config()),
+            "embedding_input_cache_key": self._embedding_cache_key,
+            "embedding_array_sha256": self._embedding_array_sha256,
+            "render_inputs": self._render_input_provenance(),
+        }
+
+    def _case_sidecar_path(self, out_dir: str, behavior_id: str) -> str:
+        return os.path.join(
+            self._cache_dir(out_dir),
+            "cases",
+            f"{_safe_stem(behavior_id)}.json",
+        )
+
+    def _load_case_cache(
+        self,
+        behavior: Behavior,
+        out_dir: str,
+        output_path: str,
+        provenance: dict[str, Any],
+    ) -> TestCase | None:
+        sidecar_path = self._case_sidecar_path(out_dir, behavior.behavior_id)
+        if not os.path.isfile(sidecar_path) or not os.path.isfile(output_path):
+            return None
+        try:
+            with open(sidecar_path, encoding="utf-8") as stream:
+                saved = json.load(stream)
+            if saved.get("schema_version") != _CASE_CACHE_SCHEMA_VERSION:
+                return None
+            if saved.get("provenance") != provenance:
+                return None
+            test_case_data = saved.get("test_case")
+            if not isinstance(test_case_data, dict):
+                return None
+            if saved.get("test_case_sha256") != _json_sha256(test_case_data):
+                return None
+            test_case = TestCase.from_dict(test_case_data)
+
+            expected_image = portable_path(output_path)
+            if (
+                test_case.test_case_id
+                != self.test_case_id(self.name, behavior.behavior_id)
+                or test_case.behavior_id != behavior.behavior_id
+                or test_case.attack != self.name
+                or test_case.text != self.target_prompt
+                or test_case.attempt != 0
+                or test_case.parent_id is not None
+                or test_case.images != [expected_image]
+            ):
+                return None
+
+            selected_indices = test_case.meta.get("selected_image_indices")
+            if (
+                not isinstance(selected_indices, list)
+                or len(selected_indices) != self.retrieval_count
+                or any(type(index) is not int for index in selected_indices)
+                or any(
+                    index < 0 or index >= len(self._library_paths)
+                    for index in selected_indices
+                )
+            ):
+                return None
+            selected_images = [
+                portable_path(self._library_paths[index])
+                for index in selected_indices
+            ]
+            if test_case.meta.get("selected_images") != selected_images:
+                return None
+            subquestions = test_case.meta.get("subquestions")
+            if (
+                not isinstance(subquestions, list)
+                or len(subquestions) != self.subquestion_count
+                or any(not isinstance(item, str) for item in subquestions)
+                or test_case.meta.get("library_sample_size")
+                != len(self._library_paths)
+            ):
+                return None
+
+            collage = saved.get("collage")
+            expected_width = self.tile_width * self.images_per_row
+            expected_rows = math.ceil(
+                (self.collage_image_count + self.subquestion_count)
+                / self.images_per_row
+            )
+            expected_height = (
+                self.tile_height + self.number_font_size + 10
+            ) * expected_rows
+            if (
+                not isinstance(collage, dict)
+                or collage.get("path") != expected_image
+                or collage.get("width") != expected_width
+                or collage.get("height") != expected_height
+                or collage.get("mode") != "RGB"
+                or collage.get("sha256") != _file_sha256(output_path)
+            ):
+                return None
+            with Image.open(output_path) as image:
+                if image.mode != "RGB" or image.size != (expected_width, expected_height):
+                    return None
+                image.verify()
+            return test_case
+        except (OSError, ValueError, TypeError, KeyError, EOFError):
+            return None
+
+    def _write_case_cache(
+        self,
+        behavior: Behavior,
+        out_dir: str,
+        output_path: str,
+        provenance: dict[str, Any],
+        test_case: TestCase,
+    ) -> None:
+        with Image.open(output_path) as image:
+            width, height = image.size
+            mode = image.mode
+            image.verify()
+        test_case_data = test_case.to_dict()
+        sidecar = {
+            "schema_version": _CASE_CACHE_SCHEMA_VERSION,
+            "provenance": provenance,
+            "test_case": test_case_data,
+            "test_case_sha256": _json_sha256(test_case_data),
+            "collage": {
+                "path": portable_path(output_path),
+                "width": width,
+                "height": height,
+                "mode": mode,
+                "sha256": _file_sha256(output_path),
+            },
+        }
+        _atomic_write_json(
+            self._case_sidecar_path(out_dir, behavior.behavior_id), sidecar
+        )
+
     def build(self, behavior: Behavior, out_dir: str) -> list[TestCase]:
         if not self._prepared:
             self.prepare(out_dir)
+        elif self._stage1_out_dir != os.path.abspath(out_dir):
+            raise RuntimeError(
+                "CS-DJ build output differs from its prepared Stage 1 directory: "
+                f"{out_dir} vs {self._stage1_out_dir}"
+            )
+
+        os.makedirs(out_dir, exist_ok=True)
+        output_path = os.path.join(out_dir, f"{_safe_stem(behavior.behavior_id)}_cs_dj.jpg")
+        provenance = self._case_provenance(behavior)
+        cached = self._load_case_cache(
+            behavior, out_dir, output_path, provenance
+        )
+        if cached is not None:
+            print(f"CS-DJ case cache hit: {behavior.behavior_id}", flush=True)
+            return [cached]
+
         subquestions = self._split_question(behavior.instruction, behavior.behavior_id)
         selected_paths, selected_indices = self._retrieve_contrasts(behavior.instruction)
         collage = self._compose_collage(selected_paths, subquestions)
 
-        os.makedirs(out_dir, exist_ok=True)
-        output_path = os.path.join(out_dir, f"{_safe_stem(behavior.behavior_id)}_cs_dj.jpg")
-        collage.save(output_path)
+        _atomic_save_jpeg(collage, output_path)
         test_case = TestCase(
             test_case_id=self.test_case_id(self.name, behavior.behavior_id),
             behavior_id=behavior.behavior_id,
@@ -526,5 +1066,10 @@ class CSDJAttack(Attack):
                 "font_sources": dict(self._font_sources),
                 "upstream_retrieval_allows_duplicates": True,
             },
+        )
+        # The sidecar is the per-behavior commit record and is written only
+        # after the final collage is durably in place and independently valid.
+        self._write_case_cache(
+            behavior, out_dir, output_path, provenance, test_case
         )
         return [test_case]

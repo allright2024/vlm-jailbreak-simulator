@@ -19,9 +19,6 @@ from __future__ import annotations
 
 import csv
 import os
-import random
-
-import torch
 from PIL import Image
 from torchvision.utils import save_image
 
@@ -31,16 +28,15 @@ from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 
-_CLIP_MEAN = [0.48145466, 0.4578275, 0.40821073]
-_CLIP_STD = [0.26862954, 0.26130258, 0.27577711]
 from multimodalmodels.registry import default_revision
 from multimodalmodels.surrogates import default_surrogate_for_backend
+from .pgd import optimize_pixels
 
 
 @register_attack("VisualAdv")
 class VisualAdvAttack(Attack):
     official_repo = "https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models"
-    official_commit = "5fc9883"
+    official_commit = "5fc9883cfa9b4183cf05c6eceef49e449e45e9c9"
     # The PGD algorithm is a faithful port, but the surrogate is substituted
     # (LLaVA-1.5, or Qwen2-VL for transfer) vs the upstream LLaVA-Llama2
     # checkpoint, so exact paper reproduction is blocked (substitutes_model).
@@ -68,6 +64,10 @@ class VisualAdvAttack(Attack):
         self.n_iters = int(c.get("n_iters", 5000))
         self.constrained = bool(c.get("constrained", False))
         self.batch_size = int(c.get("batch_size", 8))
+        self.seed = c.get("seed")
+        self.iteration_convention = c.get("iteration_convention", "released")
+        if self.iteration_convention not in {"paper", "released"}:
+            raise ValueError("iteration_convention must be 'paper' or 'released'")
         self._surrogate = None
         self._universal_rel = None
 
@@ -94,6 +94,9 @@ class VisualAdvAttack(Attack):
             "n_iters": self.n_iters,
             "constrained": self.constrained,
             "batch_size": self.batch_size,
+            "seed": self.seed,
+            "iteration_convention": self.iteration_convention,
+            "initialization": "benign_plus_uniform_delta" if self.constrained else "uniform_image",
         }
 
     def _load_targets(self):
@@ -102,33 +105,23 @@ class VisualAdvAttack(Attack):
 
     def _optimize_universal(self, out_dir: str) -> str:
         s = self._load_surrogate()
-        device = s.device
         targets = self._load_targets()
         img_pil = Image.open(self._rel(self.image_path)).convert("RGB")
 
         x = s.to_unit01(img_pil).clamp(0, 1).clone()  # [1,3,H,W] in [0,1]
-        adv_noise = (torch.rand_like(x) * 2 * self.epsilon - self.epsilon).to(device)
-        adv_noise.data = (adv_noise.data + x.data).clamp(0, 1) - x.data
-        adv_noise.requires_grad_(True)
-
         from tqdm import tqdm
-        pbar = tqdm(range(self.n_iters + 1), desc="VisualAdv")
-        for t in pbar:
-            batch = random.sample(targets, min(self.batch_size, len(targets)))
-            loss = s.compute_loss_batch(x + adv_noise, batch, img_pil)  # backend normalizes internally
-            loss.backward()
-            step = self.alpha * adv_noise.grad.detach().sign()
-            if self.constrained:
-                adv_noise.data = (adv_noise.data - step).clamp(-self.epsilon, self.epsilon)
-            else:
-                adv_noise.data = adv_noise.data - step
-            adv_noise.data = (adv_noise.data + x.data).clamp(0, 1) - x.data  # keep image valid
-            adv_noise.grad.zero_()
+        steps = self.n_iters + int(self.iteration_convention == "released")
+        def progress(step, image, loss):
             s.zero_grad()
-            if t % 50 == 0:
-                pbar.set_description(f"VisualAdv loss={loss.item():.4f}")
-
-        final = (x + adv_noise).detach().clamp(0, 1).squeeze(0).cpu()
+            pbar.update()
+            if step % 50 == 0:
+                pbar.set_description(f"VisualAdv loss={loss:.4f}")
+        with tqdm(total=steps, desc="VisualAdv") as pbar:
+            final = optimize_pixels(
+                x, targets, lambda image, batch: s.compute_loss_batch(image, batch, img_pil),
+                constrained=self.constrained, epsilon=self.epsilon, alpha=self.alpha,
+                steps=steps, batch_size=self.batch_size, seed=self.seed, callback=progress,
+            ).squeeze(0).cpu()
         os.makedirs(out_dir, exist_ok=True)
         fpath = os.path.join(out_dir, "visual_adv.png")
         save_image(final, fpath)
@@ -140,6 +133,7 @@ class VisualAdvAttack(Attack):
     def _lineage_code_files(self):
         repo_root = os.path.join(os.path.dirname(__file__), "..", "..")
         files = super()._lineage_code_files() + [
+            os.path.join(os.path.dirname(__file__), "pgd.py"),
             os.path.join(os.path.dirname(__file__), "..", "ce_surrogate.py"),
             # both backends load their surrogate through multimodalmodels.loaders
             os.path.join(repo_root, "multimodalmodels", "loaders.py"),

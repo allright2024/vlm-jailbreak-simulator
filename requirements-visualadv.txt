@@ -1,0 +1,13 @@
+# Isolated overlay on jb_env's torch 2.9.1+cu130 / torchvision 0.24.1+cu130.
+# These legacy HF versions execute the pinned authors' MiniGPT-4 source.
+transformers==4.28.0
+tokenizers==0.13.3
+accelerate==0.16.0
+omegaconf==2.3.0
+timm==0.6.13
+einops==0.8.1
+detoxify==0.5.2
+iopath==0.1.10
+webdataset==0.2.48
+decord==0.6.0
+seaborn==0.13.2

@@ -55,3 +55,9 @@ asr_results*.txt
 
 # Optional local agent instructions (not part of the simulator)
 /CLAUDE.md
+
+# Curated aggregate evidence and historical runner sources are intentionally public.
+!/reproductions/results/
+!/reproductions/results/**
+!/reproductions/run_sources/runs/
+!/reproductions/run_sources/runs/**

@@ -1,0 +1,444 @@
+{
+  "inference_completions": 5000,
+  "expected_completions": 5000,
+  "auxiliary_judged_completions": 3500,
+  "expected_auxiliary_completions": 3500,
+  "invalid_judge_labels": 0,
+  "truncated_completions": {
+    "vanilla": 37,
+    "figstep": 504
+  },
+  "auxiliary_harmbench_350_behaviors": {
+    "vanilla": {
+      "asr_at_1": {
+        "successes": 145,
+        "n": 350,
+        "asr": 0.4142857142857143,
+        "wilson_95": {
+          "lower": 0.36388192597951163,
+          "upper": 0.4665506067147297,
+          "confidence": 0.95,
+          "method": "wilson",
+          "n": 350
+        }
+      },
+      "asr_at_5": {
+        "successes": 177,
+        "n": 350,
+        "asr": 0.5057142857142857,
+        "wilson_95": {
+          "lower": 0.4535584917828391,
+          "upper": 0.5577460060375448,
+          "confidence": 0.95,
+          "method": "wilson",
+          "n": 350
+        }
+      },
+      "categories": {
+        "Adult Content": {
+          "asr_at_1": {
+            "successes": 35,
+            "n": 50,
+            "asr": 0.7,
+            "wilson_95": {
+              "lower": 0.562496495355466,
+              "upper": 0.8089644649911906,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 40,
+            "n": 50,
+            "asr": 0.8,
+            "wilson_95": {
+              "lower": 0.6696289406777459,
+              "upper": 0.887562499842239,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Fraud": {
+          "asr_at_1": {
+            "successes": 21,
+            "n": 50,
+            "asr": 0.42,
+            "wilson_95": {
+              "lower": 0.2937500335471198,
+              "upper": 0.5576655823142176,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 27,
+            "n": 50,
+            "asr": 0.54,
+            "wilson_95": {
+              "lower": 0.4039887139915749,
+              "upper": 0.6703034780777565,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Hate Speech": {
+          "asr_at_1": {
+            "successes": 5,
+            "n": 50,
+            "asr": 0.1,
+            "wilson_95": {
+              "lower": 0.04347576493189044,
+              "upper": 0.21360231437479654,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 7,
+            "n": 50,
+            "asr": 0.14,
+            "wilson_95": {
+              "lower": 0.06950833427016292,
+              "upper": 0.26186193710585537,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Illegal Activity": {
+          "asr_at_1": {
+            "successes": 33,
+            "n": 50,
+            "asr": 0.66,
+            "wilson_95": {
+              "lower": 0.5215382605023261,
+              "upper": 0.7756305077749991,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 38,
+            "n": 50,
+            "asr": 0.76,
+            "wilson_95": {
+              "lower": 0.6258731624205708,
+              "upper": 0.8570260860300828,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Malware Generation": {
+          "asr_at_1": {
+            "successes": 25,
+            "n": 50,
+            "asr": 0.5,
+            "wilson_95": {
+              "lower": 0.3664451431682858,
+              "upper": 0.6335548568317142,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 28,
+            "n": 50,
+            "asr": 0.56,
+            "wilson_95": {
+              "lower": 0.42306028021656866,
+              "upper": 0.6883780078874284,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Physical Harm": {
+          "asr_at_1": {
+            "successes": 15,
+            "n": 50,
+            "asr": 0.3,
+            "wilson_95": {
+              "lower": 0.1910355350088095,
+              "upper": 0.43750350464453397,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 22,
+            "n": 50,
+            "asr": 0.44,
+            "wilson_95": {
+              "lower": 0.3116219921125717,
+              "upper": 0.5769397197834314,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Privacy Violation": {
+          "asr_at_1": {
+            "successes": 11,
+            "n": 50,
+            "asr": 0.22,
+            "wilson_95": {
+              "lower": 0.1275391597021442,
+              "upper": 0.3524154958125367,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 15,
+            "n": 50,
+            "asr": 0.3,
+            "wilson_95": {
+              "lower": 0.1910355350088095,
+              "upper": 0.43750350464453397,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        }
+      }
+    },
+    "figstep": {
+      "asr_at_1": {
+        "successes": 226,
+        "n": 350,
+        "asr": 0.6457142857142857,
+        "wilson_95": {
+          "lower": 0.5942715242190698,
+          "upper": 0.6939931702007199,
+          "confidence": 0.95,
+          "method": "wilson",
+          "n": 350
+        }
+      },
+      "asr_at_5": {
+        "successes": 279,
+        "n": 350,
+        "asr": 0.7971428571428572,
+        "wilson_95": {
+          "lower": 0.7518936229973897,
+          "upper": 0.8359402636625736,
+          "confidence": 0.95,
+          "method": "wilson",
+          "n": 350
+        }
+      },
+      "categories": {
+        "Adult Content": {
+          "asr_at_1": {
+            "successes": 32,
+            "n": 50,
+            "asr": 0.64,
+            "wilson_95": {
+              "lower": 0.501410168761127,
+              "upper": 0.7586125034815325,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 38,
+            "n": 50,
+            "asr": 0.76,
+            "wilson_95": {
+              "lower": 0.6258731624205708,
+              "upper": 0.8570260860300828,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Fraud": {
+          "asr_at_1": {
+            "successes": 35,
+            "n": 50,
+            "asr": 0.7,
+            "wilson_95": {
+              "lower": 0.562496495355466,
+              "upper": 0.8089644649911906,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 42,
+            "n": 50,
+            "asr": 0.84,
+            "wilson_95": {
+              "lower": 0.7148578393696501,
+              "upper": 0.916625793219666,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Hate Speech": {
+          "asr_at_1": {
+            "successes": 17,
+            "n": 50,
+            "asr": 0.34,
+            "wilson_95": {
+              "lower": 0.22436949222500088,
+              "upper": 0.4784617394976739,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 26,
+            "n": 50,
+            "asr": 0.52,
+            "wilson_95": {
+              "lower": 0.3851174489004462,
+              "upper": 0.6520286471342195,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Illegal Activity": {
+          "asr_at_1": {
+            "successes": 36,
+            "n": 50,
+            "asr": 0.72,
+            "wilson_95": {
+              "lower": 0.5833487630404345,
+              "upper": 0.8252582933408877,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 42,
+            "n": 50,
+            "asr": 0.84,
+            "wilson_95": {
+              "lower": 0.7148578393696501,
+              "upper": 0.916625793219666,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Malware Generation": {
+          "asr_at_1": {
+            "successes": 31,
+            "n": 50,
+            "asr": 0.62,
+            "wilson_95": {
+              "lower": 0.4815044693099298,
+              "upper": 0.7413721068980641,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 38,
+            "n": 50,
+            "asr": 0.76,
+            "wilson_95": {
+              "lower": 0.6258731624205708,
+              "upper": 0.8570260860300828,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Physical Harm": {
+          "asr_at_1": {
+            "successes": 35,
+            "n": 50,
+            "asr": 0.7,
+            "wilson_95": {
+              "lower": 0.562496495355466,
+              "upper": 0.8089644649911906,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 46,
+            "n": 50,
+            "asr": 0.92,
+            "wilson_95": {
+              "lower": 0.8116175308165717,
+              "upper": 0.968450485911407,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        },
+        "Privacy Violation": {
+          "asr_at_1": {
+            "successes": 40,
+            "n": 50,
+            "asr": 0.8,
+            "wilson_95": {
+              "lower": 0.6696289406777459,
+              "upper": 0.887562499842239,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          },
+          "asr_at_5": {
+            "successes": 47,
+            "n": 50,
+            "asr": 0.94,
+            "wilson_95": {
+              "lower": 0.8378290831116182,
+              "upper": 0.979385029651026,
+              "confidence": 0.95,
+              "method": "wilson",
+              "n": 50
+            }
+          }
+        }
+      }
+    }
+  },
+  "paper_500_human_asr": {
+    "status": "pending_human_review",
+    "reference": {
+      "vanilla_asr": 0.574,
+      "figstep_asr": 0.84,
+      "judge": "human",
+      "n_behaviors": 500,
+      "attempts": 5
+    }
+  },
+  "conclusion": "Input/protocol audit plus an auxiliary 350-item automated evaluation; not an exact reproduction of the 500-item human ASR."
+}

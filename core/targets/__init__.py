@@ -7,12 +7,14 @@ Importing this package registers the wrappers in TARGET_REGISTRY.
 
 from .llava import LlavaTarget  # noqa: F401
 from .native_hf import (InternVL3_2BTarget, InternVL3_8BTarget, LlavaNextTarget,
-                        Qwen3VL2BTarget, Qwen3VL8BTarget)  # noqa: F401
+                        LlavaOneVision7BChatTarget, Qwen3VL2BTarget,
+                        Qwen3VL8BTarget)  # noqa: F401
 from .openai_vision import OpenAIVisionTarget  # noqa: F401
 from .qwen2vl import Qwen2VLTarget, Qwen25VLTarget  # noqa: F401
 
 from multimodalmodels.registry import (INTERNVL3_2B_HF_ID, INTERNVL3_8B_HF_ID,
                                        LLAVA_15_HF_ID, LLAVA_16_HF_ID,
+                                       LLAVA_ONEVISION_7B_CHAT_HF_ID,
                                        QWEN2_VL_HF_ID, QWEN25_VL_HF_ID,
                                        QWEN3_VL_2B_HF_ID, QWEN3_VL_8B_HF_ID)
 
@@ -24,6 +26,9 @@ TARGET_REGISTRY = {
     "LLaVA_v1_6": LlavaNextTarget,
     "llava_next_7b": LlavaNextTarget,
     LLAVA_16_HF_ID: LlavaNextTarget,
+    "llava_onevision_7b_chat": LlavaOneVision7BChatTarget,
+    "LLaVA-OneVision-Chat-7B": LlavaOneVision7BChatTarget,
+    LLAVA_ONEVISION_7B_CHAT_HF_ID: LlavaOneVision7BChatTarget,
     "qwen2_vl_7b": Qwen2VLTarget,
     "Qwen2-VL-7B-Instruct": Qwen2VLTarget,
     QWEN2_VL_HF_ID: Qwen2VLTarget,
@@ -54,7 +59,8 @@ def load_target(name: str):
 
 
 __all__ = [
-    "LlavaTarget", "LlavaNextTarget", "OpenAIVisionTarget", "Qwen2VLTarget",
+    "LlavaTarget", "LlavaNextTarget", "LlavaOneVision7BChatTarget",
+    "OpenAIVisionTarget", "Qwen2VLTarget",
     "Qwen25VLTarget", "Qwen3VL2BTarget", "Qwen3VL8BTarget",
     "InternVL3_2BTarget", "InternVL3_8BTarget", "TARGET_REGISTRY", "load_target",
 ]

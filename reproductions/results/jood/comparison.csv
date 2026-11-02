@@ -1,0 +1,3 @@
+method,n_instructions,successes,asr,paper_asr,mean_harmfulness,paper_harmfulness,target_queries
+Vanilla,17,1,0.058823529411764705,0.12,0.29411764705882354,0.6,17
+JOOD-Mixup,17,7,0.4117647058823529,0.47,6.529411764705882,7.2,765

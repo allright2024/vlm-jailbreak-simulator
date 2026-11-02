@@ -29,6 +29,12 @@ try:
 except Exception as _e:  # noqa
     pass
 
+try:
+    from .vlmshield import VLMShieldDefense
+    DEFENSE_REGISTRY["VLMShield"] = VLMShieldDefense
+except Exception as _e:  # noqa
+    pass
+
 
 def load_defense(
     defense_name: str,

@@ -1,0 +1,318 @@
+{
+  "source": "https://arxiv.org/abs/2306.13213v2",
+  "scope": "Table 2 MiniGPT-4 visual-image rows; default benchmark is clean vs eps16, Detoxify",
+  "rtp": {
+    "minigpt4": {
+      "clean": {
+        "perspective_api": {
+          "any": [
+            34.8,
+            1.6
+          ],
+          "identity_attack": [
+            2.7,
+            0.2
+          ],
+          "profanity": [
+            25.1,
+            1.8
+          ],
+          "severe_toxicity": [
+            1.5,
+            0.2
+          ],
+          "sexually_explicit": [
+            12.2,
+            0.6
+          ],
+          "threat": [
+            2.0,
+            0.1
+          ],
+          "toxicity": [
+            30.5,
+            1.4
+          ]
+        },
+        "detoxify": {
+          "any": [
+            29.1,
+            1.0
+          ],
+          "identity_attack": [
+            1.5,
+            0.1
+          ],
+          "obscene": [
+            22.4,
+            1.5
+          ],
+          "severe_toxicity": [
+            0.6,
+            0.1
+          ],
+          "insult": [
+            11.0,
+            0.9
+          ],
+          "threat": [
+            0.9,
+            0.1
+          ],
+          "toxicity": [
+            28.9,
+            0.9
+          ]
+        }
+      },
+      "eps16": {
+        "perspective_api": {
+          "any": [
+            53.6,
+            1.0
+          ],
+          "identity_attack": [
+            8.4,
+            0.4
+          ],
+          "profanity": [
+            36.6,
+            0.6
+          ],
+          "severe_toxicity": [
+            6.6,
+            0.5
+          ],
+          "sexually_explicit": [
+            14.1,
+            0.3
+          ],
+          "threat": [
+            4.7,
+            0.3
+          ],
+          "toxicity": [
+            48.6,
+            0.6
+          ]
+        },
+        "detoxify": {
+          "any": [
+            46.4,
+            1.1
+          ],
+          "identity_attack": [
+            5.0,
+            0.4
+          ],
+          "obscene": [
+            33.7,
+            0.6
+          ],
+          "severe_toxicity": [
+            2.3,
+            0.4
+          ],
+          "insult": [
+            23.6,
+            0.4
+          ],
+          "threat": [
+            2.2,
+            0.1
+          ],
+          "toxicity": [
+            46.1,
+            1.0
+          ]
+        }
+      },
+      "eps32": {
+        "perspective_api": {
+          "any": [
+            59.4,
+            1.4
+          ],
+          "identity_attack": [
+            14.6,
+            0.6
+          ],
+          "profanity": [
+            39.5,
+            1.2
+          ],
+          "severe_toxicity": [
+            7.0,
+            0.4
+          ],
+          "sexually_explicit": [
+            14.9,
+            0.9
+          ],
+          "threat": [
+            6.2,
+            0.2
+          ],
+          "toxicity": [
+            53.8,
+            1.0
+          ]
+        },
+        "detoxify": {
+          "any": [
+            51.3,
+            1.5
+          ],
+          "identity_attack": [
+            9.7,
+            0.4
+          ],
+          "obscene": [
+            38.2,
+            1.6
+          ],
+          "severe_toxicity": [
+            2.7,
+            0.6
+          ],
+          "insult": [
+            26.1,
+            0.6
+          ],
+          "threat": [
+            2.6,
+            0.3
+          ],
+          "toxicity": [
+            50.9,
+            1.4
+          ]
+        }
+      },
+      "eps64": {
+        "perspective_api": {
+          "any": [
+            67.2,
+            0.2
+          ],
+          "identity_attack": [
+            15.9,
+            0.2
+          ],
+          "profanity": [
+            49.6,
+            0.4
+          ],
+          "severe_toxicity": [
+            12.2,
+            0.5
+          ],
+          "sexually_explicit": [
+            16.9,
+            0.4
+          ],
+          "threat": [
+            6.6,
+            0.5
+          ],
+          "toxicity": [
+            63.1,
+            0.8
+          ]
+        },
+        "detoxify": {
+          "any": [
+            61.4,
+            0.8
+          ],
+          "identity_attack": [
+            11.7,
+            0.3
+          ],
+          "obscene": [
+            49.3,
+            0.1
+          ],
+          "severe_toxicity": [
+            5.4,
+            0.5
+          ],
+          "insult": [
+            36.4,
+            0.7
+          ],
+          "threat": [
+            3.2,
+            0.4
+          ],
+          "toxicity": [
+            61.1,
+            0.7
+          ]
+        }
+      },
+      "unconstrained": {
+        "perspective_api": {
+          "any": [
+            66.0,
+            1.0
+          ],
+          "identity_attack": [
+            17.4,
+            1.2
+          ],
+          "profanity": [
+            43.3,
+            1.6
+          ],
+          "severe_toxicity": [
+            8.0,
+            0.4
+          ],
+          "sexually_explicit": [
+            14.6,
+            0.3
+          ],
+          "threat": [
+            7.0,
+            1.0
+          ],
+          "toxicity": [
+            61.7,
+            1.1
+          ]
+        },
+        "detoxify": {
+          "any": [
+            61.0,
+            1.5
+          ],
+          "identity_attack": [
+            10.2,
+            0.6
+          ],
+          "obscene": [
+            42.4,
+            1.1
+          ],
+          "severe_toxicity": [
+            2.6,
+            0.1
+          ],
+          "insult": [
+            32.7,
+            1.2
+          ],
+          "threat": [
+            2.8,
+            0.4
+          ],
+          "toxicity": [
+            60.7,
+            1.6
+          ]
+        }
+      }
+    }
+  }
+}

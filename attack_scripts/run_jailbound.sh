@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # JailBound: boundary probing -> joint image/text crossing -> target -> judge.
+# Legacy LLaVA runner: requires verified safe/unsafe probe fields. The default
+# MM-SafetyBench Changed Question labeling is rejected after the 2026-10-24 audit.
+# Use jailbound_table3_pilot.py for the Qwen paper-model comparison.
 # The first stage is expensive: 128 probe forwards (64 safe/unsafe pairs), then
 # 100 gradient iterations for each requested evaluation behavior.
 #

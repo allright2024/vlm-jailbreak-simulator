@@ -1,6 +1,6 @@
-# Released Qwen2-VL experiment (thu-coai/JPS @ beacbc58). The upstream repo
-# references but does not distribute advbench_subset.csv or clean.jpeg; this
-# profile fails closed until those exact files are supplied under data/JPS/.
+# Qwen2-VL training profile (thu-coai/JPS @ beacbc58). The README links the
+# TAP training CSV, but the original clean.jpeg is not supplied.
+# Released round 0..5 image/prompt pairs support a separate inference audit.
 experiment_profile: official
 surrogate: Qwen/Qwen2-VL-7B-Instruct
 surrogate_revision: eed13092ef92e448dd6875b2a00151bd3f7db0ac

@@ -1,0 +1,19 @@
+{
+  "ready": true,
+  "models": {
+    "minigpt4": {
+      "ready": true,
+      "errors": [],
+      "identity": "MiniGPT-4 13B with Vicuna v0"
+    }
+  },
+  "failures": [],
+  "paper_reproduction": false,
+  "historical_checkpoint_identity_verified": false,
+  "limitations": [
+    "Historical sampling seeds and standard-deviation ddof are not published",
+    "The pinned public Ai2 RTP file has 1199 challenging rows; the paper says 1225",
+    "Fast runtime uses batched fp16; release defaults to serial int8 with CPU vision",
+    "GPU/runtime versions differ from the authors' 2023 environment"
+  ]
+}

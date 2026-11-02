@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "published_on": "2026-11-02",
+  "timezone": "Asia/Seoul",
+  "experiments": [
+    {
+      "id": "figstep",
+      "method": "FigStep",
+      "kind": "attack",
+      "historical_run": "runs/figstep_full500_20261028",
+      "assessment": "automated_proxy",
+      "scope": "SafeBench 500; LLaVA-1.5-7B; five attempts; Qwen2.5-14B rubric judge. Human annotation pending.",
+      "runner": "attack_scripts/figstep_full500.py",
+      "evidence": [
+        "reproductions/results/figstep/summary.json",
+        "reproductions/results/figstep/comparison.csv",
+        "reproductions/results/figstep/report.md",
+        "reproductions/results/figstep/manifest.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "figstep_harmbench",
+      "method": "FigStep",
+      "kind": "attack",
+      "historical_run": "runs/figstep_reproduction_20261022",
+      "assessment": "auxiliary",
+      "scope": "All 500 inputs generated; HarmBench scores only 350 harmful cases. Not the human ASR on 500.",
+      "runner": "attack_scripts/figstep_reproduction.py",
+      "evidence": [
+        "reproductions/results/figstep_harmbench/summary.json",
+        "reproductions/results/figstep_harmbench/manifest.json",
+        "reproductions/results/figstep_harmbench/runtime.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "mml",
+      "method": "MML-M",
+      "kind": "attack",
+      "historical_run": "runs/mml_full_reproduction_20261022",
+      "assessment": "near_paper_selected_cell",
+      "scope": "SafeBench 500, GPT-4o, CLAS ASR@5; MML-M near paper, FigStep baseline differs.",
+      "runner": "attack_scripts/mml_full_reproduction.py",
+      "evidence": [
+        "reproductions/results/mml/summary.json",
+        "reproductions/results/mml/comparison.csv",
+        "reproductions/results/mml/manifest.json",
+        "reproductions/results/mml/runtime.json",
+        "reproductions/results/mml/final_validation.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jood",
+      "method": "JOOD",
+      "kind": "attack",
+      "historical_run": "runs/jood_reproduction_20261022",
+      "assessment": "partial",
+      "scope": "Table 1 firearms/weapons only, 17 AdvBench-M questions, image+text Mixup and GPT-4V.",
+      "runner": "attack_scripts/jood_reproduction.py",
+      "evidence": [
+        "reproductions/results/jood/summary.json",
+        "reproductions/results/jood/comparison.csv",
+        "reproductions/results/jood/manifest.json",
+        "reproductions/results/jood/runtime.json",
+        "reproductions/results/jood/final_validation.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "cs_dj",
+      "method": "CS-DJ",
+      "kind": "attack",
+      "historical_run": "runs/cs_dj_reference_onevision_20261022",
+      "assessment": "near_paper_selected_row",
+      "scope": "Table 6 native OneVision Chat 7B, 750 cases, Beaver-Dam; 3 construction failures retained.",
+      "runner": "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/evaluate_cs_dj.py",
+      "evidence": [
+        "reproductions/results/cs_dj/summary.json",
+        "reproductions/results/cs_dj/comparison.csv"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "cs_dj_gpt4o",
+      "method": "CS-DJ",
+      "kind": "attack",
+      "historical_run": "runs/cs_dj_reproduction_20261022",
+      "assessment": "historical_partial",
+      "scope": "Historical Table 7 GPT-4o run; 750 cases; four construction failures. No new API run performed for this publication.",
+      "runner": "attack_scripts/cs_dj_reproduction.py",
+      "evidence": [
+        "reproductions/results/cs_dj_gpt4o/summary.json",
+        "reproductions/results/cs_dj_gpt4o/comparison.csv",
+        "reproductions/results/cs_dj_gpt4o/comparison_wide.csv",
+        "reproductions/results/cs_dj_gpt4o/manifest.json",
+        "reproductions/results/cs_dj_gpt4o/final_validation.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "hades",
+      "method": "HADES",
+      "kind": "attack",
+      "historical_run": "runs/hades_paper_llava15_20261022",
+      "assessment": "numerical_gap",
+      "scope": "Table 2 +Adv image, 750 released composites, native LLaVA-1.5-7B and Beaver-Dam.",
+      "runner": "reproductions/run_sources/runs/hades_paper_llava15_20261022/paper_run.py",
+      "evidence": [
+        "reproductions/results/hades/summary.json",
+        "reproductions/results/hades/comparison.csv",
+        "reproductions/results/hades/experiment_plan.json",
+        "reproductions/results/hades/runtime.json",
+        "reproductions/results/hades/final_validation.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "hades_issue14",
+      "method": "HADES",
+      "kind": "attack",
+      "historical_run": "runs/hades_issue14_probe_20261024",
+      "assessment": "pilot",
+      "scope": "Issue 14 geometry-consistent optimization probe on 50 examples; no full-data reproduction claim.",
+      "runner": "reproductions/run_sources/reference_repos/HADES/white_box/issue14_consistent_probe.py",
+      "evidence": [
+        "reproductions/results/hades_issue14/summary.json",
+        "reproductions/results/hades_issue14/comparison.csv",
+        "reproductions/results/hades_issue14/plan.json",
+        "reproductions/results/hades_issue14/runtime.json",
+        "reproductions/results/hades_issue14/final_validation.json",
+        "reproductions/results/hades_issue14/training_summary.json",
+        "reproductions/results/hades_issue14/roundtrip_validation.json",
+        "reproductions/results/hades_issue14/body_preservation.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jps_released",
+      "method": "JPS",
+      "kind": "attack",
+      "historical_run": "runs/jps_paper_20261024",
+      "assessment": "partial",
+      "scope": "Table 3 Qwen2-VL-7B, HarmBench 200, rounds 0-5. Final round close; released intermediate rounds differ.",
+      "runner": "reproductions/run_sources/runs/jps_paper_20261024/paper_run.py",
+      "evidence": [
+        "reproductions/results/jps_released/summary.json",
+        "reproductions/results/jps_released/comparison.csv",
+        "reproductions/results/jps_released/plan.json",
+        "reproductions/results/jps_released/runtime.json",
+        "reproductions/results/jps_released/audit.json",
+        "reproductions/results/jps_released/tokenization_check.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jps_trained",
+      "method": "JPS",
+      "kind": "attack",
+      "historical_run": "runs/jps_train_20261024",
+      "assessment": "partial",
+      "scope": "Independent optimization on AdvBench subset 50; HarmBench 200 held out; final round preselected; MIFR not measured.",
+      "runner": "reproductions/run_sources/runs/jps_train_20261024/train_run.py",
+      "evidence": [
+        "reproductions/results/jps_trained/summary.json",
+        "reproductions/results/jps_trained/comparison.csv",
+        "reproductions/results/jps_trained/plan.json",
+        "reproductions/results/jps_trained/memory_probe.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "ultrabreak_released",
+      "method": "UltraBreak",
+      "kind": "attack",
+      "historical_run": "runs/ultrabreak_released_20261024/safebench_only",
+      "assessment": "near_paper_with_extraction_caveat",
+      "scope": "Table 1 SafeBench 315, Qwen2-VL/Qwen2.5-VL. Official extraction can include the input; assistant-only audit also reported.",
+      "runner": "reproductions/run_sources/runs/ultrabreak_released_20261024/paper_run.py",
+      "evidence": [
+        "reproductions/results/ultrabreak_released/summary.json",
+        "reproductions/results/ultrabreak_released/comparison.csv",
+        "reproductions/results/ultrabreak_released/plan.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "ultrabreak_trained",
+      "method": "UltraBreak",
+      "kind": "attack",
+      "historical_run": "runs/ultrabreak_train_20261024",
+      "assessment": "numerical_gap",
+      "scope": "Fresh random image, 1300 updates, released executable math. Training completed; paper ASR not matched.",
+      "runner": "reproductions/run_sources/runs/ultrabreak_train_20261024/pipeline.py",
+      "evidence": [
+        "reproductions/results/ultrabreak_trained/summary.json",
+        "reproductions/results/ultrabreak_trained/comparison.csv",
+        "reproductions/results/ultrabreak_trained/plan.json",
+        "reproductions/results/ultrabreak_trained/paper_code_audit.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jip_table6",
+      "method": "JailbreakInPieces",
+      "kind": "attack",
+      "historical_run": "runs/jip_asr_20261024",
+      "assessment": "adapted_proxy",
+      "scope": "Table 6 adaptation, 1100 responses (22 cells x 25 x 2 arms), historical LLaVA candidate; HarmBench replaces human labels.",
+      "runner": "attack_scripts/jip_asr_audit.py",
+      "evidence": [
+        "reproductions/results/jip_table6/summary.json",
+        "reproductions/results/jip_table6/summary.md",
+        "reproductions/results/jip_table6/asr.csv",
+        "reproductions/results/jip_table6/manifest.json",
+        "reproductions/results/jip_table6/runtime.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jip_table1",
+      "method": "JailbreakInPieces",
+      "kind": "attack",
+      "historical_run": "runs/jip_table1_llava_20261024",
+      "assessment": "blocked_missing_inputs",
+      "scope": "Original Table 1 inputs unavailable: zero original cells executed; controls do not constitute reproduction.",
+      "runner": "attack_scripts/jip_table1_llava_reproduction.py",
+      "evidence": [
+        "reproductions/results/jip_table1/table1_status.json",
+        "reproductions/results/jip_table1/paper_protocol.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "visualadv_released",
+      "method": "VisualAdv",
+      "kind": "attack",
+      "historical_run": "runs/visualadv_rtp_released",
+      "assessment": "near_paper_with_data_difference",
+      "scope": "Table 2 clean/epsilon16, MiniGPT-4, Detoxify original; 1199 public RTP challenging prompts vs paper 1225; three repeats.",
+      "runner": "attack_scripts/visualadv_reproduction.py",
+      "evidence": [
+        "reproductions/results/visualadv_released/report.json",
+        "reproductions/results/visualadv_released/report.md",
+        "reproductions/results/visualadv_released/table2.csv",
+        "reproductions/results/visualadv_released/protocol.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "visualadv_trained",
+      "method": "VisualAdv",
+      "kind": "attack",
+      "historical_run": "runs/visualadv_rtp_port",
+      "assessment": "numerical_gap",
+      "scope": "Same RTP evaluation after independent optimization. Toxicity increase reproduced, exact values differ.",
+      "runner": "attack_scripts/visualadv_reproduction.py",
+      "evidence": [
+        "reproductions/results/visualadv_trained/report.json",
+        "reproductions/results/visualadv_trained/report.md",
+        "reproductions/results/visualadv_trained/table2.csv",
+        "reproductions/results/visualadv_trained/protocol.json",
+        "reproductions/results/visualadv_trained/audit.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jailbound",
+      "method": "JailBound",
+      "kind": "attack",
+      "historical_run": "runs/jailbound_three_category_boundary100_20261024",
+      "assessment": "adapted_proxy",
+      "scope": "Three professional-advice categories, custom balanced probe, non-refusal proxy; not verified harmful compliance.",
+      "runner": "attack_scripts/jailbound_three_category_reproduction.py",
+      "evidence": [
+        "reproductions/results/jailbound/summary.json",
+        "reproductions/results/jailbound/table3_comparison.csv",
+        "reproductions/results/jailbound/manifest.json",
+        "reproductions/results/jailbound/runtime.json"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "adashield_figstep",
+      "method": "AdaShield",
+      "kind": "defense",
+      "historical_run": "runs/adashield_official_repro/figstep",
+      "assessment": "partial",
+      "scope": "LLaVA-1.5-13B; 430 FigStep held-out examples; vanilla/static/adaptive. GPT-4o recheck replaces historical GPT-4.",
+      "runner": "defense_scripts/adashield_official_repro.py",
+      "evidence": [
+        "reproductions/results/adashield_figstep/summary.json",
+        "reproductions/results/adashield_figstep/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "adashield_qr",
+      "method": "AdaShield",
+      "kind": "defense",
+      "historical_run": "runs/adashield_official_repro/qr",
+      "assessment": "partial",
+      "scope": "LLaVA-1.5-13B; 1443 held-out QR examples; vanilla/static/adaptive.",
+      "runner": "defense_scripts/adashield_official_repro.py",
+      "evidence": [
+        "reproductions/results/adashield_qr/summary.json",
+        "reproductions/results/adashield_qr/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "asd",
+      "method": "AsD",
+      "kind": "defense",
+      "historical_run": "runs/asd_official_repro",
+      "assessment": "partial",
+      "scope": "LLaVA-1.5-7B, MM-SafetyBench SD_TYPO and a JIP adaptation; historical GPT-4o judge.",
+      "runner": "defense_scripts/asd_official_repro.py",
+      "evidence": [
+        "reproductions/results/asd/summary.json",
+        "reproductions/results/asd/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "cider",
+      "method": "CIDER",
+      "kind": "defense",
+      "historical_run": "runs/cider_official_repro",
+      "assessment": "partial",
+      "scope": "Released HarmBench 41 validation/160 test questions; detection 1280 pairs; defended-generation ASR 640 pairs.",
+      "runner": "defense_scripts/cider_official_repro.py",
+      "evidence": [
+        "reproductions/results/cider/summary.json",
+        "reproductions/results/cider/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "ecso",
+      "method": "ECSO",
+      "kind": "defense",
+      "historical_run": "runs/ecso_official_repro",
+      "assessment": "partial",
+      "scope": "MM-SafetyBench eight malicious scenarios; SD_TYPO/TYPO/SD/direct text; report macro harmless rate.",
+      "runner": "defense_scripts/ecso_official_repro.py",
+      "evidence": [
+        "reproductions/results/ecso/summary.json",
+        "reproductions/results/ecso/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "jailguard",
+      "method": "JailGuard",
+      "kind": "defense",
+      "historical_run": "runs/jailguard_official_repro",
+      "assessment": "partial",
+      "scope": "Table 4 PL detector on all 1000 released images, MiniGPT-4; fp16/batched runtime differs from upstream.",
+      "runner": "defense_scripts/jailguard_official_repro.py",
+      "evidence": [
+        "reproductions/results/jailguard/summary_pl.json",
+        "reproductions/results/jailguard/summary_pl.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    },
+    {
+      "id": "vlmshield",
+      "method": "VLMShield",
+      "kind": "defense",
+      "historical_run": "runs/vlmshield_official_repro",
+      "assessment": "near_paper_released_detector",
+      "scope": "Released classifier: AdvBench-M 242, VLSafe 1110, MM-Vet 218. Detector metrics only, no target generation.",
+      "runner": "defense_scripts/vlmshield_official_repro.py",
+      "evidence": [
+        "reproductions/results/vlmshield/summary.json",
+        "reproductions/results/vlmshield/summary.md"
+      ],
+      "exact_end_to_end_paper_reproduction_claimed": false
+    }
+  ]
+}

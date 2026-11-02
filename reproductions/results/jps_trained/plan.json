@@ -1,0 +1,126 @@
+{
+  "scope": "from-scratch image and steering optimization, followed by frozen evaluation",
+  "reference_commit": "beacbc58a359005e00a7e7f7b0b485eae64bb163",
+  "training": {
+    "dataset": "TAP AdvBench-subset",
+    "n": 50,
+    "size": [
+      448,
+      448
+    ],
+    "rounds": 5,
+    "image_optimization_passes": 6,
+    "steps_per_pass_max": 300,
+    "batch_size": 4,
+    "epsilon": "32/255",
+    "alpha": "1/255",
+    "momentum": 0.9,
+    "early_stop": "all 50 target CE losses <= 0.01",
+    "seed": 2025,
+    "victim": "Qwen/Qwen2-VL-7B-Instruct",
+    "victim_revision": "eed13092ef92e448dd6875b2a00151bd3f7db0ac",
+    "agent": "Qwen/Qwen2.5-14B-Instruct",
+    "agent_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+    "agent_decoding": "native greedy, feedback 100 tokens, summary/revision 8192 tokens",
+    "initialization": "clean panda image plus zero perturbation; empty steering components",
+    "released_attack_artifacts_used_as_initialization": false
+  },
+  "evaluation": {
+    "dataset": "same reconstructed HarmBench standard 200 as baseline",
+    "rounds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "responses": 1200,
+    "judge": "HarmBench-Llama-2-13b-cls",
+    "protocols": [
+      "official_jps_input",
+      "original_behavior"
+    ],
+    "baseline_round5_asr": {
+      "official_jps_input": 88.5,
+      "original_behavior": 86.0
+    },
+    "paper_round5_asr": 89.5,
+    "use_eval_for_training_or_selection": false,
+    "final_round_fixed_in_advance": 5
+  },
+  "runtime": {
+    "transformers": "4.48.2",
+    "torch": "2.9.1+cu130",
+    "attention": "sdpa",
+    "gpu": "B200 MIG 2g.45gb",
+    "cpu_threads": 2,
+    "fixed_model_weights": true,
+    "training_kv_cache": false,
+    "activation_memory": "non-reentrant checkpointing of native vision and language blocks in eval mode",
+    "retain_graph": false,
+    "generation_oom_policy": "retry smaller generation batches without dropping or truncating samples; agent fallback preserves tokenized inputs",
+    "malformed_revision_policy": "save raw output and stop; no substitute prompt"
+  },
+  "source": {
+    "training_url": "https://raw.githubusercontent.com/RICommunity/TAP/7bcdad30537c679d00699fac16052dc916c89a6d/data/advbench_subset.csv",
+    "training_git_blob_sha1": "e82968a6e36e8367df3b649a74f926399636ac64",
+    "training_sha256": "66af8279f7690e1b83f8edeeeef0ff5c9da099e994ef54ecc14bdaf5fa759de2",
+    "training_rows": 50,
+    "training_columns": [
+      "",
+      "goal",
+      "target",
+      "category",
+      "Original index"
+    ],
+    "base_image_source": "data/FORCE/clean.jpeg",
+    "base_sha256": "52cea1aac7c702fd495ae69c69937e8b8f4a656a499d6191e91947e0139fa7f5",
+    "base_image_note": "Same panda scene as released artifacts; exact identity of the authors original file is unverified. Base selected before training or evaluation.",
+    "base_pixel_checks": [
+      {
+        "round": 0,
+        "max_abs_difference": 24,
+        "mean_abs_difference": 4.350139176764456,
+        "outside_33_fraction": 0.0
+      },
+      {
+        "round": 1,
+        "max_abs_difference": 32,
+        "mean_abs_difference": 5.32758025085034,
+        "outside_33_fraction": 0.0
+      },
+      {
+        "round": 2,
+        "max_abs_difference": 32,
+        "mean_abs_difference": 5.412903247236395,
+        "outside_33_fraction": 0.0
+      },
+      {
+        "round": 3,
+        "max_abs_difference": 32,
+        "mean_abs_difference": 5.712322624362245,
+        "outside_33_fraction": 0.0
+      },
+      {
+        "round": 4,
+        "max_abs_difference": 33,
+        "mean_abs_difference": 5.819161551339286,
+        "outside_33_fraction": 0.0
+      },
+      {
+        "round": 5,
+        "max_abs_difference": 33,
+        "mean_abs_difference": 5.918259393601191,
+        "outside_33_fraction": 0.0
+      }
+    ],
+    "exact_normalized_train_eval_overlap": 0
+  },
+  "limits": [
+    "Author original clean.jpeg bytes are unverified; scene and perturbation bounds match released images",
+    "Author harmbench_standard.json is unavailable; reuse exactly the prior evaluation dataset",
+    "B200 requires a newer Torch runtime; SDPA replaces unavailable FlashAttention2",
+    "This experiment does not guarantee the paper or released-artifact ASR will match"
+  ]
+}

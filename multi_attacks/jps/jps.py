@@ -60,7 +60,8 @@ def _official_target(target: str) -> str:
 def _jps_prompt(question: str, target: str, steer: str = "") -> str:
     """The exact prompt contract shared by PGD, revision sampling and eval."""
     query = JB_PROMPT_TEMPLATE.format(attack_question=question, attack_target=target)
-    return (steer + "\n\n" if steer else "") + query
+    # Upstream files already contain the separator; local agent output does not.
+    return (steer.rstrip("\n") + "\n\n" if steer else "") + query
 
 
 def _parse_ratio(value) -> float:
@@ -83,9 +84,9 @@ def _project_linf(original: torch.Tensor, candidate: torch.Tensor, epsilon: floa
 class JPSAttack(Attack):
     official_repo = "https://github.com/thu-coai/JPS"
     official_commit = "beacbc58a359005e00a7e7f7b0b485eae64bb163"
-    # The port is conservatively labelled adapted because upstream does not
-    # publish its training CSV/base image and this unified runtime is not the
-    # authors' exact package stack. Config/model substitutions are separate.
+    # Keep the adapted label: original inputs and numerical/runtime parity are
+    # not fully established. The README links the TAP training CSV and supplies
+    # round-specific inference artifacts, but omits the original base image.
     algorithm_fidelity = "adapted"
     substitutes_model = True
     requires_surrogate = True
@@ -96,9 +97,12 @@ class JPSAttack(Attack):
         c = self.config
         self.surrogate = c.get("surrogate", "Qwen/Qwen2-VL-7B-Instruct")
         self.surrogate_revision = c.get("surrogate_revision", QWEN2_VL_REVISION)
-        self.agent_model = c.get("agent_model", "gpt-4o-2024-11-20")
-        self.agent_backend = c.get("agent_backend", "openai")
-        self.agent_revision = c.get("agent_revision")
+        self.agent_model = c.get("agent_model", "Qwen/Qwen2.5-14B-Instruct")
+        self.agent_backend = c.get("agent_backend", "huggingface")
+        self.agent_revision = c.get(
+            "agent_revision",
+            QWEN25_14B_REVISION if self.agent_model == "Qwen/Qwen2.5-14B-Instruct" else None,
+        )
         self.base_image = c.get(
             "base_image", os.path.join(DATA_ROOT, "UltraBreak", "images", "white.jpeg")
         )
