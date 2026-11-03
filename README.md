@@ -37,8 +37,10 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 ## Code and workflow guide
 
 **논문 재현 결과:** [재현·진단 기록](reproductions/README.md)에
-33개 실험·진단·데이터 구성 기록의 측정값, 논문 비교, 평가 모델, 남은 차이와 실행 코드를 정리했습니다.
+33개 실험·진단·데이터 구성 기록의 측정값, 논문 비교, 평가 모델, 남은 차이와 당시 설정을 정리했습니다.
 공식 산출물 평가와 직접 최적화, 자동 평가 대체와 인간 평가를 구분합니다.
+`dev_norep`에는 전용 재현 실행기가 포함되지 않습니다. 당시 설정은
+[재현 설정 안내](reproductions/SETTINGS.md)에 보존했습니다.
 최신 [5개 방법·3,000개 조합 데이터 구성](FIVE_METHOD_DATASET.md)은 JOOD 이미지 MixUp을
 사용하며, 생성 완료와 타깃 응답·ASR 평가 완료를 구분합니다.
 
@@ -695,9 +697,6 @@ python run_extended_metrics.py \
 ```bash
 # 데이터셋 필수 경로 검사
 python -m core.validation.data --layout-only
-
-# 공식 프로필의 자산·설정·credential 존재 여부 검사(키 값은 출력하지 않음)
-python -m core.validation.official_reproduction
 
 # 조합 결과의 harmful-only, 수량, 중복, 아티팩트·단계 연결·split 검사
 python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot

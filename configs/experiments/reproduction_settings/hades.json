@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "experiment_id": "hades",
+  "method": "HADES",
+  "scope": "Table 2 +Adv image, 750 released composites, native LLaVA-1.5-7B and Beaver-Dam.",
+  "historical_run": "runs/hades_paper_llava15_20261022",
+  "recorded_settings": {
+    "reproductions/results/hades/summary.json": {
+      "paper_table": 2,
+      "setting": "+Adv image",
+      "target": "original LLaVA-1.5-7B"
+    },
+    "reproductions/results/hades/runtime.json": {
+      "torch": "2.9.1+cu130",
+      "transformers": "4.31.0",
+      "target": "/home/jovyan/.cache/huggingface/hub/models--liuhaotian--llava-v1.5-7b/snapshots/4481d270cc22fd5c4d1bb5df129622006ccd9234",
+      "dtype": "torch.float16",
+      "model_class": "LlavaLlamaForCausalLM",
+      "generation_config": {
+        "max_length": 4096,
+        "max_new_tokens": null,
+        "min_length": 0,
+        "min_new_tokens": null,
+        "early_stopping": false,
+        "max_time": null,
+        "do_sample": false,
+        "num_beams": 1,
+        "num_beam_groups": 1,
+        "penalty_alpha": null,
+        "use_cache": true,
+        "temperature": 1.0,
+        "top_k": 50,
+        "top_p": 1.0,
+        "typical_p": 1.0,
+        "epsilon_cutoff": 0.0,
+        "eta_cutoff": 0.0,
+        "diversity_penalty": 0.0,
+        "repetition_penalty": 1.0,
+        "encoder_repetition_penalty": 1.0,
+        "length_penalty": 1.0,
+        "no_repeat_ngram_size": 0,
+        "bad_words_ids": null,
+        "force_words_ids": null,
+        "renormalize_logits": false,
+        "constraints": null,
+        "forced_bos_token_id": null,
+        "forced_eos_token_id": null,
+        "remove_invalid_values": false,
+        "exponential_decay_length_penalty": null,
+        "suppress_tokens": null,
+        "begin_suppress_tokens": null,
+        "forced_decoder_ids": null,
+        "sequence_bias": null,
+        "guidance_scale": null,
+        "num_return_sequences": 1,
+        "output_attentions": false,
+        "output_hidden_states": false,
+        "output_scores": false,
+        "return_dict_in_generate": false,
+        "pad_token_id": 0,
+        "bos_token_id": 1,
+        "eos_token_id": 2,
+        "encoder_no_repeat_ngram_size": 0,
+        "decoder_start_token_id": null,
+        "generation_kwargs": {},
+        "_from_model_config": false,
+        "transformers_version": "4.31.0"
+      },
+      "native_source": "/home/jovyan/jailbreak/reference_repos/HADES/eval/evaluate/inference",
+      "gpu": "NVIDIA B200 MIG 2g.45gb"
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/hades/summary.json",
+      "sha256": "f275f76e4ac487ea2e8c17fb4b387dc3c448b72f49ad3de54926e62bf298c070"
+    },
+    {
+      "path": "reproductions/results/hades/comparison.csv",
+      "sha256": "e3ac1e64edcd49c9977a71425171d24e2a188ab8d3caf634d2e91f5ec89710b7"
+    },
+    {
+      "path": "reproductions/results/hades/experiment_plan.json",
+      "sha256": "ecfd2f9f8f6ff5cdb415b00e5e4bbb05d47e7bf882d877542f4670d7ac9f9d48"
+    },
+    {
+      "path": "reproductions/results/hades/runtime.json",
+      "sha256": "e4bf347cb78ccf5d971360108bed5a9d5770ba9bc744b6f9e04ec7b0c46c7bec"
+    },
+    {
+      "path": "reproductions/results/hades/final_validation.json",
+      "sha256": "8502749da41c73bc29b9db43917a840888025be02a8e35353c36b7e3e77b29bd"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "attack_scripts/hades_reproduction_preparation.py",
+    "reproductions/run_sources/reference_repos/HADES/white_box/issue14_consistent_probe.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/prepare_hades_data.py",
+    "reproductions/run_sources/runs/hades_paper_llava15_20261022/paper_run.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/attacks/HADES.yaml",
+      "sha256": "6d314b2a412628a11189c537d419dc5bc571a8481ee6b509c16a80ef288a6aba"
+    },
+    {
+      "path": "configs/attacks/HADES_official.yaml",
+      "sha256": "d4a3ff458b783f92a44c2d5340d231952dd455d6f8f3d077e40139bc3113c5b3"
+    },
+    {
+      "path": "configs/attacks/HADES_white_box_mid.yaml",
+      "sha256": "44b272d59e55806daea7f47dce2cb8d66dbc96d63925c1d0f39b4240e77a71f5"
+    }
+  ]
+}

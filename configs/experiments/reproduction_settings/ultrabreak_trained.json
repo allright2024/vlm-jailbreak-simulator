@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "experiment_id": "ultrabreak_trained",
+  "method": "UltraBreak",
+  "scope": "Fresh random image, 1300 updates, released executable math. Training completed; paper ASR not matched.",
+  "historical_run": "runs/ultrabreak_train_20261024",
+  "recorded_settings": {
+    "reproductions/results/ultrabreak_trained/summary.json": {
+      "status": "complete",
+      "optimization_performed": true,
+      "training_updates": 1300,
+      "limitations": [
+        "This follows the released executable math with the paper's update count; discrepancies are recorded in paper_code_audit.json",
+        "No author-provided seed or exact training checkpoint for the released image",
+        "CUDA kernels may be numerically nondeterministic",
+        "Official response extraction includes prompt text; assistant-only scores are also reported"
+      ]
+    },
+    "reproductions/results/ultrabreak_trained/plan.json": {
+      "scope": "new universal image optimized from random initialization, then SafeBench-only evaluation",
+      "profile": "official executable implementation with paper's 1300 update count",
+      "seed": 20261024,
+      "surrogate": {
+        "id": "Qwen/Qwen2-VL-7B-Instruct",
+        "revision": "eed13092ef92e448dd6875b2a00151bd3f7db0ac",
+        "class": "Qwen2VLForConditionalGeneration",
+        "setting": "white-box surrogate",
+        "paper": {
+          "safebench": 81.59,
+          "advbench": 72.69
+        }
+      },
+      "updates": 1300,
+      "training_rows": 50,
+      "rows_per_update": 50,
+      "gradient_accumulation": "sum, one Adam step after all 50 rows",
+      "initialization": "torch.rand(3,224,224), float32, no existing attack image",
+      "optimizer": {
+        "name": "Adam",
+        "lr": 0.01,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08
+      },
+      "loss": {
+        "semantic_function": "official optimisation/utils.py:semantic_similarity_loss(mode=attention)",
+        "tau": 0.5,
+        "embedding_noise": 0.0001,
+        "positional_scale": 0.01,
+        "tv_weight": 0.5,
+        "l2_weight": 0.0
+      },
+      "transforms": {
+        "scale": [
+          0.8,
+          1.2
+        ],
+        "rotation_degrees": [
+          -15,
+          15
+        ],
+        "canvas": [
+          336,
+          336
+        ],
+        "patch": [
+          224,
+          224
+        ],
+        "patch_only": false
+      },
+      "execution": {
+        "model_parameters": "frozen; gradients computed only for image",
+        "model_mode": "eval as in from_pretrained default",
+        "input_cache": "deterministic original process_target tensors; parity checked before full run",
+        "diagnostic_generation": "omitted; no effect on loss or update rule, changes RNG consumption relative to unseeded upstream run",
+        "checkpoint": "image, Adam and Python/NumPy/Torch/CUDA RNG after each completed update",
+        "final_selection": "fixed final update 1300, no selection using held-out ASR"
+      },
+      "evaluation": {
+        "dataset": "SafeBench",
+        "rows_per_model": 315,
+        "models": {
+          "qwen2": {
+            "id": "Qwen/Qwen2-VL-7B-Instruct",
+            "revision": "eed13092ef92e448dd6875b2a00151bd3f7db0ac",
+            "class": "Qwen2VLForConditionalGeneration",
+            "setting": "white-box surrogate",
+            "paper": {
+              "safebench": 81.59,
+              "advbench": 72.69
+            }
+          },
+          "qwen25": {
+            "id": "Qwen/Qwen2.5-VL-7B-Instruct",
+            "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+            "class": "Qwen2_5_VLForConditionalGeneration",
+            "setting": "black-box transfer",
+            "paper": {
+              "safebench": 60.32,
+              "advbench": 35.77
+            }
+          }
+        },
+        "judge": {
+          "id": "cais/HarmBench-Llama-2-13b-cls-multimodal-behaviors",
+          "revision": "928eaf3333b75a0eba1d7632d26256a56223b949"
+        },
+        "protocols": [
+          "official_extraction",
+          "assistant_tokens_only"
+        ],
+        "responses": 630,
+        "judgments": 1260,
+        "baseline_summary": "/home/jovyan/jailbreak/vlm-jailbreak-simulator/runs/ultrabreak_released_20261024/safebench_only/summary.json"
+      },
+      "external_model_api_calls": false,
+      "paper_code_audit": "/home/jovyan/jailbreak/vlm-jailbreak-simulator/runs/ultrabreak_train_20261024/paper_code_audit.json",
+      "limitations": [
+        "This follows the released executable math with the paper's update count; discrepancies are recorded in paper_code_audit.json",
+        "No author-provided seed or exact training checkpoint for the released image",
+        "CUDA kernels may be numerically nondeterministic",
+        "Official response extraction includes prompt text; assistant-only scores are also reported"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/ultrabreak_trained/summary.json",
+      "sha256": "324e1c68b614a07dd563b7a0037498f36c310b07b2292362bcf2afd34d735ded"
+    },
+    {
+      "path": "reproductions/results/ultrabreak_trained/comparison.csv",
+      "sha256": "2dd02524056707156cebd9cbe85d38616bd2fd7e1501c7998557069bc7413fa3"
+    },
+    {
+      "path": "reproductions/results/ultrabreak_trained/plan.json",
+      "sha256": "78c0a2621f949a78aaa571640c481e079cd434834c1262a3b46f24728a41d39f"
+    },
+    {
+      "path": "reproductions/results/ultrabreak_trained/paper_code_audit.json",
+      "sha256": "cb82df2df4ba5a12682162948d75bbac68f805f2a200f1b88cf6f210fb0bd43b"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": []
+}

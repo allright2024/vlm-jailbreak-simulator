@@ -2,6 +2,7 @@
 
 2026-11-03 기준, 공격 **10종**과 방어 **7종**의 실험 및 조합 데이터 구성·진단을
 포함한 **33개 기록**을 정리했다. 진행 중인 실행은 완료 결과와 구분한다.
+이 브랜치는 전용 재현 실행 코드를 제거하고, 결과와 [당시 설정](SETTINGS.md)을 보존한다.
 완료된 실행과 논문 성능의 일치는 별개다. 아래 수치는 저장된 결과에서 가져왔으며,
 이 공개 작업에서 새 모델 추론, API 평가 또는 재학습을 수행하지 않았다.
 공식 산출물 평가, 직접 최적화, 자동 평가 대체, 소규모 검증을 구분한다.
@@ -86,34 +87,19 @@ ASR은 낮을수록, harmless rate와 accuracy는 높을수록 좋다.
 | JailGuard | MiniGPT-4, PL, 공식 이미지 1,000개 | Acc 75.90 / Precision 67.32 / Recall 77.25 | Table 4: 82.90 / 74.00 / 88.25 | fp16·배치 생성 등 실행 환경 차이; threshold 0.025. [결과](results/jailguard/summary_pl.md) |
 | VLMShield | 공개 검출기, AdvBench-M 242 / VLSafe 1,110 / MM-Vet 218 | ASR 0.41 / 1.71; benign ACC 96.79 | Tables 2–3: 0.41 / 1.62 / 96.33 | 공개된 세 데이터셋만 평가. 타깃 VLM 답변은 생성하지 않음. [결과](results/vlmshield/summary.md) |
 
-## 파일과 검증
+## 결과와 설정 보존
 
-- [experiments.json](experiments.json): 범위, 방법, 판정, 실행 코드, 근거 파일의 기계 판독 목록.
-- [files.json](files.json): 각 원본 집계·프로토콜·실행 스크립트의 SHA-256, 크기, 로컬 상대 경로.
-- `results/`: 저장된 집계 CSV/JSON과 실험 조건. 원본 바이트를 보존한다.
-- `run_sources/`: `runs/` 또는 참조 저장소에만 있던 실험 실행 코드.
-  JPS import 경로 수정의 이전 해시·변경 사유는 `files.json`에 기록했다.
+- [experiments.json](experiments.json): 실험 범위·평가 방식·근거 파일과 설정 경로.
+- [files.json](files.json): 보존한 결과 파일의 SHA-256과 크기.
+- `results/`: 원본 집계 CSV/JSON과 실험 조건. 기존 파일 바이트를 유지했다.
+- [설정 안내](SETTINGS.md): 기존 방법론 YAML과 실험별 실제 기록, 삭제 전 실행기의 기본값.
 
-```bash
-# 보존된 실행 코드의 목록과 안전한 복원. 기존 파일이 다르면 중단한다.
-python reproductions/restore_sources.py --list
-python reproductions/restore_sources.py --recipe jps_train_20261024
-```
+전용 재현 실행기·백그라운드 래퍼·진단·복원 스크립트는 이 브랜치에서 제거했다.
+`historical_runner`와 원본 경로는 과거 실행의 출처이며 현재 실행 가능한 파일을 뜻하지 않는다.
+일반 방법론 구현과 공통 생성·응답·평가 CLI는 [루트 README](../README.md)를 참고한다.
+기본 방법론 설정과 과거 원본 runtime·판정기의 차이는 각 실험 설정에 따로 기록한다.
+설정 스냅샷만으로 삭제한 전용 실행 흐름이 자동 복원되는 것은 아니다.
 
-복원 명령은 복사할 실행 파일의 해시와 기존 파일 충돌을 확인한다.
-`runs/`, 데이터, 이미지, 모델 가중치,
-원시 타깃 응답과 API 로그는 이 결과 묶음에 포함하지 않는다.
-원본 집계 파일의 절대 경로와 일부 로컬 링크는 당시 실행을 기록한 것으로,
-새 머신에서 유효한 경로라는 뜻은 아니다.
-
-## 실행 코드 사용
-
-공통 파이프라인은 [루트 README](../README.md), 전용 실행기는
-[실행 안내](RUNNERS.md)를 참고한다. `attack_scripts/`와 `defense_scripts/`에는
-전용 프로토콜·집계·재시작 스크립트가 추가되어 있다.
-JPS, 원본 OneVision, HADES는 저자 코드와 별도 Transformers 환경을
-사용하므로, 보존한 실행 코드를 복원하고 입력 자산·참조 저장소·환경을 준비해야 한다.
-원본 실행기를 메인 환경에서 무조건 실행하는 방식은 지원하지 않는다.
-
-결과에 남은 차이는 `assessment`, `scope`, 각 `plan.json`/`summary.json`에서 확인할 수 있다.
-모든 방법이 원 논문과 동일하게 재현됐다는 포괄적인 주장을 하지 않는다.
+`runs/`, 이미지, 모델 가중치, 원시 응답과 API 로그는 결과 묶음에 포함하지 않는다.
+원본 기록의 절대 경로는 당시 실행 위치이며 새 머신의 유효한 경로를 보장하지 않는다.
+모든 방법이 원 논문과 동일한 성능으로 재현됐다는 포괄적인 주장을 하지 않는다.

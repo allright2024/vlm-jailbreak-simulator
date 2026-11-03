@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "experiment_id": "five_methods_3000_mixup",
+  "method": "Five-method compositions",
+  "scope": "SafeBench 180 source questions, 18 recipes of FigStep/MML/JOOD/CS-DJ/JPS, 3,000 inputs. Adapted composition; no target responses or ASR. JPS image/steering reused, not jointly reoptimized. Image MixUp: .7 source + .3 harmless image, native source canvas; 1,840 JOOD-containing cases. Verified pre-JOOD renders reused from the historical run.",
+  "historical_run": "runs/five_methods_3000_jood_image_mix_20261103",
+  "recorded_settings": {
+    "reproductions/results/five_methods_3000_mixup/full/manifest.json": {
+      "status": "complete",
+      "phase": "full",
+      "identity": "f46dfd17a8fc211859ec2a5ca45f450b99d70e992e745da73e124dfc8dc65de5",
+      "n_cases": 3000,
+      "counts": {
+        "P01": 160,
+        "P02": 160,
+        "P03": 160,
+        "P04": 160,
+        "P05": 160,
+        "P06": 160,
+        "P07": 160,
+        "P08": 160,
+        "P09": 160,
+        "T01": 180,
+        "T02": 180,
+        "T03": 180,
+        "T04": 180,
+        "T05": 180,
+        "T06": 180,
+        "T07": 180,
+        "Q01": 150,
+        "Q02": 150
+      },
+      "algorithm_fidelity": "adapted_composition",
+      "paper_reproduction": false,
+      "target_model_queried": false,
+      "jood": {
+        "operation": "mixup",
+        "source_weight": 0.7,
+        "harmless_dir": "data/AdvBenchM/images/harmless",
+        "paths": [
+          "runs/five_methods_3000_jood_image_mix_20261103/assets/jood/airpodmax.png",
+          "runs/five_methods_3000_jood_image_mix_20261103/assets/jood/apple.png",
+          "runs/five_methods_3000_jood_image_mix_20261103/assets/jood/iphone.png",
+          "runs/five_methods_3000_jood_image_mix_20261103/assets/jood/soccerball.png",
+          "runs/five_methods_3000_jood_image_mix_20261103/assets/jood/watch.png"
+        ],
+        "hashes": {
+          "airpodmax.png": "cbe5655b9864ccd8b8c32d009c8b4577c502b5b10fb9057c4dc69f0c5db3a3ef",
+          "apple.png": "95290068d08e30b79c5c45cdd99cf13e4d213bbf2bcb0ea360805380adc70aff",
+          "iphone.png": "7c11f2da3d8b92cd94dfb7077a0e545754c71a9b59c96b86c4582c83af4bccbf",
+          "soccerball.png": "e37710fae9e0368a8d0e25180b2eebe7ea5fc1eb27f11ec03741b30c1d8110bb",
+          "watch.png": "645a3d519e66684dca9a48086c6d2a4fee587c81e9bb824de9f06c0123a514a4"
+        },
+        "preprocessing": "letterbox_harmless_to_native_source_canvas",
+        "algorithm_fidelity": "adapted_native_resolution_mixup"
+      },
+      "reused_rendered_bases": {
+        "source_run": "runs/five_methods_3000_20261025",
+        "identity": "4d4e27aedffbbb04fe61b8a1249a37d00f12e9a53566ab18da77a47a6486b448",
+        "manifest_sha256": "efafba3288e16392dd4439a920155327c04d7f7eaf75f2311a963051ae9c34f6",
+        "parents_sha256": "11e5ef8cd57688a0f4c793d84ab6252a42eef4068ee587e61ce87059ef257659",
+        "scope": "verified_pre_JOOD_rendered_images_and_source_parents"
+      },
+      "test_cases_sha256": "a55731e42ae930904eb903b369cbf2ebb280da9aa31020ae4a6d9c9cc77f56e4"
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/run_identity.json",
+      "sha256": "8d24ece30520c3b4132b6545a25a6389c4b80502f2cce31f0165de6180deaed1"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/full/manifest.json",
+      "sha256": "83cf58afa57a76879a51291b323989eaf8c379228bde9d6cf4b03f5caa4e0bd1"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/full/qc.json",
+      "sha256": "4ba3d25218c82a3fe171918106a17d7a34f2c0f6a92df6c564d68c50ea3364de"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/regeneration_audit.json",
+      "sha256": "529c9460f3b5e4d6b496fd04608c440b58602681ea584e1869ffdb240c66355b"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/compositions/five_methods_3000.yaml",
+      "sha256": "4f6acbe35becbb33f8a8c246df1b75e9e9f3f59c71bac289525d9b02e49641e2"
+    }
+  ]
+}

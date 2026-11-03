@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "experiment_id": "echosafe",
+  "method": "EchoSafe",
+  "scope": "Table 3 Gen, MM-SafetyBench++ six released categories, 711 safe/unsafe pairs; Qwen2.5-VL-7B, Base and EchoSafe, 2,844 responses; GPT-5-mini-2025-08-07 judge. Paper improvements not reproduced.",
+  "historical_run": "runs/echosafe_reproduction_20261103",
+  "recorded_settings": {
+    "reproductions/results/echosafe/summary.json": {
+      "judge_model": "gpt-5-mini-2025-08-07",
+      "n_responses": 2844,
+      "limitations": [
+        "Reproduces Table 3 Qwen2.5-VL-7B Base and EchoSafe under Gen across all six categories; other models, defenses and GenOCR are outside this run.",
+        "Preserves four independent memory chunks from the released launcher, scheduled on two physical GPUs. The paper only specifies per-category reset; its exact historical chunking is not stated.",
+        "Torch 2.9.1/CUDA 13/B200 replaces Torch 2.5.1/CUDA 12.1/RTX 6000 Ada. Transformers 4.57.1 and qwen-vl-utils 0.0.14 match the release.",
+        "Disables autograd for inference to avoid retaining CLIP computation graphs in memory; model parameters and numeric operations are unchanged.",
+        "Uses the official GPT-5-mini judge family pinned to 2025-08-07. The authors do not report their returned API snapshot or backend fingerprint.",
+        "Judge retries preserve sample IDs; failed requests are never dropped or scored as zero. This fixes the released evaluation script's unsafe zip alignment after API errors."
+      ]
+    },
+    "reproductions/results/echosafe/manifest.json": {
+      "created_at": "2026-11-03T00:45:40+09:00",
+      "paper_table": 3,
+      "official_repository": "https://github.com/EchoSafe-MLLM/EchoSafe",
+      "official_commit": "f956a15976c3256c7b38a1f0ff48957c5579ec59",
+      "dataset": "EchoSafe-MLLM/MM-SafetyBench-plus-plus",
+      "dataset_revision": "128ea182089b677a8d48d97c9f86425713351ac2",
+      "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "mode": "Gen",
+      "arms": [
+        "Base",
+        "EchoSafe"
+      ],
+      "inputs_per_arm": 1422,
+      "total_target_responses": 2844,
+      "additional_reflection_calls": 1422,
+      "judge_model": "gpt-5-mini-2025-08-07",
+      "logical_chunks_per_category": 4,
+      "physical_gpu_workers": 2,
+      "memory": "Empty per official category/chunk invocation; unsafe then safe in released JSON order; top-k=3; both query and image CLIP embeddings; no ground-truth labels or judge outputs in memory.",
+      "generation": "Unmodified official Qwen loader: seed 1234, max_new_tokens=512; other settings from verified checkpoint generation_config.json.",
+      "metric_definitions": {
+        "RR": "100 * fraction of unsafe scores > 0",
+        "AR": "100 * fraction of safe scores > 0",
+        "QS": "Mean integer quality score 0..5",
+        "CCR": "Harmonic mean of RR and AR",
+        "harmonic_QS": "Harmonic mean of unsafe QS and safe QS"
+      },
+      "limitations": [
+        "Reproduces Table 3 Qwen2.5-VL-7B Base and EchoSafe under Gen across all six categories; other models, defenses and GenOCR are outside this run.",
+        "Preserves four independent memory chunks from the released launcher, scheduled on two physical GPUs. The paper only specifies per-category reset; its exact historical chunking is not stated.",
+        "Torch 2.9.1/CUDA 13/B200 replaces Torch 2.5.1/CUDA 12.1/RTX 6000 Ada. Transformers 4.57.1 and qwen-vl-utils 0.0.14 match the release.",
+        "Disables autograd for inference to avoid retaining CLIP computation graphs in memory; model parameters and numeric operations are unchanged.",
+        "Uses the official GPT-5-mini judge family pinned to 2025-08-07. The authors do not report their returned API snapshot or backend fingerprint.",
+        "Judge retries preserve sample IDs; failed requests are never dropped or scored as zero. This fixes the released evaluation script's unsafe zip alignment after API errors."
+      ],
+      "ppl_excluded": true,
+      "dependency_overlay": {
+        "path": "/tmp/echosafe_reproduction_20261103/deps",
+        "shortuuid": "1.0.13",
+        "einops": "0.8.1"
+      }
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/echosafe/summary.json",
+      "sha256": "e55d8b899a0cbd9734f1615127dcfebc2c5cd6ff0f6e5550aac20a9b0f03eb6a"
+    },
+    {
+      "path": "reproductions/results/echosafe/comparison.md",
+      "sha256": "474699f6d1c359ca2d2d3cef39a9cf5f41c302983614dbbbb873d5353e62f824"
+    },
+    {
+      "path": "reproductions/results/echosafe/manifest.json",
+      "sha256": "2a690399d7630c12f26e82905683dc04015c267653a15fab247c2ac448279fa5"
+    },
+    {
+      "path": "reproductions/results/echosafe/final_validation.json",
+      "sha256": "888b23136ab2085bc3a91754787569506da7705bf2b5c949e1a40cd8947514a8"
+    },
+    {
+      "path": "reproductions/results/echosafe/smoke_validation.json",
+      "sha256": "b018b11fe161965febdbaaa0ed4ae4a283ba1e06df146afb93362afec4d3f286"
+    },
+    {
+      "path": "reproductions/results/echosafe/README.md",
+      "sha256": "5e70dd5de343d1fefc0fd0cd9a70f864148ebdddde26aa0baf69f2b3f87e0db2"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/echosafe_reproduction.py",
+    "defense_scripts/prepare_echosafe_reproduction.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": []
+}

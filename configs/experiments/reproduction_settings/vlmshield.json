@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "experiment_id": "vlmshield",
+  "method": "VLMShield",
+  "scope": "Released classifier: AdvBench-M 242, VLSafe 1110, MM-Vet 218. Detector metrics only, no target generation.",
+  "historical_run": "runs/vlmshield_official_repro",
+  "recorded_settings": {
+    "reproductions/results/vlmshield/summary.json": {
+      "provenance": {
+        "official_repo": "https://github.com/pgqihere/VLMShield",
+        "official_commit": "344ca14778383aef57315229118f7669454fb4bb",
+        "paper": "arXiv:2604.06502 (VLMShield: Efficient and Robust Defense of Vision-Language Models against Malicious Prompts)",
+        "clip_model": "openai/clip-vit-large-patch14",
+        "clip_snapshot": "32bd64288804d66eefd0ccbe215aa642df71cc41",
+        "classifier_sha256": "b36702877791f347f0b846d93b9b9162c86a8895efe962b6052d322ed0c53c34",
+        "advbench_m_images": {
+          "repo": "https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model",
+          "commit": "fd98910ae4075fe587a1944095c00660aa24cc54",
+          "path": "dataset/advimage/{0..7}/{1..20}.jpg (linked as datasets/Jailbreak_advbench_m/advimage)"
+        },
+        "datasets_sha256": {
+          "MM-Vet": "ae66713f6c2d5f909d01c11bbf01a0262c4435722b5c03ee45c5166f46752b23",
+          "VLSafe": "beae24905a488f379b8e4e4bf7b2315d63e7c8a7fc966f547b545f79e020ecc6",
+          "Advbench_M": "0e6478c2fa28a076cc4fade16d9c16df18d59c42e4c991eb4e0cc72fc67c4c41"
+        }
+      }
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/vlmshield/summary.json",
+      "sha256": "5e1d0084b11d0cda4bb9ad6c65ef7824621fd151deb4b2306f0df024f66cb742"
+    },
+    {
+      "path": "reproductions/results/vlmshield/summary.md",
+      "sha256": "5963ac824bd7031d2d00290a3cd492f9c88644f325eee9b03bab41f56d5ec641"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/vlmshield_official_repro.py",
+    "local_workspace:defense_scripts/vlmshield_official_repro.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/defense_configs/VLMShield.yaml",
+      "sha256": "0b31215c0c1c01fd90e753061184d637978185e9bb7372c95fd9698450de140f"
+    }
+  ]
+}

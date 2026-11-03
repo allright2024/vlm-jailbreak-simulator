@@ -99,7 +99,7 @@ class JailBoundAttack(Attack):
             raise ValueError(
                 "MM-SafetyBench Changed Question is a rephrased harmful request, not an annotated safe input. "
                 "It cannot be assigned probe label 0. Supply verified safe/unsafe fields from a labeled corpus "
-                "or use attack_scripts/jailbound_table3_pilot.py for the response-labeled Qwen paper pilot."
+                "or provide a frozen boundary artifact with recorded label provenance."
             )
         if not 0.0 < self.p0 < 1.0:
             raise ValueError("JailBound p0 must be in (0, 1)")

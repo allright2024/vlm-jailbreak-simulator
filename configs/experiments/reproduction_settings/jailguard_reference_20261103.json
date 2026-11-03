@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "experiment_id": "jailguard_reference_20261103",
+  "method": "JailGuard",
+  "scope": "Official main_img.py serial inference, vendored MiniGPT-4 Vicuna-13B int8, CPU FP32 vision, PL eight variants; smoke passed and 1,000-item evaluation running at snapshot. No final metrics claimed. Runtime copies are reconstructed from the official files using archived diffs.",
+  "historical_run": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl",
+  "recorded_settings": {
+    "reproductions/results/jailguard_reference_20261103/manifest.json": {
+      "created_utc": "2026-11-03T04:49:19.738373+00:00",
+      "jailguard_commit": "419e1d3d08f4d02998a11a687f925518d2d5dd0c",
+      "minigpt_dependency_commit": "5fc9883cfa9b4183cf05c6eceef49e449e45e9c9",
+      "dataset_key_sha256": "2845f2f13c438821bec3a39a0d702e42912c60378bb3b2dc79ef9ad754220ed9",
+      "target": "MiniGPT-4 Vicuna-13B v0",
+      "protocol": {
+        "mutator": "PL",
+        "variants": 8,
+        "threshold": 0.025,
+        "top_string": 100,
+        "serial": true,
+        "low_resource": true,
+        "seed_base": 2026
+      },
+      "smoke_serials": [
+        0,
+        100,
+        200,
+        400
+      ],
+      "allowed_runtime_adaptations": [
+        "Replace hardcoded GPU index only in executable main copy; original repository tracked files unchanged.",
+        "Original initialize_model receives isolated CLI args and is cached once per worker.",
+        "Cache spaCy model once per worker; do not change embeddings or scoring.",
+        "Local weight paths in a copy of official YAML.",
+        "Record deterministic per-item seeds, raw images/responses, metadata, and metrics without altering results.",
+        "Remove unused Gradio UI import from a runtime copy of minigpt_utils.py; inference functions unchanged.",
+        "Close matplotlib figures after each item, equivalent to original single-item process exit."
+      ],
+      "remaining_deviations": [
+        "B200-compatible Torch 2.9.1/torchvision 0.24.1/bitsandbytes 0.50.2 rather than historical libraries.",
+        "Python 3.11; item seeds fixed; original CLI did not set seeds.",
+        "Model cached once per worker rather than reloaded for each independent CLI invocation."
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/manifest.json",
+      "sha256": "354f69e68a400c5155edc8dd54c25bc74fcbef73a866e4290bdcad8c78bc14e7"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/smoke_validation.json",
+      "sha256": "fce230bfeb966f822388af264d1ff58c6f88a33f0b22fd63de49668bbbe39149"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/smoke.runtime.json",
+      "sha256": "8f2c95eee44905db4e8dd732e45e135d7c735c9dd8db54b4c4949139e5e75c27"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/status.json",
+      "sha256": "3c0aa58f85bc1e52ae818bec1cebda3539b8316bdd4ec3abd79bdaa44ac88040"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/README.md",
+      "sha256": "3aef3d74782f94e1106ce4d26e3fc5fa40fa10ea1383bb349fa8f484f181a997"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/jailguard_official_repro.py",
+    "defense_scripts/jailguard_official_repro_eval.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/supervise.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/worker.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/defense_configs/JailGuard.yaml",
+      "sha256": "1c9ef1d4e990bb1ec636ffff34dd8012403b4aae29bef8316064cbee02faf372"
+    }
+  ],
+  "runtime_configuration": {
+    "path": "configs/experiments/reproduction_settings/jailguard_reference_minigpt4.yaml",
+    "sha256": "82d5cccc8a9532e8992223b0c3748f7b21ce1e4992d8e4a58b5b1199f3cbf817"
+  }
+}

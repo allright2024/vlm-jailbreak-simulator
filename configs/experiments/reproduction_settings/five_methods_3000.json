@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment_id": "five_methods_3000",
+  "method": "Five-method compositions",
+  "scope": "SafeBench 180 source questions, 18 recipes of FigStep/MML/JOOD/CS-DJ/JPS, 3,000 inputs. Adapted composition; no target responses or ASR. JPS image/steering reused, not jointly reoptimized. Historical brightness/contrast JOOD operations; retained without regeneration.",
+  "historical_run": "runs/five_methods_3000_20261025",
+  "recorded_settings": {
+    "reproductions/results/five_methods_3000/full/manifest.json": {
+      "status": "complete",
+      "phase": "full",
+      "identity": "4d4e27aedffbbb04fe61b8a1249a37d00f12e9a53566ab18da77a47a6486b448",
+      "n_cases": 3000,
+      "counts": {
+        "P01": 160,
+        "P02": 160,
+        "P03": 160,
+        "P04": 160,
+        "P05": 160,
+        "P06": 160,
+        "P07": 160,
+        "P08": 160,
+        "P09": 160,
+        "T01": 180,
+        "T02": 180,
+        "T03": 180,
+        "T04": 180,
+        "T05": 180,
+        "T06": 180,
+        "T07": 180,
+        "Q01": 150,
+        "Q02": 150
+      },
+      "algorithm_fidelity": "adapted_composition",
+      "paper_reproduction": false,
+      "target_model_queried": false,
+      "test_cases_sha256": "88f3eff4983932c015350476829777dcb4890a8b92c844363dfd934d01295dc1"
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/five_methods_3000/run_identity.json",
+      "sha256": "19a2e8af23cf519997de7160ca7f90cdf4637bf2a186ad55187e31abbb62e89a"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000/full/manifest.json",
+      "sha256": "efafba3288e16392dd4439a920155327c04d7f7eaf75f2311a963051ae9c34f6"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000/full/qc.json",
+      "sha256": "43c7e6632322d11387eb7244d54b83d29f4cf1eae4dd576aac2d98c601e6a691"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/compositions/five_methods_3000.yaml",
+      "sha256": "4f6acbe35becbb33f8a8c246df1b75e9e9f3f59c71bac289525d9b02e49641e2"
+    }
+  ]
+}

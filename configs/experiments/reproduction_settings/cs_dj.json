@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "experiment_id": "cs_dj",
+  "method": "CS-DJ",
+  "scope": "Table 6 native OneVision Chat 7B, 750 cases, Beaver-Dam; 3 construction failures retained.",
+  "historical_run": "runs/cs_dj_reference_onevision_20261022",
+  "recorded_settings": {
+    "reproductions/results/cs_dj/summary.json": {
+      "method": "CS-DJ",
+      "target": "lmms-lab/llava-onevision-qwen2-7b-ov-chat",
+      "paper_table": 6,
+      "judge": "Beaver-Dam-7B",
+      "construction_failed": 3,
+      "actual_judge_calls": 747,
+      "construction_failure_policy": "Unsuccessful construction; retained in denominator without a fabricated target response or judge prediction. This accounting rule is an explicit reproduction choice.",
+      "degenerate_The_or_empty": 0,
+      "deviations": [
+        "Initialize undefined tip counter and enforce paper section 8.1 maximum five decomposition attempts. Construction failures remain in the 750-case denominator without target/judge calls; failure accounting is an explicit reproduction choice, not specified by the paper.",
+        "Fixed per-case seed 2025-derived for resumability; paper seed unpublished",
+        "Skip API calls and run native OneVision in a separate phase",
+        "Checkpoint and skip completed inputs without resampling",
+        "Native runtime uses isolated transformers 4.45.2, current GPU-compatible torch and SDPA; paper environment not established",
+        "Select PyTorch SDPA MATH backend: default backend returned The on benign red-circle control; see native_benign_diagnostics.json. Exact paper backend/environment is unpublished."
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/cs_dj/summary.json",
+      "sha256": "8f021212896d5ec1261adfa0f4c12da90bdbef724d4947aa8ba31a09de3bca62"
+    },
+    {
+      "path": "reproductions/results/cs_dj/comparison.csv",
+      "sha256": "ec10d7281b8169518f08202e3cbecc5277ae36c67eac690ba331665c3043684a"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "attack_scripts/cs_dj_financial_pilot_stages.py",
+    "attack_scripts/cs_dj_onevision_batch_check.py",
+    "attack_scripts/cs_dj_onevision_diagnostics.py",
+    "attack_scripts/cs_dj_onevision_reproduction.py",
+    "attack_scripts/cs_dj_reproduction.py",
+    "attack_scripts/prepare_cs_dj_financial_pilot.py",
+    "attack_scripts/write_cs_dj_pilot_status.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/diagnose_native_benign.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/evaluate_cs_dj.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/native_onevision.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/orchestrate.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/prepare_hades_data.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/ranged_download.py",
+    "reproductions/run_sources/runs/cs_dj_reference_onevision_20261022/run_support.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/attacks/CS-DJ.yaml",
+      "sha256": "7c60961bb9f31de55b14982e7792c5cdf1b631f0c33b70087a213cde360b4781"
+    },
+    {
+      "path": "configs/attacks/CS-DJ_financial_pilot.yaml",
+      "sha256": "acff7c12e8c74f88d12669fc87a24fe5e90af9d2533dc18475726e16885e3ed0"
+    }
+  ]
+}

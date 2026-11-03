@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "experiment_id": "adashield_qr",
+  "method": "AdaShield",
+  "scope": "LLaVA-1.5-13B; 1443 held-out QR examples; vanilla/static/adaptive.",
+  "historical_run": "runs/adashield_official_repro/qr",
+  "recorded_settings": {
+    "reproductions/results/adashield_qr/summary.json": {
+      "attack": "qr",
+      "judge_model": "gpt-4o"
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/adashield_qr/summary.json",
+      "sha256": "d3d9ab8364d9a08127950fc7786f4442c1006288642a8c913d95519a101503c5"
+    },
+    {
+      "path": "reproductions/results/adashield_qr/summary.md",
+      "sha256": "6fa4b6968cf642be07ca2d27cb400c516de140bcbae6d3a215c1153c0b6f71f1"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/adashield_official_repro.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/defense_configs/AdaShield-A.example.yaml",
+      "sha256": "72e7d1be1fa0cbbf0e869026ecf3677fdc13a021a7f5c83d86dff01990aef3c7"
+    },
+    {
+      "path": "configs/defense_configs/AdaShield.yaml",
+      "sha256": "07b90a9d50714acb7a70d497eb7a60a533b5b7c19982c7f06b43bad3bf9be60a"
+    }
+  ]
+}

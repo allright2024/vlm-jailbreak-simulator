@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "experiment_id": "jailguard",
+  "method": "JailGuard",
+  "scope": "Table 4 PL detector on all 1000 released images, MiniGPT-4; fp16/batched runtime differs from upstream.",
+  "historical_run": "runs/jailguard_official_repro",
+  "recorded_settings": {},
+  "evidence": [
+    {
+      "path": "reproductions/results/jailguard/summary_pl.json",
+      "sha256": "56f420d002c982f65a89c64278551973acc042f5ac408c5db273128db2eb477f"
+    },
+    {
+      "path": "reproductions/results/jailguard/summary_pl.md",
+      "sha256": "57e17b1ce6aaffd8428ce3e1224958ebaddd4c5544b902bce91a4d53aa52893f"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/jailguard_official_repro.py",
+    "defense_scripts/jailguard_official_repro_eval.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/supervise.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/worker.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/defense_configs/JailGuard.yaml",
+      "sha256": "1c9ef1d4e990bb1ec636ffff34dd8012403b4aae29bef8316064cbee02faf372"
+    }
+  ]
+}

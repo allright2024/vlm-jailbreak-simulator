@@ -63,17 +63,13 @@ The model preprocessing in `multimodalmodels/qwen2_adapter.py` originated in
 is retained for JPS and CE surrogate clients. Attack-specific optimization,
 random patch placement and semantic-loss code have been removed.
 
-Historical reproduction metadata and project-written run wrappers are indexed
-under `reproductions/`. References to external source files, checkpoints, fonts
-and data in those records do not redistribute those assets or change their terms.
-
-The EchoSafe reproduction wrappers in `defense_scripts/` load a separately
-obtained [EchoSafe-MLLM/EchoSafe](https://github.com/EchoSafe-MLLM/EchoSafe)
-checkout at `f956a15976c3256c7b38a1f0ff48957c5579ec59`. Its source, released
-MM-SafetyBench++ images and model weights are not bundled with these wrappers;
-consult their upstream terms separately. The archived JailGuard reference
-runner includes project-written orchestration and runtime diffs; obtain the
-original source at the revision recorded in its manifest before applying them.
+Historical reproduction metadata is indexed under `reproductions/`, and
+data-only experiment settings are under `configs/experiments/reproduction_settings/`.
+Dedicated reproduction wrappers and archived source copies have been removed.
+References to external sources, checkpoints, fonts and data in those records
+do not redistribute the assets or change their original terms. EchoSafe's
+historical settings refer to [EchoSafe-MLLM/EchoSafe](https://github.com/EchoSafe-MLLM/EchoSafe)
+at `f956a15976c3256c7b38a1f0ff48957c5579ec59`; obtain its source and assets separately.
 
 The AdaShield defense adapter in `defenses/adashield.py` follows
 [SaFo-Lab/AdaShield](https://github.com/SaFo-Lab/AdaShield) at

@@ -108,8 +108,8 @@ source-group split isolation.
 
 ## Validation (`core/validation/`)
 
-Use `python -m core.validation.data`, `composed_dataset`,
-`official_reproduction`, or `artifact_lineage` (with the same package prefix).
+Use `python -m core.validation.data`, `composed_dataset`, or
+`artifact_lineage` (with the same package prefix).
 The CLI arguments are unchanged. `data --data-root PATH` also works when core
 was already imported; loader directories and logical image paths both follow
 the explicitly selected root. Package imports remain lazy and model-free.

@@ -72,31 +72,10 @@ weights are in `../models/Vision-CAIR-vicuna`, and the MiniGPT-4 projection
 checkpoint is `checkpoints/pretrained_minigpt4.pth`. The original model also uses
 the cached EVA vision and BLIP2 Q-Former weights.
 
-```bash
-# Inspect the protocol, prepare public data, and check prerequisites.
-python attack_scripts/visualadv_reproduction.py --stage plan
-python attack_scripts/visualadv_reproduction.py --stage fetch-data
-python attack_scripts/visualadv_reproduction.py --stage audit
-
-# Corrected implementation: optimize once, generate, score, then report.
-python attack_scripts/visualadv_reproduction.py --stage all
-
-# Evaluation sanity check with the authors' released image, avoiding PGD.
-python attack_scripts/visualadv_reproduction.py --stage generate \
-  --image-source released --out runs/visualadv_released
-python attack_scripts/visualadv_reproduction.py --stage score \
-  --image-source released --out runs/visualadv_released
-python attack_scripts/visualadv_reproduction.py --stage report \
-  --image-source released --out runs/visualadv_released
-```
-
-Each stage can be rerun after interruption. Completed images are reused only
-after checking configuration, source code, input hashes and checkpoint hashes.
-Fixed generation chunks have recorded seeds; an interrupted partial chunk is
-regenerated and checked against its existing rows. Outputs are locked against
-concurrent writers. Use a new output directory after changing parameters/code.
-An interrupted PGD run restarts optimization; `latest.png` is diagnostic and is
-never accepted as a completed 5,000-step image.
-
-Outputs: `protocol.json`, `audit.json`, image manifests, `loss.jsonl`, per-cell
-`responses.jsonl`/`detoxify.jsonl`, **`table2.csv`** and **`report.md`**.
+The dedicated reproduction worker is excluded from `dev_norep`.
+Historical settings remain in `configs/experiments/VisualAdv_paper.yaml` and
+`configs/experiments/reproduction_settings/visualadv_released.json` /
+`visualadv_trained.json`. Original results are preserved under
+`reproductions/results/visualadv_released/` and `visualadv_trained/`.
+The simulator PGD and generic wrappers remain available. Their common
+surrogate runtime differs from the historical MiniGPT-4 worker.

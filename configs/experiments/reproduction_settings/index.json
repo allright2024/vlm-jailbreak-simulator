@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "experiments": [
+    {
+      "experiment_id": "figstep",
+      "method": "FigStep",
+      "settings": "configs/experiments/reproduction_settings/figstep.json"
+    },
+    {
+      "experiment_id": "figstep_harmbench",
+      "method": "FigStep",
+      "settings": "configs/experiments/reproduction_settings/figstep_harmbench.json"
+    },
+    {
+      "experiment_id": "mml",
+      "method": "MML-M",
+      "settings": "configs/experiments/reproduction_settings/mml.json"
+    },
+    {
+      "experiment_id": "jood",
+      "method": "JOOD",
+      "settings": "configs/experiments/reproduction_settings/jood.json"
+    },
+    {
+      "experiment_id": "cs_dj",
+      "method": "CS-DJ",
+      "settings": "configs/experiments/reproduction_settings/cs_dj.json"
+    },
+    {
+      "experiment_id": "cs_dj_gpt4o",
+      "method": "CS-DJ",
+      "settings": "configs/experiments/reproduction_settings/cs_dj_gpt4o.json"
+    },
+    {
+      "experiment_id": "hades",
+      "method": "HADES",
+      "settings": "configs/experiments/reproduction_settings/hades.json"
+    },
+    {
+      "experiment_id": "hades_issue14",
+      "method": "HADES",
+      "settings": "configs/experiments/reproduction_settings/hades_issue14.json"
+    },
+    {
+      "experiment_id": "jps_released",
+      "method": "JPS",
+      "settings": "configs/experiments/reproduction_settings/jps_released.json"
+    },
+    {
+      "experiment_id": "jps_trained",
+      "method": "JPS",
+      "settings": "configs/experiments/reproduction_settings/jps_trained.json"
+    },
+    {
+      "experiment_id": "ultrabreak_released",
+      "method": "UltraBreak",
+      "settings": "configs/experiments/reproduction_settings/ultrabreak_released.json"
+    },
+    {
+      "experiment_id": "ultrabreak_trained",
+      "method": "UltraBreak",
+      "settings": "configs/experiments/reproduction_settings/ultrabreak_trained.json"
+    },
+    {
+      "experiment_id": "jip_table6",
+      "method": "JailbreakInPieces",
+      "settings": "configs/experiments/reproduction_settings/jip_table6.json"
+    },
+    {
+      "experiment_id": "jip_table1",
+      "method": "JailbreakInPieces",
+      "settings": "configs/experiments/reproduction_settings/jip_table1.json"
+    },
+    {
+      "experiment_id": "visualadv_released",
+      "method": "VisualAdv",
+      "settings": "configs/experiments/reproduction_settings/visualadv_released.json"
+    },
+    {
+      "experiment_id": "visualadv_trained",
+      "method": "VisualAdv",
+      "settings": "configs/experiments/reproduction_settings/visualadv_trained.json"
+    },
+    {
+      "experiment_id": "jailbound",
+      "method": "JailBound",
+      "settings": "configs/experiments/reproduction_settings/jailbound.json"
+    },
+    {
+      "experiment_id": "adashield_figstep",
+      "method": "AdaShield",
+      "settings": "configs/experiments/reproduction_settings/adashield_figstep.json"
+    },
+    {
+      "experiment_id": "adashield_qr",
+      "method": "AdaShield",
+      "settings": "configs/experiments/reproduction_settings/adashield_qr.json"
+    },
+    {
+      "experiment_id": "asd",
+      "method": "AsD",
+      "settings": "configs/experiments/reproduction_settings/asd.json"
+    },
+    {
+      "experiment_id": "cider",
+      "method": "CIDER",
+      "settings": "configs/experiments/reproduction_settings/cider.json"
+    },
+    {
+      "experiment_id": "ecso",
+      "method": "ECSO",
+      "settings": "configs/experiments/reproduction_settings/ecso.json"
+    },
+    {
+      "experiment_id": "jailguard",
+      "method": "JailGuard",
+      "settings": "configs/experiments/reproduction_settings/jailguard.json"
+    },
+    {
+      "experiment_id": "vlmshield",
+      "method": "VLMShield",
+      "settings": "configs/experiments/reproduction_settings/vlmshield.json"
+    },
+    {
+      "experiment_id": "jood_minigpt4",
+      "method": "JOOD",
+      "settings": "configs/experiments/reproduction_settings/jood_minigpt4.json"
+    },
+    {
+      "experiment_id": "mml_variants",
+      "method": "MML",
+      "settings": "configs/experiments/reproduction_settings/mml_variants.json"
+    },
+    {
+      "experiment_id": "jailguard_8bit",
+      "method": "JailGuard",
+      "settings": "configs/experiments/reproduction_settings/jailguard_8bit.json"
+    },
+    {
+      "experiment_id": "asd_released_patch_check",
+      "method": "AsD",
+      "settings": "configs/experiments/reproduction_settings/asd_released_patch_check.json"
+    },
+    {
+      "experiment_id": "echosafe",
+      "method": "EchoSafe",
+      "settings": "configs/experiments/reproduction_settings/echosafe.json"
+    },
+    {
+      "experiment_id": "five_methods_3000",
+      "method": "Five-method compositions",
+      "settings": "configs/experiments/reproduction_settings/five_methods_3000.json"
+    },
+    {
+      "experiment_id": "five_methods_3000_mixup",
+      "method": "Five-method compositions",
+      "settings": "configs/experiments/reproduction_settings/five_methods_3000_mixup.json"
+    },
+    {
+      "experiment_id": "jailguard_reference_20261103",
+      "method": "JailGuard",
+      "settings": "configs/experiments/reproduction_settings/jailguard_reference_20261103.json"
+    },
+    {
+      "experiment_id": "mmsafetybench_refusal_audit",
+      "method": "JailBound prerequisite audit",
+      "settings": "configs/experiments/reproduction_settings/mmsafetybench_refusal_audit.json"
+    }
+  ],
+  "existing_configuration_hashes": {
+    "configs/attacks/CS-DJ.yaml": "7c60961bb9f31de55b14982e7792c5cdf1b631f0c33b70087a213cde360b4781",
+    "configs/attacks/CS-DJ_financial_pilot.yaml": "acff7c12e8c74f88d12669fc87a24fe5e90af9d2533dc18475726e16885e3ed0",
+    "configs/attacks/DeltaJP.yaml": "2aed2e7b746bf001930e6377b5087fc39c6f252337eea4a56c9738a52b05f4d8",
+    "configs/attacks/DeltaJP_official.yaml": "32dc7305d8e23b6f359fe73c50aa20894406b090367e05d5e1641a133094d6a4",
+    "configs/attacks/DeltaJP_transfer.yaml": "08a76aae8f8ad3a1b7b32ad36cfa0c9d64377c45c501c1ce369542118361c79b",
+    "configs/attacks/FigStep.yaml": "f97de53ba8901e775c9c7978f6d765bff75cc858fed8e0aed6969d2a81ecf40b",
+    "configs/attacks/FigStep_official.yaml": "01e41f3bd0bc2a58d27ffb5bffc8dc777413eed72a2dd07994153d3099ba7fd7",
+    "configs/attacks/HADES.yaml": "6d314b2a412628a11189c537d419dc5bc571a8481ee6b509c16a80ef288a6aba",
+    "configs/attacks/HADES_official.yaml": "d4a3ff458b783f92a44c2d5340d231952dd455d6f8f3d077e40139bc3113c5b3",
+    "configs/attacks/HADES_white_box_mid.yaml": "44b272d59e55806daea7f47dce2cb8d66dbc96d63925c1d0f39b4240e77a71f5",
+    "configs/attacks/JOOD.yaml": "87fa37d93eb1ecf2d4a3c19a2dc57103dccc043f731be843d27e86a8d15a78b3",
+    "configs/attacks/JPS.yaml": "35f336f0aad1af078696f5d8de4faf95dcbda46a94ea04a8865ddb4b01b02f37",
+    "configs/attacks/JailBound.yaml": "2cf7e3a6f305b5705e9c02ef703a57d85884877dab0c0feb0b7bd69d00c9d763",
+    "configs/attacks/MML.yaml": "4e82151f483ee8af03c299ef496ab4fd9353674ec2b903f1ceab0e30f2a03e0e",
+    "configs/attacks/VisualAdv.yaml": "196113f3bf9a62e3389a3fa7dd6fe48dd6c9a20e68e3d2a146663c9b8217a863",
+    "configs/attacks/VisualAdv_constrained32.yaml": "8c85d77c7bfb5819032c3c1367fd5460e0e7b14cbda8706158021d31dc554568",
+    "configs/attacks/VisualAdv_official.yaml": "d96c08700619c963e0aba0618ded0f2fcc13b7fe1ce81ffac35b8c92898c2bc9",
+    "configs/attacks/VisualAdv_transfer.yaml": "20362cd7bb2cb43cd5d9fd6fd58498429ea38b5b3b9f8eee696afd85592f3065",
+    "configs/compositions/five_methods_3000.yaml": "4f6acbe35becbb33f8a8c246df1b75e9e9f3f59c71bac289525d9b02e49641e2",
+    "configs/compositions/jailbreak_dataset_v3.yaml": "b54d1dc7dda8060f5f224d2e1fa79eefc66d06751b0dd1f368422d9ceae246fc",
+    "configs/defense_configs/AdaShield-A.example.yaml": "72e7d1be1fa0cbbf0e869026ecf3677fdc13a021a7f5c83d86dff01990aef3c7",
+    "configs/defense_configs/AdaShield.yaml": "07b90a9d50714acb7a70d497eb7a60a533b5b7c19982c7f06b43bad3bf9be60a",
+    "configs/defense_configs/AsD.yaml": "8fa0e15239bf90843aa9965dd931442ce5b0b414a438b7fc7b1956e97ee95117",
+    "configs/defense_configs/CIDER.yaml": "5f5af5f29394a4d06649ca705dafa20195b8b7494f938544d3b5251077355afe",
+    "configs/defense_configs/HiddenDetect.yaml": "38306a19ed899260b4c8095de6ba95bd85ce916f9b93002fc3596dda728b8666",
+    "configs/defense_configs/JailGuard.yaml": "1c9ef1d4e990bb1ec636ffff34dd8012403b4aae29bef8316064cbee02faf372",
+    "configs/defense_configs/VLMShield.yaml": "0b31215c0c1c01fd90e753061184d637978185e9bb7372c95fd9698450de140f",
+    "configs/experiments/VisualAdv_paper.yaml": "2cb643c483f2d83c6d11de2f502c1755c1dcde42ee99066583fb654c9c763649",
+    "configs/experiments/VisualAdv_reference.json": "592267db49eafbad977e13d19ebc4753f357a76961a4fb0973092b3d03584312"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "experiment_id": "jailguard_8bit",
+  "method": "JailGuard",
+  "scope": "Official image subset: 400 attacks and 600 benign. MiniGPT-4 Vicuna-13B, int8 LLM, eight batched variants, GPU vision, PL threshold .025. Detection accuracy/precision/recall, not response ASR.",
+  "historical_run": "runs/jailguard_8bit_20261102",
+  "recorded_settings": {
+    "reproductions/results/jailguard_8bit/manifest.json": {
+      "created_utc": "2026-11-02T05:34:44.115095+00:00",
+      "baseline_sha256": "a32f22ba83c5e9a280d25971a1b634556535eee594b0e4c77532abb1a1f67b03",
+      "planned_change": "Vicuna LLM 8-bit; keep batch eight and vision GPU path",
+      "local_model": "/home/jovyan/jailbreak/models/Vision-CAIR-vicuna"
+    }
+  },
+  "evidence": [
+    {
+      "path": "reproductions/results/jailguard_8bit/summary_pl.json",
+      "sha256": "119ac0eade106ff7ecee430af12a2a223f85f452dd2a6076a0e5757141533adb"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/summary_pl.md",
+      "sha256": "a5a64a6f79480f04274d194135327ae819b5c32e951eeb12a2f342b86f2f5d37"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/comparison.json",
+      "sha256": "44057c2eba45750e076deca233f442f20559e48f5d70b99b9f5c3c25cf32aec4"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/comparison.md",
+      "sha256": "286243c16a353195ef713405a7160a96cf8646341d4b62bd100e93d9aade59c7"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/manifest.json",
+      "sha256": "3acd1ee9dbee827604d2bd1542ea16dd6dc4888c95dcc69dce406c2233eeea9b"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/smoke_validation.json",
+      "sha256": "5d328d202e36ba08c244901afdabfda4473070663dcd226870d5af0ceaa7f26b"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/README.md",
+      "sha256": "be6184bac960743b0bd9360faa891659b0a1f3f8d5e2c3b1d3f77b2c872beb9d"
+    }
+  ],
+  "note": "Historical settings, not an automatically executable simulator config. Use run records before runner defaults; preserve separately recorded target/judge/runtime substitutions.",
+  "runner_default_sources": [
+    "defense_scripts/jailguard_official_repro.py",
+    "defense_scripts/jailguard_official_repro_eval.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/supervise.py",
+    "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/worker.py"
+  ],
+  "defaults_file": "configs/experiments/reproduction_settings/runner_defaults.json",
+  "existing_configuration_files": [
+    {
+      "path": "configs/defense_configs/JailGuard.yaml",
+      "sha256": "1c9ef1d4e990bb1ec636ffff34dd8012403b4aae29bef8316064cbee02faf372"
+    }
+  ]
+}

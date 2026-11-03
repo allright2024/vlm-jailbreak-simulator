@@ -59,8 +59,6 @@ asr_results*.txt
 # Curated aggregate evidence and historical runner sources are intentionally public.
 !/reproductions/results/
 !/reproductions/results/**
-!/reproductions/run_sources/runs/
-!/reproductions/run_sources/runs/**
 
 # Local-only unit/regression tests and repository verification helpers.
 **/tests/
@@ -72,3 +70,7 @@ asr_results*.txt
 /tox.ini
 /reproductions/verify.py
 /reproductions/validation.json
+
+# Dedicated historical reproduction runners are excluded from this branch.
+/reproductions/run_sources/
+/reproductions/*.py

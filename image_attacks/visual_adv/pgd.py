@@ -1,4 +1,4 @@
-"""VisualAdv pixel PGD, shared by the simulator and paper reproduction worker.
+"""VisualAdv pixel PGD, used by the simulator.
 
 The released attackers use ``range(num_iter + 1)``; ``steps`` here is the actual
 number of updates, so callers explicitly choose 5000 (paper) or 5001 (release).

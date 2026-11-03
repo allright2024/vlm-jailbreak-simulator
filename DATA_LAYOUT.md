@@ -100,7 +100,7 @@ samples 10,000 images and rejects font fallback.
 dataset image references. Use `--layout-only` for a fast presence check or
 repeat `--dataset NAME` to validate selected datasets only.
 
-Run `python -m core.validation.official_reproduction` before a four-method official
-matrix. CS-DJ, JOOD, and MML require `OPENAI_API_KEY`; JOOD and JPS also require
-`HF_TOKEN` for the gated Llama Guard checkpoints. The validator checks presence
-only and never prints credential values.
+Historical experiment settings are retained under
+`configs/experiments/reproduction_settings/`. CS-DJ, JOOD and MML require
+API credentials when their selected backend uses remote services; supply
+credentials through environment variables, never configuration snapshots.
