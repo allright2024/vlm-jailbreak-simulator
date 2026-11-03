@@ -1,6 +1,0 @@
-{
-  "torch": "2.9.1+cu130",
-  "device": "NVIDIA B200 MIG 3g.90gb",
-  "cudnn_sdp_enabled": false,
-  "pid": 974884
-}

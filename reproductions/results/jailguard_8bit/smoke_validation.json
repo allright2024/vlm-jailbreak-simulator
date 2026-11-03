@@ -1,6 +1,0 @@
-{
-  "passed": true,
-  "n": 4,
-  "variants": 32,
-  "criteria": "verified int8, exact baseline protocol/input metadata, finite detector scores, nondegenerate benign outputs; no accuracy criterion"
-}

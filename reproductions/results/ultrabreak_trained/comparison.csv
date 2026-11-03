@@ -1,5 +1,0 @@
-dataset,model,protocol,n,successes,asr_percent,paper_asr_percent,gap_to_paper_pp,released_image_asr_percent,gap_to_released_image_pp
-safebench,Qwen/Qwen2-VL-7B-Instruct,official_extraction,315,79,25.07936507936508,81.59,-56.51063492063493,83.4920634920635,-58.41269841269842
-safebench,Qwen/Qwen2-VL-7B-Instruct,assistant_tokens_only,315,73,23.174603174603174,81.59,-58.415396825396826,79.68253968253968,-56.507936507936506
-safebench,Qwen/Qwen2.5-VL-7B-Instruct,official_extraction,315,86,27.3015873015873,60.32,-33.0184126984127,60.63492063492063,-33.33333333333333
-safebench,Qwen/Qwen2.5-VL-7B-Instruct,assistant_tokens_only,315,80,25.396825396825395,60.32,-34.9231746031746,55.87301587301587,-30.476190476190478

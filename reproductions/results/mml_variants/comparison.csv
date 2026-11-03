@@ -1,5 +1,0 @@
-variant,table,paper_asr_pct,reproduced_asr_pct,delta_pp,successes,n,input_provenance
-MML-WR,1,96.0,96.39999999999999,0.40000000000000036,482,500,released_image_and_prompt
-MML-R,1,97.8,98.0,0.20000000000000018,490,500,released_image_and_prompt
-MML-B64,1,97.2,98.2,1.0000000000000009,491,500,released_image_and_prompt
-MML-SC,7,99.4,98.4,-1.0000000000000009,492,500,paper_Figure19_prompt_and_locally_rendered_images

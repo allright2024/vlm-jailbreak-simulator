@@ -1,5 +1,0 @@
-{
-  "runner_sha256": "f582cc413a9cf203b3eee32cf736e3c8628cdc781838197a56a7353a43e08d01",
-  "workers": 8,
-  "concurrency": "Across behaviors only; each up-to-5 query loop stays sequential."
-}

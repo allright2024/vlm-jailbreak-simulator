@@ -63,9 +63,9 @@ The model preprocessing in `multimodalmodels/qwen2_adapter.py` originated in
 is retained for JPS and CE surrogate clients. Attack-specific optimization,
 random patch placement and semantic-loss code have been removed.
 
-Historical reproduction metadata is indexed under `reproductions/`, and
-data-only experiment settings are under `configs/experiments/reproduction_settings/`.
-Dedicated reproduction wrappers and archived source copies have been removed.
+Data-only experiment settings are under `configs/experiments/reproduction_settings/`.
+Dedicated reproduction wrappers, archived source copies and the result archive
+have been removed.
 References to external sources, checkpoints, fonts and data in those records
 do not redistribute the assets or change their original terms. EchoSafe's
 historical settings refer to [EchoSafe-MLLM/EchoSafe](https://github.com/EchoSafe-MLLM/EchoSafe)

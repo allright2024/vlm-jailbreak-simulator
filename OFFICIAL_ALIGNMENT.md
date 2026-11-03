@@ -1,10 +1,11 @@
 # Official implementation alignment
 
-Measured experiments are indexed in [reproductions/README.md](reproductions/README.md).
-That catalog distinguishes released-artifact evaluation, independent optimization,
-automatic proxy evaluation and incomplete reproduction. The implementation labels
-below describe the common adapter; they do not establish numerical paper replication.
-Dedicated runners can use a different target/runtime from the common adapter.
+Historical experiment settings are preserved in
+[the settings directory](configs/experiments/reproduction_settings/README.md).
+Dedicated runners and the result archive have been removed. The implementation
+labels below describe the common adapter; they do not establish numerical paper
+replication. Historical experiments may use a different target/runtime from the
+common adapter.
 
 This repository pins the upstream revision used to review each attack. Every
 stage-1 run writes the source, commit, algorithm fidelity, requested and resolved

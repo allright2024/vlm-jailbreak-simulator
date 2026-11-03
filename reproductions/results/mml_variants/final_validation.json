@@ -1,8 +1,0 @@
-{
-  "all_2000_jobs_complete": true,
-  "exact_model_snapshots_returned": true,
-  "frozen_inputs_verified": true,
-  "no_queries_after_success": true,
-  "no_missing_results_counted_as_failures": true,
-  "finished_at_utc": "2026-11-02T08:31:16.219442+00:00"
-}

@@ -1,4 +1,0 @@
-# Keep checksum-bound historical evidence byte-identical, including CSV CRLF
-# and original whitespace. Continue displaying ordinary textual diffs.
-/reproductions/results/** -text -whitespace
-/reproductions/run_sources/** -text -whitespace

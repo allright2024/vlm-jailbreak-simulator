@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "responses": 2844,
-  "scores": 2844,
-  "all_six_categories_complete": true,
-  "both_safe_and_unsafe_complete": true,
-  "judge_model": "gpt-5-mini-2025-08-07",
-  "ppl_excluded": true
-}

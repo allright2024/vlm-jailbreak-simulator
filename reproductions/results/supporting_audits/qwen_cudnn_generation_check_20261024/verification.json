@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "same_input_token_ids_verified": true,
-  "unique_inputs": 4,
-  "response_pairs": 5,
-  "on_marker_responses": 5,
-  "off_marker_responses": 0,
-  "responses_sha256": "b0cf6436d2963554b6c31c7e988c8f39be47a3f6e263cbc88d02859cddd52e65"
-}

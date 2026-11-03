@@ -1,8 +1,0 @@
-{
-  "passed": true,
-  "cases": 64,
-  "identical_prompt_tokens": true,
-  "identical_processed_image_tensors": true,
-  "all_rendered_patches_match_frozen_positions": true,
-  "identical_response_texts": 60
-}
