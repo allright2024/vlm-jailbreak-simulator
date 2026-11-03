@@ -1,6 +1,6 @@
 """Centralized model loading: every model this repo uses is loaded here.
 
-The eval target, the judge, attack surrogates (UltraBreak, JPS, JailBound,
+The eval target, the judge, attack surrogates (JPS, JailBound,
 VisualAdv, DeltaJP) and defense models (CIDER, JailGuard) all call these
 helpers instead of ``*.from_pretrained`` / ``torch.load`` / ``spacy.load``
 directly, so model ids, pinned revisions, dtype and device placement live in
@@ -9,8 +9,8 @@ one place. ``core/tests/test_model_loading.py`` enforces that no code outside
 
 When ``revision`` is None, the pinned revision from ``registry.py`` is used for
 registered model ids (local paths and unregistered ids load as given).
-Attack-specific machinery (JailBound's layer hooks, UltraBreak's patchify and
-semantic loss) stays in the attacks; only the loading lives here.
+Attack-specific loss functions and JailBound's layer hooks stay in the attacks;
+shared model preprocessing lives in multimodalmodels.qwen2_adapter.
 
 Heavy imports (torch, transformers, spacy) are deferred to call time so that
 importing this module is cheap.
@@ -238,13 +238,7 @@ def load_clip_image_encoder(
     do_normalize: bool = False,
     local_files_only: Optional[bool] = None,
 ):
-    """CLIP model + image processor used by Jailbreak In Pieces.
-
-    The released attack explicitly disables processor normalization before
-    optimizing pixels in ``[0, 1]``. Keeping that switch here makes model
-    construction auditable without moving attack-specific loss code into the
-    loading layer.
-    """
+    """CLIP encoder for image similarity, with explicit normalization control."""
     from transformers import CLIPImageProcessor, CLIPModel
 
     revision = _revision(model_id, revision)

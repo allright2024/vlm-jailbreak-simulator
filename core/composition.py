@@ -37,22 +37,19 @@ FORBIDDEN_COMPONENT_ATTACKS = {"bestofn", "deltajp", "visualadv"}
 KNOWN_COMPONENTS = {
     "cs_dj_split",
     "cs_dj_full",
-    "ultrabreak_patch",
     "figstep_render",
     "mml_layout",
     "jood_aug",
     "hades_patch",
     "delta_jp",
-    "jailbreak_in_pieces_embedding",
     "jps_joint",
     "jailbound_joint",
 }
 COMPONENT_ATTACKS = {
     "cs_dj_split": "CS-DJ", "cs_dj_full": "CS-DJ",
-    "ultrabreak_patch": "UltraBreak", "figstep_render": "FigStep",
+    "figstep_render": "FigStep",
     "mml_layout": "MML", "jood_aug": "JOOD",
     "hades_patch": "HADES", "delta_jp": "DeltaJP",
-    "jailbreak_in_pieces_embedding": "JailbreakInPieces",
     "jps_joint": "JPS", "jailbound_joint": "JailBound",
 }
 

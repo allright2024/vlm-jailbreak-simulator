@@ -278,127 +278,6 @@ class CSDJFullComponent(FullAttackComponent):
         )
 
 
-class UltraBreakPatchComponent(AttackBackedComponent):
-    """Apply a trained UltraBreak patch without replacing the incoming image.
-
-    Training uses the existing optimizer unchanged. Application to a collage,
-    reserved side strip, or disjoint region is an explicitly adapted operation.
-    A run-wide cache shares one lineage-verified optimization across processes.
-    """
-
-    component_name = "ultrabreak_patch"
-    attack_name = "UltraBreak"
-    algorithm_fidelity = "adapted_decomposition"
-
-    def __init__(self, stage_spec, **kwargs):
-        super().__init__(stage_spec, **kwargs)
-        self.placement = str(stage_spec.get("placement", "right_strip"))
-        self.fraction = float(stage_spec.get("patch_fraction", 0.35))
-        self.preserve_top = float(stage_spec.get("preserve_top_fraction", 0.0))
-        self.tile_index = int(stage_spec.get("tile_index", 8))
-        if self.placement not in {"right_strip", "cs_dj_contrast", "bottom_right"}:
-            raise ValueError(f"unsupported UltraBreak patch placement: {self.placement}")
-        if not 0 < self.fraction <= 1 or not 0 <= self.preserve_top < 1:
-            raise ValueError("invalid UltraBreak patch/preserved-region fraction")
-        if not 0 <= self.tile_index < 9:
-            raise ValueError("UltraBreak contrast tile_index must be in [0, 8]")
-
-    @property
-    def effective_config(self):
-        return {**super().effective_config, "patch_application": {
-            "placement": self.placement, "patch_fraction": self.fraction,
-            "preserve_top_fraction": self.preserve_top, "tile_index": self.tile_index,
-        }}
-
-    def prepare(self, out_dir):
-        import fcntl
-
-        CompositionComponent.prepare(self, out_dir)
-        if self.attack.config.get("adv_image"):
-            self.attack.prepare(out_dir)
-            if not self.attack.verify_lineage(resolve_path(self.attack._universal_rel)):
-                raise ValueError("UltraBreak supplied patch has missing or mismatched lineage")
-            return
-        identity = {"config": self.attack.effective_config(),
-                    "implementation": self.attack._implementation_sha256()}
-        key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
-        root = os.environ.get("VLM_COMPOSITION_CACHE_ROOT", out_dir)
-        cache = os.path.join(os.path.abspath(root), "ultrabreak", key)
-        os.makedirs(cache, exist_ok=True)
-        with open(os.path.join(cache, ".lock"), "a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            path = os.path.join(cache, "universal_adv.png")
-            if os.path.exists(path) or os.path.exists(path + ".lineage.json"):
-                if not self.attack.verify_lineage(path):
-                    raise ValueError(f"UltraBreak cache lineage mismatch: {path}")
-                self.attack._universal_rel = portable_path(path)
-            else:
-                self.attack.prepare(cache)
-                if not os.path.isfile(path) or not self.attack._lineage_verified:
-                    raise RuntimeError("UltraBreak optimization did not produce a verified patch")
-        # Application is CPU-only. Do not keep a second Qwen2-VL on the GPU
-        # beside JPS/HADES after the universal training has finished.
-        self.attack._adapter = None
-        import gc
-        import torch
-
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
-    def transform(self, artifact, behavior, out_dir):
-        if self.attack._universal_rel is None:
-            raise RuntimeError("UltraBreak patch was not prepared")
-        source = _input_image(artifact, behavior)
-        with Image.open(source) as image:
-            original = image.convert("RGB")
-        with Image.open(resolve_path(self.attack._universal_rel)) as image:
-            patch = image.convert("RGB")
-        width, height = original.size
-        canvas = original.copy()
-        if self.placement == "right_strip":
-            side = max(1, round(min(width, height) * self.fraction))
-            margin = max(1, side // 20)
-            canvas = Image.new("RGB", (width + side + 2 * margin, height), "white")
-            canvas.paste(original, (0, 0))
-            left, top = width + margin, (height - side) // 2
-        elif self.placement == "cs_dj_contrast":
-            boxes = artifact.metadata.get("cs_dj_contrast_boxes")
-            if not boxes or len(boxes) != 9:
-                raise ValueError("CS-DJ contrast placement requires the full collage stage")
-            x0, y0, x1, y1 = map(int, boxes[self.tile_index])
-            if not (0 <= x0 < x1 <= width and 0 <= y0 < y1 <= height):
-                raise ValueError("CS-DJ contrast box lies outside the input image")
-            side = max(1, int(min(x1 - x0, y1 - y0) * self.fraction))
-            left, top = x0 + (x1 - x0 - side) // 2, y0 + (y1 - y0 - side) // 2
-        else:
-            protected = max(self.preserve_top,
-                            float(artifact.metadata.get("hades_top_fraction", 0.0)))
-            first_row = math.ceil(height * protected)
-            side = max(1, int(min(width, height - first_row) * self.fraction))
-            if side > height - first_row:
-                raise ValueError("UltraBreak has no space outside the protected HADES region")
-            left, top = width - side, height - side
-        canvas.paste(patch.resize((side, side), Image.Resampling.LANCZOS), (left, top))
-        os.makedirs(out_dir, exist_ok=True)
-        path = os.path.join(out_dir, f"{_safe_stem(behavior.behavior_id)}_ultrabreak.png")
-        canvas.save(path)
-        text = artifact.text
-        if self.attack.tpg_suffix and not text.endswith(self.attack.tpg_suffix):
-            text += self.attack.tpg_suffix
-        return ComponentResult(
-            artifact=artifact.with_payload(text=text, images=[portable_path(path)]),
-            iteration_plan={"epochs": self.attack.epochs, "train_rows": self.attack.train_rows},
-            iteration_result={"universal_optimization_completed": True,
-                              "optimization_scope": "once_per_verified_config",
-                              "artifact_reused": self.attack._artifact_reused,
-                              "application_completed": True},
-            metadata={"placement": self.placement,
-                      "patch_box": [left, top, left + side, top + side],
-                      "input_size": [width, height], "output_size": list(canvas.size),
-                      "universal_patch_sha256": file_sha256(resolve_path(self.attack._universal_rel)),
-                      "source_provenance": self._attack_provenance()},
-        )
 
 
 class FigStepRenderComponent(FullAttackComponent):
@@ -423,35 +302,6 @@ class JailBoundJointComponent(FullAttackComponent):
     attack_name = "JailBound"
 
 
-class JailbreakInPiecesEmbeddingComponent(AttackBackedComponent):
-    component_name = "jailbreak_in_pieces_embedding"
-    attack_name = "JailbreakInPieces"
-    algorithm_fidelity = "adapted_decomposition"
-
-    def transform(self, artifact, behavior, out_dir):
-        target = _input_image(artifact, behavior)
-        target_digest = file_sha256(target)
-        reused = bool(target_digest and target_digest in self.attack._artifacts)
-        optimized = self.attack._optimize(target, out_dir)
-        output = artifact.with_payload(
-            images=[optimized["image"]],
-            metadata={"jip_embedding": copy.deepcopy(optimized)},
-        )
-        return ComponentResult(
-            artifact=output,
-            iteration_plan={
-                "num_epochs": self.attack.num_epochs,
-                "learning_rate": self.attack.learning_rate,
-            },
-            iteration_result={
-                "epochs_completed": self.attack.num_epochs,
-                "epochs_completed_this_call": 0 if reused else self.attack.num_epochs,
-                "artifact_reused": reused,
-                "initial_loss": optimized["initial_loss"],
-                "final_loss": optimized["final_loss"],
-            },
-            metadata={"source_provenance": self._attack_provenance()},
-        )
 
 
 class HADESPatchComponent(AttackBackedComponent):
@@ -626,12 +476,10 @@ COMPONENTS: dict[str, type[CompositionComponent]] = {
     for cls in (
         CSDJSplitComponent,
         CSDJFullComponent,
-        UltraBreakPatchComponent,
         FigStepRenderComponent,
         MMLLayoutComponent,
         JPSJointComponent,
         JailBoundJointComponent,
-        JailbreakInPiecesEmbeddingComponent,
         HADESPatchComponent,
         DeltaJPComponent,
         JOODAugComponent,

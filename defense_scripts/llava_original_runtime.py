@@ -1,5 +1,5 @@
 """Original LLaVA runtime (``liuhaotian/llava-v1.5-*``) helpers shared by the
-official-protocol reproductions (AsD, ECSO, AdaShield).
+official-protocol reproductions (AsD, AdaShield).
 
 The upstream defense repositories all vendor the original LLaVA code base and
 call ``load_pretrained_model`` / ``conv_templates`` / ``tokenizer_image_token``

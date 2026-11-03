@@ -36,7 +36,7 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ## Code and workflow guide
 
-**논문 재현 결과:** [공격 10종·방어 7종의 실험 기록](reproductions/README.md)에
+**논문 재현 결과:** [재현·진단 기록](reproductions/README.md)에
 33개 실험·진단·데이터 구성 기록의 측정값, 논문 비교, 평가 모델, 남은 차이와 실행 코드를 정리했습니다.
 공식 산출물 평가와 직접 최적화, 자동 평가 대체와 인간 평가를 구분합니다.
 집계 파일은 `python reproductions/verify.py`로 모델 실행 없이 검증할 수 있습니다.
@@ -344,11 +344,9 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 | --- | --- | --- | --- |
 | `FigStep` | [multi_attacks/figstep/](multi_attacks/figstep/) | 지시문을 이미지 목록으로 렌더링하고 고정 프롬프트 결합. 폰트 차이 기록 | [run_figstep.sh](attack_scripts/run_figstep.sh) |
 | `CS-DJ` | [multi_attacks/cs_dj/](multi_attacks/cs_dj/) | Qwen 분해 → CLIP 대조 이미지 검색 → 3×4 콜라주. 외부 이미지 풀·폰트 필요 | [run_cs_dj.sh](attack_scripts/run_cs_dj.sh) |
-| `JailbreakInPieces` | [multi_attacks/jailbreak_in_pieces/](multi_attacks/jailbreak_in_pieces/) | CLIP 기반 이미지 최적화 5,000 steps, 공식 고정 이미지 쌍과 16개 프롬프트 | [run_jailbreak_in_pieces.sh](attack_scripts/run_jailbreak_in_pieces.sh) |
 | `MML` | [multi_attacks/mml/](multi_attacks/mml/) | 공개 이미지·프롬프트 replay. 공통 Stage 2의 MML 프로토콜로 CLAS 조기 종료 | [run_mml.sh](attack_scripts/run_mml.sh) |
 | `HADES` | [multi_attacks/hades/](multi_attacks/hades/) | 기본 white-box 상단 패치 3,000 epochs. 별도 official 설정은 공개 이미지 6단계 replay | [run_hades.sh](attack_scripts/run_hades.sh) |
 | `JOOD` | [multi_attacks/jood/](multi_attacks/jood/) | benign 항목과 Mixup/CutMix/ResizeMix/RandAug. 개별 runner는 AdvBenchM 대상 | [run_jood.sh](attack_scripts/run_jood.sh) |
-| `UltraBreak` | [multi_attacks/ultrabreak/](multi_attacks/ultrabreak/) | Qwen2-VL universal 이미지 최적화, 의미 손실·변환·TV·TPG | [run_ultrabreak.sh](attack_scripts/run_ultrabreak.sh) |
 | `JPS` | [multi_attacks/jps/](multi_attacks/jps/) | Qwen2 시각 최적화와 Qwen2.5-14B 에이전트의 피드백·수정. 공식 CSV·기저 이미지 별도 필요 | [run_jps.sh](attack_scripts/run_jps.sh) |
 | `JailBound` | [multi_attacks/jailbound/](multi_attacks/jailbound/) | 안전 경계 probe 학습 후 이미지·20-token suffix 공동 최적화. 논문 기반 adapted 구현 | [run_jailbound.sh](attack_scripts/run_jailbound.sh) |
 | `VisualAdv` | [image_attacks/visual_adv/](image_attacks/visual_adv/) | CE/PGD universal 이미지. 기저 이미지·목표 문장 코퍼스·미분 가능 surrogate | [run_visualadv.sh](attack_scripts/run_visualadv.sh) |
@@ -360,7 +358,7 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 
 ### Configs and reproduction scope
 
-CS-DJ, JOOD, MML, JPS, JailbreakInPieces는 공식 설정을 지향하는 단일 기본 YAML을 사용합니다.
+CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사용합니다.
 다른 공격에는 `*_official.yaml`, transfer 등 별도 프로필을 제공합니다.
 특히 다음은 구분해야 합니다.
 
@@ -383,15 +381,14 @@ CS-DJ, JOOD, MML, JPS, JailbreakInPieces는 공식 설정을 지향하는 단일
 
 | 스크립트 계열 | 추가 옵션 / 주의점 |
 | --- | --- |
-| FigStep·HADES·VisualAdv·DeltaJP·UltraBreak | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
+| FigStep·HADES·VisualAdv·DeltaJP | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
 | `run_cs_dj.sh` | 기본 `MODEL=gpt-4o-mini`, `DATASETS=CS-DJ` |
 | `run_jood.sh` | 기본 GPT-4 Turbo 대상, AdvBenchM, 네 `AUGS`를 각각 실행 |
 | `run_jps.sh` | 기본 `MODEL=qwen2_vl_7b`, `CONFIG` 지정 가능 |
 | `run_mml.sh` | 기본 GPT-4o snapshot 대상. `VARIANTS`, `JUDGE_MODEL`, `EVALUATE_LLAMA_GUARD` 지원 |
-| `run_jailbreak_in_pieces.sh` | 기본 `LIMIT=1`, `DATASETS=AdvBench`, 선택적 `EVALUATE=1` |
 | `run_jailbound.sh` | **단수** `DATASET`, 기본 MM-SafetyBench·1행. `RUN_DIR`, `BOUNDARY` 지정 가능 |
 | [run_transfer.sh](attack_scripts/run_transfer.sh) | VisualAdv/DeltaJP의 Qwen2 surrogate → 별도 target 전이 실행 |
-| [run_ultrabreak_full.sh](attack_scripts/run_ultrabreak_full.sh), [run_jps_full.sh](attack_scripts/run_jps_full.sh), [run_visualadv_full.sh](attack_scripts/run_visualadv_full.sh) | 장시간 프로필과 lineage 검증 캐시 실행 |
+| [run_jps_full.sh](attack_scripts/run_jps_full.sh), [run_visualadv_full.sh](attack_scripts/run_visualadv_full.sh) | 장시간 프로필과 lineage 검증 캐시 실행 |
 
 환경 변수의 `LIMIT=0`은 보통 래퍼에서 전체 실행을 뜻합니다.
 직접 Python CLI에는 필요한 양의 `--limit`을 지정하거나 옵션을 생략하세요.
@@ -439,7 +436,7 @@ python run_generate_test_cases.py \
 ```
 
 공통 CE 프로필은 원본 RGB 텐서를 각 모델의 미분 가능한 전처리에 통과시킵니다.
-JPS/UltraBreak는 전용 Qwen2 adapter, JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
+JPS는 공통 Qwen2 adapter, JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
 CIDER는 LLaVA-1.5 target의 encoder를 사용합니다.
 
 ## 6. Single-attack pipeline
@@ -513,7 +510,6 @@ ASR/RSR/query 요약을 한 번에 기록합니다. 작은 실험은 Stage 1에�
 | --- | --- | --- | --- |
 | `AdaShield` | [adashield.py](defenses/adashield.py) / [YAML](configs/defense_configs/AdaShield.yaml) | 기본 S 안전 프롬프트. A는 CLIP 기반 방어 프롬프트 검색 | [run_adashield.sh](defense_scripts/run_adashield.sh) |
 | `AsD` | [asd.py](defenses/asd.py) / [YAML](configs/defense_configs/AsD.yaml) | 공식 protective patch와 안전 프롬프트 | [setup_asd.sh](defense_scripts/setup_asd.sh) / [run_asd.sh](defense_scripts/run_asd.sh) |
-| `ECSO` | [ecso.py](defenses/ecso.py) / [YAML](configs/defense_configs/ECSO.yaml) | 직접 응답 → 자기 평가 → 필요시 caption과 이미지 없는 재응답 | [run_ecso.sh](defense_scripts/run_ecso.sh) |
 | `JailGuard` | [jailguard.py](defenses/jailguard.py) / [YAML](configs/defense_configs/JailGuard.yaml) | 이미지 변형별 응답 불일치로 탐지 | [setup_jailguard.sh](defense_scripts/setup_jailguard.sh) / [run_jailguard.sh](defense_scripts/run_jailguard.sh) |
 | `VLMShield` | [vlmshield.py](defenses/vlmshield.py) / [YAML](configs/defense_configs/VLMShield.yaml) | CLIP 특징과 공개 MLP로 입력 쌍의 안전성 판정 | [setup_vlmshield.sh](defense_scripts/setup_vlmshield.sh) / [run_vlmshield.sh](defense_scripts/run_vlmshield.sh) |
 | `CIDER` | [cider.py](defenses/cider.py) / [YAML](configs/defense_configs/CIDER.yaml) | diffusion denoising 전후 이미지·질문 유사도 변화로 탐지 | [setup_cider.sh](defense_scripts/setup_cider.sh) / [run_cider.sh](defense_scripts/run_cider.sh) |
@@ -549,9 +545,6 @@ python run_evaluate_completions.py \
 ```bash
 RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
   bash defense_scripts/run_adashield.sh
-
-RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
-  bash defense_scripts/run_ecso.sh
 ```
 
 방어 래퍼의 공통 변수는 `RUN_DIR`, `MODEL`, `DEFENSE_CONFIG`, `LIMIT`,
@@ -567,9 +560,6 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
   공개 저장소에 해당 prompt pool이 없어 fresh checkout만으로 A 전체 실험을 재현할 수 없습니다.
 - **AsD:** 공식 패치 SHA-256을 확인하고 seed 42, 이미지 면적 25%, alpha 0.7을 사용합니다.
   입력 변환이지 차단 detector가 아니므로 `blocked=false`가 정상일 수 있습니다.
-- **ECSO:** MM-SafetyBench 공식 경로의 프롬프트·`yes`/`yes.` 분기를 사용합니다.
-  안전 분기는 대상 질의 2회, 재생성 분기는 4회이며 마지막은 text-only입니다.
-  최종 응답을 judge로 평가하며 `blocked=false`를 방어 실패로 해석하지 않습니다.
 - **JailGuard:** PL 정책(RR/BL/RP)으로 변형 8개, 응답 앞 100자,
   spaCy 유사도/KL threshold 0.025를 사용합니다.
   통과한 입력은 원본에 대한 후속 질의 1회가 추가됩니다.
@@ -584,134 +574,57 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 
 ## 8. Composed jailbreak generation
 
-현재 계획은 [configs/compositions/jailbreak_dataset_v3.yaml](configs/compositions/jailbreak_dataset_v3.yaml)입니다.
-실행 엔진은 [core/composition.py](core/composition.py),
-단계별 결합 구현은 [core/composition_components.py](core/composition_components.py)에 있습니다.
+최신 3,000개 생성 워크플로는 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md)를 참고하세요.
+FigStep, CS-DJ, MML, JOOD, JPS의 18개 조합이며, 이 데이터 구성은 이번 삭제의 영향을 받지 않습니다.
 
-사용하는 개별 방법론은 **9개**:
-CS-DJ, FigStep, MML, JOOD, UltraBreak, HADES, JailbreakInPieces, JailBound, JPS입니다.
+별도 일반 조합 엔진의 [v3 설정](configs/compositions/jailbreak_dataset_v3.yaml)은
+삭제된 방법을 포함한 레시피를 제외해 **8개 조합, 최종 1,450개 / 후보 1,740개**로 정리했습니다.
+기존 레시피 ID와 남은 조합의 수량은 유지합니다.
 
-### Recipe plan
-
-총 **3,000개**의 데이터셋을 목표로 생성하며, 아래 수량은 조합별 최종 샘플 수입니다.
-
-화살표는 적용 순서입니다. Split/Full/Patch/Aug 같은 접미사는
-원래 방법론 전체와 분해된 구성요소를 구분하며 새로운 개별 공격 이름은 아닙니다.
-
-| ID | 순서 | 샘플 수 |
+| ID | 적용 순서 | 최종 수량 |
 | --- | --- | ---: |
 | P01 | CS-DJ-Split → FigStep | 200 |
 | P02 | CS-DJ-Split → MML | 200 |
 | P03 | FigStep → JOOD | 200 |
-| P04 | MML → UltraBreak-Patch | 200 |
 | P05 | HADES → JailBound | 200 |
-| P06 | Jailbreak-In-Pieces → UltraBreak-Patch | 200 |
-| P07 | Jailbreak-In-Pieces → JailBound | 200 |
 | P08 | JPS → JailBound | 200 |
-| P09 | CS-DJ-Full → UltraBreak-Patch | 200 |
 | T01 | CS-DJ-Split → FigStep → JailBound | 150 |
 | T02 | CS-DJ-Split → MML → JailBound | 150 |
-| T03 | Jailbreak-In-Pieces → HADES → UltraBreak-Patch | 150 |
 | T04 | JPS → JailBound → JOOD | 150 |
-| T05 | Jailbreak-In-Pieces → CS-DJ-Split → JailBound | 150 |
-| T06 | JPS → HADES → UltraBreak-Patch | 150 |
-| Q01 | CS-DJ-Split → MML → JailBound → UltraBreak-Patch | 100 |
-| Q02 | Jailbreak-In-Pieces → CS-DJ-Split → HADES → JailBound | 100 |
-| Q03 | CS-DJ-Split → FigStep → JailBound → UltraBreak-Patch | 100 |
-| **합계** | **2개 조합 1,800 + 3개 조합 900 + 4개 조합 300** | **3,000** |
-
-JOOD는 최종 350개(11.67%), UltraBreak는 1,100개(36.67%)에 포함됩니다.
-원본은 harmful-only로 선택하고, 같은 `source_behavior_id` 파생물은
-70/10/20 source-group split에서 반드시 같은 split에 배치합니다.
-
-### Pilot and script entry points
 
 ```bash
-# 설정 검사만: 데이터·모델 로딩 없음
+# 설정 검사: 데이터·모델 로딩 없음
 python run_generate_composed_dataset.py --dry-run
-
-# 데이터·설정·생성 가능 수량 검사: 모델 로딩 없음
+# 데이터·수량·설정 사전 검사
 python run_generate_composed_dataset.py --preflight
-
-# 레시피별 최종 3개: 전체 18개면 최종 54개
-python run_generate_composed_dataset.py \
-  --per-recipe 3 --save-dir runs/composed_jailbreak_v3_pilot
-
-python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot
+# 레시피당 3개, 총 24개 pilot. 최적화 단계는 GPU와 시간이 필요합니다.
+python run_generate_composed_dataset.py --per-recipe 3 \
+  --save-dir runs/composed_jailbreak_pruned_pilot
+python -m core.validation.composed_dataset runs/composed_jailbreak_pruned_pilot
 ```
 
-`--recipes P01,T01`로 레시피를 제한할 수 있습니다.
-`--per-recipe`를 생략하면 설정된 전체 쿼터를 사용합니다.
-소수 행이어도 JIP 5,000 epochs, HADES 3,000 epochs, UltraBreak 5,000 epochs,
-JPS 300 steps·5 rounds, JailBound 100 joint iterations 등 설정된 최적화 루프를 수행합니다.
-최적화가 포함된 pilot도 장시간이 걸릴 수 있습니다.
+`--recipes P01,T01`로 범위를 제한할 수 있습니다. 단계별 구현은
+[core/composition_components.py](core/composition_components.py)에 있습니다.
+소수 입력에서도 설정된 HADES·JPS·JailBound 최적화 루프를 수행합니다.
+JPS는 `configs/attacks/JPS.yaml`의 학습 CSV와 초기 이미지를 준비해야 합니다.
 
-| 실행 스크립트 | 역할 / 주요 변수 |
-| --- | --- |
-| [run_composed_dataset.sh](attack_scripts/run_composed_dataset.sh) | 직접 생성 후 검증. `CONFIG`, `SAVE_DIR`, `RECIPES`, `PER_RECIPE`, `PYTHON` |
-| [run_composed_dataset_3000.sh](attack_scripts/run_composed_dataset_3000.sh) | GPU 메모리 증가를 제한하도록 8개 그룹을 별도 프로세스로 실행·검증·병합. `CONFIG`, `OUTPUT_ROOT`, `PREFLIGHT_ONLY`, `PYTHON` |
-| [run_composed_dataset_3000_nohup.sh](attack_scripts/run_composed_dataset_3000_nohup.sh) | 위 worker를 detached 실행. `--status`, `--dry-run`, `LOG_FILE`, `PID_FILE` 지원 |
+그룹 실행은 기존 이름의 `attack_scripts/run_composed_dataset_3000.sh`,
+백그라운드 실행은 `run_composed_dataset_3000_nohup.sh`를 사용합니다.
+스크립트 이름과 별개로 현재 YAML의 수량을 따르며, 기본 출력은
+`runs/composed_jailbreak_pruned_20261103`입니다. `CONFIG`, `OUTPUT_ROOT`,
+`PYTHON`, `PREFLIGHT_ONLY`로 실행 조건을 지정할 수 있습니다.
+최신 5개 방법·3,000개 생성기와 이 일반 조합 실행기는 별개의 워크플로입니다.
 
-직접 pilot 래퍼 예: `PER_RECIPE=3 bash attack_scripts/run_composed_dataset.sh`.
-단일 공격 CLI는 `--save_dir`, 조합 CLI는 `--save-dir`라는 옵션명 차이에 주의하세요.
+후보 체크포인트는 10회마다 저장하며 설정·입력·코드 해시가 일치해야 재개합니다.
+학습 중 optimizer 상태의 매 step 복원은 지원하지 않습니다.
+`nohup` 실행은 SSH·VS Code 종료 후에도 유지되지만 서버 재시작을 견디지는 않습니다.
 
-### Full 3,000-sample background run
-
-선택한 conda 환경을 활성화한 뒤 interpreter와 출력 루트를 명시합니다.
-
-```bash
-export PYTHON="$(command -v python)"
-export OUTPUT_ROOT=runs/composed_jailbreak_3000_v3
-
-# 자원·데이터 사전 확인만
-PREFLIGHT_ONLY=1 bash attack_scripts/run_composed_dataset_3000.sh
-
-# 백그라운드 시작. 동일 명령은 유효한 기존 그룹/체크포인트를 확인하여 재사용
-bash attack_scripts/run_composed_dataset_3000_nohup.sh
-
-# 실행한 동일 서버에서, 동일 OUTPUT_ROOT로 확인
-bash attack_scripts/run_composed_dataset_3000_nohup.sh --status
-tail -f "$OUTPUT_ROOT/nohup.log"
-```
-
-`nohup`은 SSH·VS Code 연결 종료 후에도 실행을 유지하지만 서버 재부팅·프로세스 종료를 막지는 않습니다.
-PID는 실행 서버마다 다릅니다. 공유 폴더가 보이더라도 다른 서버에서 PID가 없다는 이유만으로
-작업 종료를 단정하면 안 됩니다. 완료 표식은 `<OUTPUT_ROOT>/SUCCESS`입니다.
-
-worker는 `nohup.pid`, 로그와 중복 실행 lock을 관리합니다.
-완료 그룹은 config hash·recipe ID가 일치할 때만 재사용하고,
-유효한 incomplete 그룹은 검증 후 재개합니다.
-manifest 없는 부분 출력이나 설정이 다른 기존 폴더를 강제로 덮어쓰지 않습니다.
-
-### Checkpoints, fidelity and outputs
-
-- 실제 cases·behaviors·QC·manifest는 후보 시도 10회마다, 그리고 레시피 경계마다 저장합니다.
-  마지막 유효 체크포인트 이후 최대 9회 시도는 다시 수행될 수 있습니다.
-  전체 쿼터 전의 `incomplete` 표시는 정상이며 직접 CLI 재개는 `--resume`을 사용합니다.
-- 이 체크포인트는 **완료된 후보/아티팩트 기준**입니다.
-  UltraBreak 같은 최적화 도중의 매 epoch optimizer 상태를 복구하는 기능은 아닙니다.
-  중단된 universal 학습은 완료 캐시가 없으면 다시 수행할 수 있습니다.
-- UltraBreak 완료 패치·lineage는 기본 `<OUTPUT_ROOT>/_universal_cache`에서 그룹 간 공유합니다.
-  `VLM_COMPOSITION_CACHE_ROOT`로 변경할 수 있으며 설정·입력·구현 hash가 맞아야 재사용합니다.
-  오래된 PNG만 있다고 full-step 캐시로 인정하지 않습니다.
-- UltraBreak-Patch는 **덧셈 perturbation이 아니라 학습된 패치 삽입**입니다.
-  P09는 CS-DJ contrast tile 9, P04/P06/Q01/Q03은 새 오른쪽 strip,
-  T03/T06은 HADES 상단과 겹치지 않는 하단에 배치합니다.
-- CS-DJ-Full 조합의 HADES 이미지 풀·DejaVu 폰트, JPS 조합의
-  AdvBench first-50·UltraBreak white image 등 대체 자산은 effective config에 기록합니다.
-  기본 개별 공격의 공식 자산 요구 조건과 혼동하지 않습니다.
-- 조합 결과는 항상 `algorithm_fidelity: adapted_composition`,
-  `paper_reproduction: false`입니다. JailBound 단계는 앞선 최적화의 픽셀 완전 보존을 보장하지 않습니다.
-
-평가에 사용하는 데이터는 `test_cases.jsonl`/`behaviors.jsonl`과 이미지이며,
-구성·검증 정보는 `composition_manifest.json`, `composition_qc.json`에 기록합니다.
-QC에는 단계별 입력·출력 hash와 연결 정보를 남깁니다.
-[merge_composed_runs.py](merge_composed_runs.py)가 그룹을 검증·병합합니다.
-
-최종 선별은 구조적 무결성·중복 hash·결정적 순서 기준이며
-**대상 응답이나 ASR로 성공 샘플만 고르지 않습니다**.
-최종 디렉터리에 [6절](#6-single-attack-pipeline)의 Stage 2/3을 적용해야 ASR이 나옵니다.
-설정에 기재된 600개 controls는 별도 평가 묶음이며 자동 생성된 benign 대조군이 아닙니다.
+모든 조합 결과는 `adapted_composition`, `paper_reproduction: false`로 기록합니다.
+원본 질문별 split을 유지하고, 구조·중복·결정적 순서로 최종 선별합니다.
+대상 응답이나 ASR로 성공한 입력만 고르는 과정은 없습니다.
+출력은 `test_cases.jsonl`, `behaviors.jsonl`, 이미지 및
+`composition_manifest.json`/`composition_qc.json`입니다.
+타깃 추론과 판정은 [6절](#6-single-attack-pipeline)의 별도 단계에서 실행합니다.
 
 ## 9. Evaluation and metrics
 
@@ -820,12 +733,10 @@ its upstream authors and is governed by its own license (see
     [7]  https://github.com/isXinLiu/MM-SafetyBench
     [8]  https://github.com/centerforaisafety/HarmBench
     [9]  https://github.com/TeamPigeonLab/CS-DJ
-    [10] https://github.com/erfanshayegani/Jailbreak-In-Pieces
     [11] https://github.com/SaFo-Lab/AdaShield
     [12] https://github.com/PandragonXIII/CIDER
     [13] https://github.com/shiningrain/JailGuard
     [14] https://github.com/AngelAlita/AsD
-    [15] https://github.com/gyhdog99/ECSO
 
 
 ## License

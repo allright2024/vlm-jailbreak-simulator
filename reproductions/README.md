@@ -6,6 +6,11 @@
 이 공개 작업에서 새 모델 추론, API 평가 또는 재학습을 수행하지 않았다.
 공식 산출물 평가, 직접 최적화, 자동 평가 대체, 소규모 검증을 구분한다.
 
+UltraBreak, Jailbreak in Pieces(JIP), ECSO의 실행 코드·설정은 2026-11-03에
+삭제했다. 아래의 해당 결과는 **과거 실험 기록**이며 현재 지원 방법이 아니다.
+`experiments.json`에서 `code_status: removed`, `historical_runner`로 표시하며
+결과 파일의 원본 해시는 유지한다. AsD의 과거 JIP 결과도 기록으로만 남는다.
+
 ## 2026-11-03 추가 기록
 
 아래는 기존 기록 이후 추가된 결과다. ASR은 %, 차이는 percentage points(pp)이며,
@@ -86,7 +91,8 @@ ASR은 낮을수록, harmless rate와 accuracy는 높을수록 좋다.
 - [experiments.json](experiments.json): 범위, 방법, 판정, 실행 코드, 근거 파일의 기계 판독 목록.
 - [files.json](files.json): 각 원본 집계·프로토콜·실행 스크립트의 SHA-256, 크기, 로컬 상대 경로.
 - `results/`: 저장된 집계 CSV/JSON과 실험 조건. 원본 바이트를 보존한다.
-- `run_sources/`: `runs/` 또는 참조 저장소에만 있던 실험 실행 코드의 원본 사본.
+- `run_sources/`: `runs/` 또는 참조 저장소에만 있던 실험 실행 코드.
+  JPS import 경로 수정의 이전 해시·변경 사유는 `files.json`에 기록했다.
 
 ```bash
 # CPU 파일 검증만 수행; 모델 로딩, 네트워크, API 호출 없음.
@@ -108,7 +114,7 @@ python reproductions/restore_sources.py --recipe jps_train_20261024
 공통 파이프라인은 [루트 README](../README.md), 전용 실행기는
 [실행 안내](RUNNERS.md)를 참고한다. `attack_scripts/`와 `defense_scripts/`에는
 전용 프로토콜·집계·재시작 스크립트가 추가되어 있다.
-JPS, 원본 OneVision, HADES, UltraBreak는 저자 코드와 별도 Transformers 환경을
+JPS, 원본 OneVision, HADES는 저자 코드와 별도 Transformers 환경을
 사용하므로, 보존한 실행 코드를 복원하고 입력 자산·참조 저장소·환경을 준비해야 한다.
 원본 실행기를 메인 환경에서 무조건 실행하는 방식은 지원하지 않는다.
 

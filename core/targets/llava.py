@@ -5,7 +5,7 @@ greedy-decoding settings) but exposes ``generate(text, image_paths)`` with
 repo-root-relative paths and a true batched path.
 
 LLaVA-1.5 is single-image; this wrapper accepts either one image or no image.
-The latter exposes the language-only path used by ECSO's "eyes closed" stage.
+The latter exposes language-only generation for text-only inputs.
 Multi-image attacks (DMN, CS-DJ) should target a multi-image VLM.
 """
 

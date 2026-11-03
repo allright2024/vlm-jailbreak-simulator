@@ -627,9 +627,13 @@
     {
       "path": "reproductions/run_sources/runs/jps_paper_20261024/paper_run.py",
       "source_path": "vlm-jailbreak-simulator/runs/jps_paper_20261024/paper_run.py",
-      "sha256": "ac5c4e51de4bf8295d1bb902302e5c4791417fb9c75ffcf4191f33c60b471ff5",
-      "bytes": 18805,
-      "kind": "historical_runner"
+      "sha256": "545f52264189cb878a789e02c713bb37b523539c2585ba023742895deb3d6d48",
+      "bytes": 18792,
+      "kind": "historical_runner",
+      "original_sha256": "ac5c4e51de4bf8295d1bb902302e5c4791417fb9c75ffcf4191f33c60b471ff5",
+      "adaptations": [
+        "2026-11-03: update shared Qwen2Adapter import after removing the UltraBreak package; tokenization logic unchanged."
+      ]
     },
     {
       "path": "reproductions/run_sources/runs/jps_paper_20261024/run_background.sh",
@@ -657,55 +661,6 @@
       "source_path": "vlm-jailbreak-simulator/runs/jps_train_20261024/validate_and_run.sh",
       "sha256": "19bb75bb03a040c051df3ade147c94be6a990aeece5795b767ce4cc2deefb380",
       "bytes": 1150,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_released_20261024/paper_run.py",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_released_20261024/paper_run.py",
-      "sha256": "60c1835ce7579edfcb111a7870abc5a41578d2baa70c9f1158ead74c2169b079",
-      "bytes": 18174,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_released_20261024/run_background.sh",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_released_20261024/run_background.sh",
-      "sha256": "45cea4f374b038ee4bf071519dbd1f0423ca8911c495d61307e0ae7dffad81e9",
-      "bytes": 3091,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_released_20261024/safebench_only/evaluate_safebench.py",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_released_20261024/safebench_only/evaluate_safebench.py",
-      "sha256": "75b42c5c2c8ca8183c0fc72396be751b177c0013721b12990c88d285aa60a0fc",
-      "bytes": 6504,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_released_20261024/safebench_only/run_background.sh",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_released_20261024/safebench_only/run_background.sh",
-      "sha256": "813785744c8be8ca7873c4c54b2a33da10f93a666fcd451aeb05062095f77f06",
-      "bytes": 918,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_train_20261024/pipeline.py",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_train_20261024/pipeline.py",
-      "sha256": "3a9fd939f3c2e716fd066905d62e9452569ba105ce7eabf588a020045096dd6e",
-      "bytes": 10477,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_train_20261024/run_background.sh",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_train_20261024/run_background.sh",
-      "sha256": "c7d811124da894c457349ea7eda3adfffac41581e507cc22d069b39b5e3117f6",
-      "bytes": 997,
-      "kind": "historical_runner"
-    },
-    {
-      "path": "reproductions/run_sources/runs/ultrabreak_train_20261024/train.py",
-      "source_path": "vlm-jailbreak-simulator/runs/ultrabreak_train_20261024/train.py",
-      "sha256": "18e42b1bca334959bfe74ae4e75ed0817497da32b16ec6245bd5d785578e15de",
-      "bytes": 13403,
       "kind": "historical_runner"
     },
     {

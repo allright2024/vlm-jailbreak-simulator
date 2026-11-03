@@ -45,13 +45,11 @@ authors.
 | `multi_attacks/hades/`               | [AoiDragon/HADES](https://github.com/AoiDragon/HADES)                                                                                                           | **MIT**                        |
 | `multi_attacks/jood/`                | [naver-ai/JOOD](https://github.com/naver-ai/JOOD) — full upstream `LICENSE` file is preserved at `multi_attacks/jood/UPSTREAM_LICENSE`                         | **Apache-2.0**                 |
 | `multi_attacks/cs_dj/`               | [TeamPigeonLab/CS-DJ](https://github.com/TeamPigeonLab/CS-DJ) — upstream notice is preserved at `multi_attacks/cs_dj/UPSTREAM_LICENSE`                         | **MIT**                        |
-| `multi_attacks/jailbreak_in_pieces/` | [erfanshayegani/Jailbreak-In-Pieces](https://github.com/erfanshayegani/Jailbreak-In-Pieces) — upstream notice is preserved at `multi_attacks/jailbreak_in_pieces/UPSTREAM_LICENSE` | **MIT** |
 | `multi_attacks/mml/`                 | [wangyu-ovo/MML](https://github.com/wangyu-ovo/MML) at `5966fca529011e8b5ccff61d70365997d6466abc`; released images are replayed, while the unreleased renderer is a clean-room adapter. Exact prompt literals are read from a user-supplied, hash-pinned checkout and are not redistributed. | No explicit license            |
 | `multi_attacks/jailbound/`           | [JailBound, arXiv:2505.19610v3](https://arxiv.org/abs/2505.19610); clean-room implementation of the published equations because no author source repository is publicly linked | No upstream code distributed; paper terms apply |
 | `defenses/cider.py`, `defenses/cider_models/` | [PandragonXIII/CIDER](https://github.com/PandragonXIII/CIDER) at `3c08d7e2d52e27b47d1e428a030e8ffda5efae3e` | **Apache-2.0** |
 | `defenses/jailguard.py`, `defenses/JailGuard_utils/` | [shiningrain/JailGuard](https://github.com/shiningrain/JailGuard) at `419e1d3d08f4d02998a11a687f925518d2d5dd0c` | No explicit license |
 | `defenses/asd.py`, `defenses/asd_assets/` | [AngelAlita/AsD](https://github.com/AngelAlita/AsD) at `ba71efe0972c92e38da156ec76911f9122bbe12f`; upstream notice preserved at `defenses/asd_assets/UPSTREAM_LICENSE` | **MIT** |
-| `defenses/ecso.py`, `defenses/ecso_assets/` | [gyhdog99/ECSO](https://github.com/gyhdog99/ECSO) at `3878522f3a59ccb5f0edaa019086b3e954130719`; upstream license preserved at `defenses/ecso_assets/UPSTREAM_LICENSE` | **Apache-2.0** |
 
 The VLMShield detector in `defenses/vlmshield.py` and `defenses/vlmshield_utils.py`
 follows [pgqihere/VLMShield](https://github.com/pgqihere/VLMShield) at
@@ -59,6 +57,11 @@ follows [pgqihere/VLMShield](https://github.com/pgqihere/VLMShield) at
 license is preserved at `defenses/vlmshield_assets/UPSTREAM_LICENSE`.
 `defense_scripts/setup_vlmshield.sh` obtains the released classifier separately;
 the model weights and evaluation images are not included in this repository.
+
+The model preprocessing in `multimodalmodels/qwen2_adapter.py` originated in
+[kaiyuanCui/UltraBreak](https://github.com/kaiyuanCui/UltraBreak) under MIT and
+is retained for JPS and CE surrogate clients. Attack-specific optimization,
+random patch placement and semantic-loss code have been removed.
 
 Historical reproduction metadata and project-written run wrappers are indexed
 under `reproductions/`. References to external source files, checkpoints, fonts
@@ -130,7 +133,7 @@ imply permission to redistribute it.
 | PixArt-α XL-2-1024-MS                        | [https://huggingface.co/PixArt-alpha/PixArt-XL-2-1024-MS](https://huggingface.co/PixArt-alpha/PixArt-XL-2-1024-MS)         | Refer to the upstream model card (PixArt-α release terms; built on the OpenRAIL family)                       | Hades (text-to-image generation step)    |
 | Qwen2.5-3B-Instruct                          | [https://huggingface.co/Qwen/Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)                         | Apache-2.0                                                                                                   | CS-DJ query decomposition                |
 | sentence-transformers CLIP ViT-L/14          | [https://huggingface.co/sentence-transformers/clip-ViT-L-14](https://huggingface.co/sentence-transformers/clip-ViT-L-14)   | Refer to the upstream model card and OpenAI CLIP terms                                                        | CS-DJ image retrieval                    |
-| OpenAI CLIP ViT-L/14@336                      | [https://huggingface.co/openai/clip-vit-large-patch14-336](https://huggingface.co/openai/clip-vit-large-patch14-336)       | Refer to the upstream model card and OpenAI CLIP terms                                                        | JailbreakInPieces embedding optimization |
+| OpenAI CLIP ViT-L/14@336                      | [https://huggingface.co/openai/clip-vit-large-patch14-336](https://huggingface.co/openai/clip-vit-large-patch14-336)       | Refer to the upstream model card and OpenAI CLIP terms                                                        | Optional CLIP image-similarity metric |
 | Guided-diffusion 256×256 unconditional checkpoint | [OpenAI public checkpoint](https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt), used by [OpenAI guided-diffusion](https://github.com/openai/guided-diffusion) | MIT for guided-diffusion code; review checkpoint terms upstream | CIDER image denoising |
 
 The Llama 2 Community License contains specific restrictions (including

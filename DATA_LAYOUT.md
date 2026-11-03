@@ -35,15 +35,9 @@ vlm-jailbreak-data/
 ├── JPS/
 │   ├── advbench_subset.csv
 │   └── clean.jpeg
-├── JailbreakInPieces/
-│   ├── meth_pill.png              # upstream fixed target
-│   └── white.jpeg                 # upstream base image
 ├── MM-SafetyBench/
 ├── SafeBench/
 │   └── safebench.csv
-├── UltraBreak/
-│   ├── images/white.jpeg
-│   └── train_configs/safebench_white_force_jailbroken_mode.csv
 └── VisualAdv/
     └── derogatory_corpus.csv
 ```
@@ -92,11 +86,9 @@ Paths beginning with `data/` in attack YAML files are logical paths. When
 `$VLM_JAILBREAK_DATA_ROOT/FORCE/clean.jpeg`. Absolute paths in custom configs
 remain valid.
 
-The two `JPS/` files are required by the sole `JPS.yaml`. The upstream
-repository references both files but does not distribute them; preserve the
-official `goal,target` CSV columns. The default JPS config instead keeps the
-official optimization settings while using the local AdvBench loader and the
-shared UltraBreak white image.
+The two `JPS/` files are required by `JPS.yaml`. Obtain the training CSV
+linked by the JPS README and preserve its `goal,target` columns. The original
+`clean.jpeg` is not distributed; record the provenance of the supplied base image.
 
 `CS-DJ/llava_images/` is required only when running CS-DJ. Download the
 LLaVA-CC3M-Pretrain-595K image archive referenced by the upstream project and
@@ -104,16 +96,11 @@ place its image files directly in that directory. Copy the upstream five
 `instructions/*.json` files and `Super Moods.ttf` as shown above. `CS-DJ.yaml`
 samples 10,000 images and rejects font fallback.
 
-`JailbreakInPieces/{meth_pill.png,white.jpeg}` are the two files under the
-upstream repository's `images/` directory and are required by
-`JailbreakInPieces.yaml`; their expected SHA-256 values are recorded in the
-attack provenance.
-
 `python -m core.validation.data` verifies expected row counts, unique behavior IDs, and all
 dataset image references. Use `--layout-only` for a fast presence check or
 repeat `--dataset NAME` to validate selected datasets only.
 
-Run `python -m core.validation.official_reproduction` before a five-method official
+Run `python -m core.validation.official_reproduction` before a four-method official
 matrix. CS-DJ, JOOD, and MML require `OPENAI_API_KEY`; JOOD and JPS also require
 `HF_TOKEN` for the gated Llama Guard checkpoints. The validator checks presence
 only and never prints credential values.

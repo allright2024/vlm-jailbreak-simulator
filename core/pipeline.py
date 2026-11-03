@@ -181,7 +181,7 @@ def generate_completions(
                 res["blocked"], res["text"], res["images"], res.get("default_response"),
             )
             defense_meta.update(dict(res.get("meta") or {}))
-            # Some defenses (currently ECSO) conditionally query the target and
+            # Some defenses conditionally query the target and
             # return the final completion themselves. Preserve blocked=False so
             # the response is judged normally, but do not query the target twice.
             defense_generated = "response" in res

@@ -215,7 +215,7 @@ def load_victim():
 def tokenization_check(victim):
     import torch
     from PIL import Image
-    from multi_attacks.ultrabreak.ultrabreak_adapter import Qwen2Adapter
+    from multimodalmodels.qwen2_adapter import Qwen2Adapter
     from multi_attacks.jps.jps import _official_target
     cls = native("utils.string_utils").autodan_SuffixManager
     case = json.loads((RUN / "test_cases.json").read_text())[0]

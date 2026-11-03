@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build the configured 3,000-sample harmful-only composed jailbreak dataset.
+# Build the configured harmful-only composed jailbreak dataset.
 #
 # Foreground:
 #   bash attack_scripts/run_composed_dataset_3000.sh
@@ -12,7 +12,7 @@ set -euo pipefail
 # Optional overrides:
 #   PYTHON=/path/to/python
 #   CONFIG=configs/compositions/jailbreak_dataset_v3.yaml
-#   OUTPUT_ROOT=runs/composed_jailbreak_3000_v3
+#   OUTPUT_ROOT=runs/composed_jailbreak_pruned_20261103
 #   PREFLIGHT_ONLY=1  # validate prerequisites/quotas, then stop
 #
 # A completed recipe group is validated and reused on a later invocation. A
@@ -33,7 +33,7 @@ else
 fi
 
 CONFIG="${CONFIG:-configs/compositions/jailbreak_dataset_v3.yaml}"
-OUTPUT_ROOT="${OUTPUT_ROOT:-runs/composed_jailbreak_3000_v3}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-runs/composed_jailbreak_pruned_20261103}"
 OUTPUT_ROOT="$(realpath -m -- "$OUTPUT_ROOT")"
 PARTS_DIR="$OUTPUT_ROOT/_parts"
 LOG_DIR="$OUTPUT_ROOT/logs"
@@ -84,8 +84,8 @@ if [[ -f "$OUTPUT_ROOT/composition_manifest.json" ]]; then
     "$CONFIG" "$OUTPUT_ROOT"
   "$PYTHON_BIN" -m core.validation.composed_dataset "$OUTPUT_ROOT"
   "$PYTHON_BIN" -c \
-    "import json,sys; m=json.load(open(sys.argv[1])); assert m['n_final_test_cases']==3000 and m['n_raw_structurally_valid']==3600" \
-    "$OUTPUT_ROOT/composition_manifest.json"
+    "import json,sys; from core.composition import load_composition_config; m=json.load(open(sys.argv[1])); c=load_composition_config(sys.argv[2]); assert m['n_final_test_cases']==c['expected_totals']['final'] and m['n_raw_structurally_valid']==c['expected_totals']['raw']" \
+    "$OUTPUT_ROOT/composition_manifest.json" "$CONFIG"
   echo "Dataset is already complete: $OUTPUT_ROOT"
   exit 0
 fi
@@ -181,7 +181,7 @@ while IFS=$'\t' read -r group_name recipe_ids; do
   run_group "$group_name" "$recipe_ids"
 done <<< "$GROUP_PLAN"
 
-echo "Merge ${#COMPLETED_PARTS[@]} validated groups into the final 3,000-sample bundle"
+echo "Merge ${#COMPLETED_PARTS[@]} validated groups into the final configured bundle"
 "$PYTHON_BIN" merge_composed_runs.py \
   --config "$CONFIG" \
   --output-dir "$OUTPUT_ROOT" \
@@ -189,8 +189,8 @@ echo "Merge ${#COMPLETED_PARTS[@]} validated groups into the final 3,000-sample 
 
 "$PYTHON_BIN" -m core.validation.composed_dataset "$OUTPUT_ROOT"
 "$PYTHON_BIN" -c \
-  "import json,sys; m=json.load(open(sys.argv[1])); assert m['status']=='complete'; assert len(m['recipes'])==18; assert m['n_final_test_cases']==3000; assert m['n_raw_structurally_valid']==3600; print('FINAL OK: 18 recipes, 3,600 raw, 3,000 selected')" \
-  "$OUTPUT_ROOT/composition_manifest.json"
+  "import json,sys; from core.composition import load_composition_config; m=json.load(open(sys.argv[1])); c=load_composition_config(sys.argv[2]); assert m['status']=='complete'; assert len(m['recipes'])==len(c['recipes']); assert m['n_final_test_cases']==c['expected_totals']['final']; assert m['n_raw_structurally_valid']==c['expected_totals']['raw']; print('FINAL OK:', c['expected_totals'])" \
+  "$OUTPUT_ROOT/composition_manifest.json" "$CONFIG"
 touch "$OUTPUT_ROOT/SUCCESS"
 
 echo "Completed dataset: $OUTPUT_ROOT"

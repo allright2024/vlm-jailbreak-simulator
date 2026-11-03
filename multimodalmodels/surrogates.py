@@ -3,7 +3,7 @@
 These profiles describe *implemented* differentiable interfaces, not every VLM
 that can merely be loaded.  The modern profiles currently support the shared
 teacher-forced CE contract used by VisualAdv, DeltaJP, and HADES white-box.
-Algorithm-specific adapters (JPS, UltraBreak, JailBound) intentionally
+Algorithm-specific adapters (JPS, JailBound) intentionally
 remain separate and must not silently consume these profiles.
 """
 
@@ -48,7 +48,7 @@ SURROGATE_SPECS: dict[str, SurrogateSpec] = {
     ),
     "qwen2_vl_7b": SurrogateSpec(
         "qwen2", QWEN2_VL_HF_ID, QWEN2_VL_REVISION, CE_ATTACKS,
-        "legacy transfer CE; JPS/UltraBreak use their own Qwen2 adapter",
+        "legacy transfer CE; JPS use their own Qwen2 adapter",
     ),
     "llava_v1_6": SurrogateSpec(
         "llava-next", LLAVA_16_HF_ID, LLAVA_16_REVISION, CE_ATTACKS,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed preflight for the five official-only attack profiles."""
+"""Fail-closed preflight for the four official-only attack profiles."""
 
 from __future__ import annotations
 
@@ -75,17 +75,6 @@ PROFILES = {
             "data/HarmBench/harmbench_standard.json",
         ],
         "env": ["HF_TOKEN"],
-    },
-    "JailbreakInPieces": {
-        "expected": {
-            "experiment_profile": "official", "target_mode": "fixed",
-            "num_epochs": 5000, "prompt_indices": list(range(16)),
-            "official_target_model": "llava_v1_5",
-        },
-        "paths": [
-            "data/JailbreakInPieces/white.jpeg",
-            "data/JailbreakInPieces/meth_pill.png",
-        ],
     },
 }
 

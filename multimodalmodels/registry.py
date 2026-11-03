@@ -68,7 +68,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
     for spec in (
         ModelSpec(LLAVA_15_HF_ID, LLAVA_15_REVISION, "llava",
                   "eval target; white-box surrogate (VisualAdv, DeltaJP, HADES); "
-                  "CIDER encoder; ECSO target and text-only generator"),
+                  "CIDER encoder; text-only generator"),
         ModelSpec(LLAVA_16_HF_ID, LLAVA_16_REVISION, "llava-next",
                   "eval target; optional CE surrogate (VisualAdv, DeltaJP, HADES)"),
         ModelSpec(LLAVA_ONEVISION_7B_CHAT_HF_ID,
@@ -76,7 +76,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
                   "llava-onevision",
                   "CS-DJ Table 6 approximate-reproduction eval target"),
         ModelSpec(QWEN2_VL_HF_ID, QWEN2_VL_REVISION, "qwen2-vl",
-                  "transfer surrogate (UltraBreak, JPS, VisualAdv/DeltaJP qwen2)"),
+                  "transfer surrogate (JPS, VisualAdv/DeltaJP qwen2)"),
         ModelSpec(QWEN25_VL_HF_ID, QWEN25_VL_REVISION, "qwen2-vl",
                   "optional Qwen2.5-VL eval target / surrogate"),
         ModelSpec(QWEN3_VL_2B_HF_ID, QWEN3_VL_2B_REVISION, "qwen3-vl",
@@ -95,7 +95,6 @@ MODEL_SPECS: dict[str, ModelSpec] = {
                   "sentence-transformer", "CS-DJ contrastive image retrieval"),
         ModelSpec(CLIP_VIT_L14_336_HF_ID, CLIP_VIT_L14_336_REVISION,
                   "clip-image-encoder",
-                  "JailbreakInPieces target-image embedding optimization; "
                   "optional benchmark CLIP image-similarity metric"),
         ModelSpec(CLIP_VIT_L14_HF_ID, CLIP_VIT_L14_REVISION, "clip-model",
                   "VLMShield detector image/text encoder (official checkpoint)"),

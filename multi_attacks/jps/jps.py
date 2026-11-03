@@ -34,7 +34,7 @@ from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
 from .jps_prompts import ANGLES, JB_PROMPT_TEMPLATE
-from multi_attacks.ultrabreak.ultrabreak_utils import OPENAI_CLIP_MEAN, OPENAI_CLIP_STD
+from multimodalmodels.qwen2_adapter import OPENAI_CLIP_MEAN, OPENAI_CLIP_STD
 
 
 from multimodalmodels.registry import (QWEN25_14B_REVISION,
@@ -104,7 +104,7 @@ class JPSAttack(Attack):
             QWEN25_14B_REVISION if self.agent_model == "Qwen/Qwen2.5-14B-Instruct" else None,
         )
         self.base_image = c.get(
-            "base_image", os.path.join(DATA_ROOT, "UltraBreak", "images", "white.jpeg")
+            "base_image", os.path.join(DATA_ROOT, "JPS", "clean.jpeg")
         )
         self.image_size = int(c.get("image_size", 448))
         self.epsilon = _parse_ratio(c.get("epsilon", "32/255"))
@@ -175,7 +175,7 @@ class JPSAttack(Attack):
 
     def _load(self):
         if self._adapter is None:
-            from multi_attacks.ultrabreak.ultrabreak_adapter import Qwen2Adapter
+            from multimodalmodels.qwen2_adapter import Qwen2Adapter
             self._adapter = Qwen2Adapter(
                 self.surrogate,
                 revision=self.surrogate_revision,
@@ -498,12 +498,10 @@ class JPSAttack(Attack):
 
     def _lineage_code_files(self):
         here = os.path.dirname(__file__)
-        ultra = os.path.join(here, "..", "ultrabreak")
         return super()._lineage_code_files() + [
             os.path.join(here, "jps_agents.py"),
             os.path.join(here, "jps_prompts.py"),
-            os.path.join(ultra, "ultrabreak_adapter.py"),
-            os.path.join(ultra, "ultrabreak_utils.py"),
+            os.path.join(here, "..", "..", "multimodalmodels", "qwen2_adapter.py"),
             os.path.join(here, "..", "..", "multimodalmodels", "loaders.py"),
             os.path.join(here, "..", "..", "multimodalmodels", "registry.py"),
         ]

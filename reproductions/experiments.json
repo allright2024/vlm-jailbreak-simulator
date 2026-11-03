@@ -177,13 +177,15 @@
       "historical_run": "runs/ultrabreak_released_20261024/safebench_only",
       "assessment": "near_paper_with_extraction_caveat",
       "scope": "Table 1 SafeBench 315, Qwen2-VL/Qwen2.5-VL. Official extraction can include the input; assistant-only audit also reported.",
-      "runner": "reproductions/run_sources/runs/ultrabreak_released_20261024/paper_run.py",
       "evidence": [
         "reproductions/results/ultrabreak_released/summary.json",
         "reproductions/results/ultrabreak_released/comparison.csv",
         "reproductions/results/ultrabreak_released/plan.json"
       ],
-      "exact_end_to_end_paper_reproduction_claimed": false
+      "exact_end_to_end_paper_reproduction_claimed": false,
+      "historical_runner": "reproductions/run_sources/runs/ultrabreak_released_20261024/paper_run.py",
+      "code_status": "removed",
+      "code_removed_on": "2026-11-03"
     },
     {
       "id": "ultrabreak_trained",
@@ -192,14 +194,16 @@
       "historical_run": "runs/ultrabreak_train_20261024",
       "assessment": "numerical_gap",
       "scope": "Fresh random image, 1300 updates, released executable math. Training completed; paper ASR not matched.",
-      "runner": "reproductions/run_sources/runs/ultrabreak_train_20261024/pipeline.py",
       "evidence": [
         "reproductions/results/ultrabreak_trained/summary.json",
         "reproductions/results/ultrabreak_trained/comparison.csv",
         "reproductions/results/ultrabreak_trained/plan.json",
         "reproductions/results/ultrabreak_trained/paper_code_audit.json"
       ],
-      "exact_end_to_end_paper_reproduction_claimed": false
+      "exact_end_to_end_paper_reproduction_claimed": false,
+      "historical_runner": "reproductions/run_sources/runs/ultrabreak_train_20261024/pipeline.py",
+      "code_status": "removed",
+      "code_removed_on": "2026-11-03"
     },
     {
       "id": "jip_table6",
@@ -208,7 +212,6 @@
       "historical_run": "runs/jip_asr_20261024",
       "assessment": "adapted_proxy",
       "scope": "Table 6 adaptation, 1100 responses (22 cells x 25 x 2 arms), historical LLaVA candidate; HarmBench replaces human labels.",
-      "runner": "attack_scripts/jip_asr_audit.py",
       "evidence": [
         "reproductions/results/jip_table6/summary.json",
         "reproductions/results/jip_table6/summary.md",
@@ -216,7 +219,10 @@
         "reproductions/results/jip_table6/manifest.json",
         "reproductions/results/jip_table6/runtime.json"
       ],
-      "exact_end_to_end_paper_reproduction_claimed": false
+      "exact_end_to_end_paper_reproduction_claimed": false,
+      "historical_runner": "attack_scripts/jip_asr_audit.py",
+      "code_status": "removed",
+      "code_removed_on": "2026-11-03"
     },
     {
       "id": "jip_table1",
@@ -225,12 +231,14 @@
       "historical_run": "runs/jip_table1_llava_20261024",
       "assessment": "blocked_missing_inputs",
       "scope": "Original Table 1 inputs unavailable: zero original cells executed; controls do not constitute reproduction.",
-      "runner": "attack_scripts/jip_table1_llava_reproduction.py",
       "evidence": [
         "reproductions/results/jip_table1/table1_status.json",
         "reproductions/results/jip_table1/paper_protocol.json"
       ],
-      "exact_end_to_end_paper_reproduction_claimed": false
+      "exact_end_to_end_paper_reproduction_claimed": false,
+      "historical_runner": "attack_scripts/jip_table1_llava_reproduction.py",
+      "code_status": "removed",
+      "code_removed_on": "2026-11-03"
     },
     {
       "id": "visualadv_released",
@@ -344,12 +352,14 @@
       "historical_run": "runs/ecso_official_repro",
       "assessment": "partial",
       "scope": "MM-SafetyBench eight malicious scenarios; SD_TYPO/TYPO/SD/direct text; report macro harmless rate.",
-      "runner": "defense_scripts/ecso_official_repro.py",
       "evidence": [
         "reproductions/results/ecso/summary.json",
         "reproductions/results/ecso/summary.md"
       ],
-      "exact_end_to_end_paper_reproduction_claimed": false
+      "exact_end_to_end_paper_reproduction_claimed": false,
+      "historical_runner": "defense_scripts/ecso_official_repro.py",
+      "code_status": "removed",
+      "code_removed_on": "2026-11-03"
     },
     {
       "id": "jailguard",

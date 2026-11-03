@@ -25,7 +25,7 @@ does not require editing the pipeline.
 
 ## Model loading (`multimodalmodels/`)
 Every model the repo uses — the eval target, the HarmBench judge, attack
-surrogates (UltraBreak, JPS, JailBound, VisualAdv, DeltaJP) and defense models
+surrogates (JPS, JailBound, VisualAdv, DeltaJP) and defense models
 (CIDER, JailGuard) — is loaded through `multimodalmodels/loaders.py`; nothing
 else calls `from_pretrained` / `torch.load` / `spacy.load`.
 - `multimodalmodels/registry.py` pins each HF model id to an exact revision
@@ -39,7 +39,7 @@ else calls `from_pretrained` / `torch.load` / `spacy.load`.
   2B/8B, and native-HF InternVL3 2B/8B targets. `multimodalmodels/surrogates.py`
   exposes the same families to the shared CE contract used by VisualAdv,
   DeltaJP, and HADES white-box via `--surrogate-profile`. Model-specific
-  JPS/UltraBreak/JailBound adapters are deliberately not inferred from
+  JPS/JailBound adapters are deliberately not inferred from
   target compatibility.
 
 ## Datasets (`core/datasets/`)
@@ -80,7 +80,6 @@ Import `core.attacks` to register them. Ported so far:
 | `FigStep` | — | Renders the declarative `statement` (falls back to `instruction`) above an empty numbered list; fixed incitement prompt. Config: `configs/attacks/FigStep.yaml`. |
 | `JOOD` | AdvBenchM | OOD-mixes the harmful item with a benign one. `aug` picks image mixing (`mixup`/`cutmix_original`/`cutmix_resizemix`) or text mixing (`textmix_*`). Builds one test case per (harmless item × λ); Pass@k scores "succeed on any mix". Config: `configs/attacks/JOOD.yaml`. |
 | `HADES` | HADES | The default runs 3,000 white-box epochs to learn a universal top-quarter patch toward a `Sure...` target, then applies it with the keyword-masked prompt. `HADES_official.yaml` instead replays released image steps 0–5 (`step: all`, Pass@6). |
-| `UltraBreak` | any (+ white base image) | **White-box, universal, transferable.** Optimizes ONE adversarial image on a Qwen2-VL-7B surrogate (`requires_surrogate`) with a semantic embedding-space loss + random patch transforms + TV, then pairs it with every query + Targeted Prompt Guidance. Optimized once and cached; `epochs` controls cost. Config: `configs/attacks/UltraBreak.yaml`, data under `data/UltraBreak/`. Needs `qwen-vl-utils`. |
 | `VisualAdv` | any (+ benign base image) | **White-box (foundational).** PGD-optimizes a perturbation on a benign image (`requires_surrogate`; LLaVA) so the model emits toxic strings from a derogatory corpus (CE loss); one universal image reused per behavior. `constrained` = L_inf-bounded. Config: `configs/attacks/VisualAdv.yaml`. |
 | `DeltaJP` | datasets with per-behavior images (AdvBenchM/HADES/MM-SafetyBench) | **White-box.** A universal L_inf perturbation (delta) added to each behavior's own image (`requires_surrogate`+`requires_images`), fit over a training subset toward affirmative targets, then applied per behavior. Paper: Niu et al. 2402.02309 (deltaJP). Config: `configs/attacks/DeltaJP.yaml`. |
 | `JPS` | AdvBench, HarmBench, MM-SafetyBench | **White-box, collaborative.** Co-optimizes a global 32/255 visual perturbation on Qwen2-VL and two textual steer prompts through the official feedback→summarize→revision loop. `JPS.yaml` requires the external upstream CSV/base image and uses Qwen2.5-14B-Instruct. Default target: `qwen2_vl_7b`. Needs `qwen-vl-utils`. |
@@ -90,7 +89,7 @@ Run stage 1: `python run_generate_test_cases.py --attack FigStep --dataset SafeB
 
 ## Compositions (`core/composition*.py`)
 
-`run_generate_composed_dataset.py` executes the versioned 18-recipe plan in
+`run_generate_composed_dataset.py` executes the versioned 8-recipe plan in
 `configs/compositions/jailbreak_dataset_v3.yaml`. `ComposedArtifact` carries the
 current text/images, while every `StageRecord` authenticates its input and
 output text hash, ordered image paths and SHA-256 values, effective config,
@@ -101,9 +100,6 @@ image SHA-256 values).
 Components that run an existing optimizer preserve its configured loop.
 Decomposed stages are separately labelled `adapted_decomposition`; the final
 artifact is always `adapted_composition`, never an official paper reproduction.
-UltraBreak inserts its trained patch into
-a protected side strip, CS-DJ contrast tile, or disjoint bottom region. A
-lineage-verified cache shares training across the eight execution groups.
 JOOD-Aug generates its configured candidates and chooses one by deterministic
 hash, not ASR. DeltaJP and VisualAdv are excluded by config validation.
 Periodic transactional checkpoints persist cases and lineage every 10 candidates
@@ -154,9 +150,6 @@ gated by `RUN_GPU_TESTS=1`.
   text-mix construction, reproducibility, requirement gating (no model).
 - `python -m core.tests.test_hades` — HADES masked-prompt construction and step
   selection against the real HADES data (no model).
-- `python -m core.tests.test_ultrabreak` — UltraBreak config/TPG and the
-  vendored semantic-loss / transform / TV utilities (no model; the optimization
-  runs on GPU with the Qwen2-VL surrogate).
 - `python -m core.tests.test_visual_adv` — VisualAdv config, corpus loading, and
   normalize round-trip (no model; the PGD runs on GPU with the LLaVA surrogate).
 - `python -m core.tests.test_delta_jp` — DeltaJP config and affirmative

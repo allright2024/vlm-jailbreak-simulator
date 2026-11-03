@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Start the exact 3,600-raw -> 3,000-final harmful-only composition run in a
+# Start the configured harmful-only composition run in a
 # detached session.  The worker performs CUDA/data/config preflight, executes
 # configured memory-bounded groups, validates them, and writes SUCCESS only after the
 # final merge passes validation.
@@ -20,7 +20,7 @@ Usage:
   bash attack_scripts/run_composed_dataset_3000_nohup.sh --dry-run
 
 Optional environment variables:
-  OUTPUT_ROOT  Dataset/output directory (default: runs/composed_jailbreak_3000_v3)
+  OUTPUT_ROOT  Dataset/output directory (default: runs/composed_jailbreak_pruned_20261103)
   CONFIG       Composition YAML (default: configs/compositions/jailbreak_dataset_v3.yaml)
   PYTHON       Python executable (worker defaults to the jb_env interpreter)
   LOG_FILE     Combined nohup log (default: <OUTPUT_ROOT>/nohup.log)
@@ -61,7 +61,7 @@ case "$MODE" in
     ;;
 esac
 
-RUN_ROOT="$(resolve_path "${OUTPUT_ROOT:-runs/composed_jailbreak_3000_v3}")"
+RUN_ROOT="$(resolve_path "${OUTPUT_ROOT:-runs/composed_jailbreak_pruned_20261103}")"
 CONFIG_PATH="$(resolve_path "${CONFIG:-configs/compositions/jailbreak_dataset_v3.yaml}")"
 LOG_PATH="$(resolve_path "${LOG_FILE:-$RUN_ROOT/nohup.log}")"
 PID_PATH="$(resolve_path "${PID_FILE:-$RUN_ROOT/nohup.pid}")"
@@ -183,7 +183,7 @@ fi
 
 existing_pid="$(read_pid)"
 if is_worker_pid "$existing_pid"; then
-  echo "A 3,000-sample run is already active for this output root (PID=$existing_pid)." >&2
+  echo "A configured run is already active for this output root (PID=$existing_pid)." >&2
   echo "Check it with: bash $LAUNCHER --status" >&2
   exit 4
 fi
@@ -192,7 +192,7 @@ mkdir -p "$RUN_ROOT" "$(dirname "$LOG_PATH")" "$(dirname "$PID_PATH")"
 timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 {
   echo
-  echo "[$timestamp] Launching composed 3,000-sample run"
+  echo "[$timestamp] Launching composed configured run"
   print_command
 } >> "$LOG_PATH"
 
@@ -215,7 +215,7 @@ if ! kill -0 "$pid" 2>/dev/null; then
   exit "$status"
 fi
 
-echo "Started the 3,000-sample run."
+echo "Started the configured run."
 echo "PID: $pid"
 echo "Output: $RUN_ROOT"
 echo "Log: $LOG_PATH"

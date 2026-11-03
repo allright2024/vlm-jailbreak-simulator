@@ -5,6 +5,8 @@
 대부분의 준비 단계는 데이터를 읽거나 다운로드하고, 추론·평가 단계는 GPU 또는 API를 사용한다.
 집계 검증만 필요하면 `python reproductions/verify.py`를 실행한다.
 
+UltraBreak, JIP, ECSO의 실행 코드는 삭제했으며 과거 결과만 보존한다.
+
 ## 공통 실행기
 
 저장소 루트에서 실행한다. `--help`로 해당 실행기의 단계와 출력 위치를 확인한다.
@@ -18,15 +20,12 @@
 | JOOD MiniGPT-4-7B | `attack_scripts/prepare_jood_minigpt4_assets.py`, `jood_minigpt4_target.py`, `jood_minigpt4_evaluate.py`, `jood_minigpt4_background.py`, `jood_minigpt4_dual_gpu.py` | 7범주 170문항; HF 후보 선택과 ASR 판정을 별도로 수행 |
 | CS-DJ | `attack_scripts/cs_dj_reproduction.py`, `cs_dj_onevision_reproduction.py` | 초기 GPT-4o 및 HF OneVision 실험용. 최종 원본 OneVision 결과는 아래 별도 실행 코드 사용 |
 | HADES | `attack_scripts/hades_reproduction_preparation.py` | 공식 입력 준비; 최종 원본 LLaVA 및 issue 14 검증은 아래 코드 사용 |
-| Jailbreak in Pieces | `attack_scripts/jailbreak_in_pieces_table6_reproduction.py`, `jip_asr_audit.py`, `jip_table1_llava_reproduction.py` | Table 6 변형과 자동 ASR; Table 1은 원본 입력 부족을 명시 |
-| UltraBreak | `attack_scripts/ultrabreak_table1_reproduction.py` | 일반 Table 1 실행기. 게시한 SafeBench-only 두 실험은 아래 보존 코드 사용 |
 | VisualAdv | `attack_scripts/visualadv_reproduction.py` | [전용 프로토콜](../image_attacks/visual_adv/REPRODUCTION.md), `configs/experiments/VisualAdv_paper.yaml` |
 | JailBound | `attack_scripts/jailbound_three_category_reproduction.py` 및 `jailbound_*` 검증 코드 | 자체 probe의 세 범주 실험; 논문 ASR과 동일한 의미로 취급하지 않음 |
 | AdaShield | `defense_scripts/adashield_official_repro.py` | FigStep/QR, vanilla/static/adaptive |
-| AsD | `defense_scripts/asd_official_repro.py` | SD_TYPO 및 별도 JIP 변형 |
+| AsD | `defense_scripts/asd_official_repro.py` | MM-SafetyBench SD_TYPO |
 | AsD 공개 패치 검증 | `defense_scripts/asd_released_patch_check.py` | 공식 직렬 실행과 배치 어댑터의 64개 입력 비교; `asd_official_repro.py --patch_path` 지원 |
 | CIDER | `defense_scripts/cider_official_repro.py` | threshold/detection/응답 ASR |
-| ECSO | `defense_scripts/ecso_official_repro.py` | 이미지 유형별 direct/ECSO harmless rate |
 | JailGuard | `defense_scripts/jailguard_official_repro.py`, `jailguard_official_repro_eval.py` | PL 검출기, MiniGPT-4, 공식 1,000개 |
 | VLMShield | `defense_scripts/setup_vlmshield.sh`, `vlmshield_official_repro.py` | 공개 classifier와 세 공개 평가 데이터셋 |
 | EchoSafe | `defense_scripts/prepare_echosafe_reproduction.py`, `echosafe_reproduction.py` | 외부 EchoSafe checkout을 사용한 Table 3 Gen 6범주 평가 |
@@ -36,14 +35,16 @@
 이번 게시에 추가된 MM-SafetyBench 감사 기록은 baseline 추론 진단이며,
 이 학습기의 완료된 실험 결과를 뜻하지 않는다.
 
-루트 `requirements.txt`는 공통 환경이다. 원본 LLaVA, JPS 및 UltraBreak 전용 실행기는
+루트 `requirements.txt`는 공통 환경이다. 원본 LLaVA 및 JPS 전용 실행기는
 별도 환경을 사용했다. 기록된 패키지를 공통 환경 위에 덮어 설치하지 않는다.
 `--help` 전에 import 또는 경로 검사를 수행하는 역사적 스크립트도 있다.
 API 기반 평가의 모델 이름은 당시 실행 기록이며 새 실행을 자동으로 예약하지 않는다.
 
 ## 보존한 원본 실행 코드
 
-`run_sources/`의 코드는 SHA-256으로 보존한 당시 실행 파일이다.
+`run_sources/`의 코드는 SHA-256으로 관리한다. JPS 평가 실행기의 Qwen 어댑터 import는
+공통 모듈 이동에 맞춰 수정했고, 이전 해시와 변경 사유를 `files.json`에 기록했다.
+그 외 보존 파일은 당시 바이트를 유지한다.
 실험 디렉터리를 기준으로 경로를 계산하므로, 그 위치에서 바로 실행하지 말고
 `restore_sources.py`로 `runs/<실험명>/` 구조에 복원한다.
 복원은 실행하지 않으며, 기존 파일과 내용이 다르면 전체 복원을 중단한다.
@@ -52,7 +53,7 @@ API 기반 평가의 모델 이름은 당시 실행 기록이며 새 실행을 �
 python reproductions/restore_sources.py --list
 python reproductions/restore_sources.py --recipe jps_train_20261024
 # 별도 작업용 checkout으로 복원할 수도 있다.
-python reproductions/restore_sources.py --recipe ultrabreak_train_20261024 \
+python reproductions/restore_sources.py --recipe jps_train_20261024 \
   --destination /path/to/vlm-jailbreak-simulator
 ```
 
@@ -62,8 +63,6 @@ python reproductions/restore_sources.py --recipe ultrabreak_train_20261024 \
 | `jps_train_20261024` | `train_run.py` | 위 실행기 자동 복원; TAP AdvBench subset 50, Qwen2-VL-7B, Qwen2.5-14B; original `clean.jpeg` 동일성 미확인 |
 | `cs_dj_reference_onevision_20261022` | `native_onevision.py`, `evaluate_cs_dj.py`, `orchestrate.py` | CS-DJ와 LLaVA-NeXT 참조 코드, Transformers 4.45.2; SDPA MATH; Beaver-Dam |
 | `hades_paper_llava15_20261022` | `paper_run.py` | HADES 원본 LLaVA와 공식 이미지; `hades_reproduction_preparation_20261022`의 준비 결과 필요 |
-| `ultrabreak_released_20261024` | `paper_run.py`, `safebench_only/evaluate_safebench.py` | UltraBreak at `c024bb42`; Transformers 4.51.3, GPU 호환 Torch; 공식 `outputs/ultrabreak.png` |
-| `ultrabreak_train_20261024` | `train.py`, `pipeline.py` | 공개 이미지 평가 실행기 자동 복원; 직접 학습 1,300회, 초기화/최종 이미지·입력 별도 준비 |
 
 HADES issue 14 검증 코드는
 `run_sources/reference_repos/HADES/white_box/issue14_consistent_probe.py`에 있다.
@@ -109,5 +108,5 @@ shell wrapper에 고정되어 있다. **복원 명령은 그 경로·환경·데
 
 새 실행은 과거 결과 디렉터리에 섞지 않는다. 평가 분모, 판정기, 입력 추출 방식,
 학습/평가 분할을 바꾸면 별도 실험으로 기록한다. 특히 HADES 50개 검증,
-JPS의 원본 질문 판정, UltraBreak의 응답 토큰만 판정, JailBound 비거절률은
+JPS의 원본 질문 판정과 JailBound 비거절률은
 각각 해당 논문의 전체 평가와 구분해야 한다.

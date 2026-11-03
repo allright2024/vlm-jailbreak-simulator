@@ -68,7 +68,7 @@ _TRANSACTION_FILE = ".composition_metadata_transaction.json"
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=DEFAULT_CONFIG)
-    parser.add_argument("--save-dir", default="runs/composed_jailbreak_v3")
+    parser.add_argument("--save-dir", default="runs/composed_jailbreak_pruned_20261103")
     parser.add_argument(
         "--recipes",
         help="comma-separated recipe IDs (default: all configured recipes)",

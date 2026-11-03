@@ -11,7 +11,6 @@ from verify import ROOT, verify
 
 DEPENDENCIES = {
     "jps_train_20261024": ["jps_paper_20261024"],
-    "ultrabreak_train_20261024": ["ultrabreak_released_20261024"],
 }
 
 

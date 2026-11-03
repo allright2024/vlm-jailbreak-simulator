@@ -1,6 +1,6 @@
 # VisualAdv in TRANSFER mode: craft the universal image on a Qwen2-VL-7B
 # surrogate (teacher-forced CE on the derogatory corpus), then evaluate on LLaVA.
-# Same surrogate->target setup as UltraBreak/JPS.
+# Same surrogate->target setup as JPS.
 surrogate_backend: qwen2
 surrogate: Qwen/Qwen2-VL-7B-Instruct
 surrogate_revision: eed13092ef92e448dd6875b2a00151bd3f7db0ac

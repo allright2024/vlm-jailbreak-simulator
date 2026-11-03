@@ -34,8 +34,11 @@ def verify(root: Path = ROOT) -> dict:
         if experiment["id"] in ids:
             raise ValueError(f"Duplicate experiment: {experiment['id']}")
         ids.add(experiment["id"])
-        if not (root / experiment["runner"]).is_file():
-            raise ValueError(f"Missing runner: {experiment['runner']}")
+        if experiment.get("code_status") == "removed":
+            if experiment.get("runner") or not experiment.get("historical_runner") or not experiment.get("code_removed_on"):
+                raise ValueError(f"Incomplete removed-code record: {experiment['id']}")
+        elif not experiment.get("runner") or not (root / experiment["runner"]).is_file():
+            raise ValueError(f"Missing runner: {experiment.get('runner')}")
         if not experiment["evidence"] or not set(experiment["evidence"]) <= paths:
             raise ValueError(f"Missing evidence: {experiment['id']}")
     return {"experiments": len(ids), "verified_files": len(paths), "status": "passed"}

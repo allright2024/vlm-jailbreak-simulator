@@ -8,7 +8,7 @@ that *provides* that loss (the surrogate) can be:
     white-box attack (the original behavior).
   * ``qwen2``  -> a different model (Qwen2-VL-7B-Instruct): the image is crafted
     on Qwen2-VL and then evaluated on LLaVA, i.e. a black-box *transfer* attack,
-    the same surrogate->target setup UltraBreak / JPS use.
+    the same surrogate->target setup JPS use.
 
 Both backends expose one small interface so the attacks are backend-agnostic:
 
@@ -79,16 +79,15 @@ class _LlavaCE:
 class _Qwen2CE:
     """Transfer backend: Qwen2-VL-7B surrogate with a teacher-forced CE loss.
 
-    Reuses UltraBreak's ``Qwen2Adapter`` for the differentiable patchify + forward
-    plumbing, but computes a plain next-token CE on the target (not UltraBreak's
-    semantic patch loss), matching what VisualAdv/DeltaJP optimize on LLaVA.
+    Uses the shared ``Qwen2Adapter`` for differentiable patchification and
+    computes next-token CE, matching what VisualAdv/DeltaJP optimize on LLaVA.
     """
 
     backend = "qwen2"
 
     def __init__(self, model_id: str = "Qwen/Qwen2-VL-7B-Instruct", image_size=(336, 336),
                  revision=None):
-        from multi_attacks.ultrabreak.ultrabreak_adapter import Qwen2Adapter
+        from multimodalmodels.qwen2_adapter import Qwen2Adapter
         self.ad = Qwen2Adapter(
             model_id, image_size=image_size, patch_only=False, revision=revision
         )

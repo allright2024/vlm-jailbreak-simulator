@@ -49,16 +49,8 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
             resolve_path(c.get("image_path", "data/FORCE/clean.jpeg")),
             resolve_path(c.get("target_path", "data/VisualAdv/derogatory_corpus.csv")),
         ]
-    if name == "UltraBreak":
-        return [
-            resolve_path(c.get(
-                "train_config",
-                "data/UltraBreak/train_configs/safebench_white_force_jailbroken_mode.csv",
-            )),
-            resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg")),
-        ]
     if name == "JPS":
-        paths = [resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg"))]
+        paths = [resolve_path(c.get("base_image", "data/JPS/clean.jpeg"))]
         train_csv = c.get("train_csv")
         if train_csv:
             paths.append(resolve_path(train_csv))
@@ -70,13 +62,6 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
         paths = [resolve_path(c.get("image_dir", "data/CS-DJ/llava_images"))]
         if c.get("strict_font") and c.get("font_path"):
             paths.append(resolve_path(c["font_path"]))
-        return paths
-    if name == "JailbreakInPieces":
-        paths = [resolve_path(c.get("base_image", "data/UltraBreak/images/white.jpeg"))]
-        if str(c.get("target_mode", "behavior")).lower() == "fixed":
-            paths.append(resolve_path(c.get(
-                "target_image", "data/JailbreakInPieces/meth_pill.png"
-            )))
         return paths
     if name == "JailBound":
         artifact = c.get("boundary_artifact")
@@ -135,4 +120,4 @@ def require_data(
 
 
 def all_data_available() -> bool:
-    return not missing_data(DATASET_LAYOUT, ("VisualAdv", "UltraBreak", "JPS", "DeltaJP", "JOOD"))
+    return not missing_data(DATASET_LAYOUT, ("VisualAdv", "JPS", "DeltaJP", "JOOD"))

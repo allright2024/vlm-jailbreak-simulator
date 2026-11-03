@@ -1,12 +1,9 @@
-"""Qwen2-VL surrogate adapter for UltraBreak.
+"""Shared Qwen2-VL chat preprocessing and differentiable patchification.
 
-Ported from the official UltraBreak (kaiyuanCui/UltraBreak, optimisation/
-base_adapter.py + qwen2_adapter.py), MIT License. The adapter embeds the
-adversarial patch into Qwen2-VL's patchified ``pixel_values`` (replicating the
-processor's exact reshape), augments the query with Targeted Prompt Guidance,
-and exposes ``compute_loss`` (semantic loss) and ``generate``.
-
-Behavior follows the original; only imports are adapted to the vendored utils.
+The model preprocessing originated in kaiyuanCui/UltraBreak's MIT-licensed
+base_adapter.py and qwen2_adapter.py. JPS-specific chat supervision was added
+by this project. Attack-specific semantic loss and random patch placement
+are not part of this shared adapter.
 """
 
 from __future__ import annotations
@@ -15,11 +12,10 @@ import base64
 import io
 
 import torch
-import torch.nn.functional as F
 from PIL import Image
 
-from .ultrabreak_utils import (OPENAI_CLIP_MEAN, OPENAI_CLIP_STD,
-                               apply_random_patch, semantic_similarity_loss)
+OPENAI_CLIP_MEAN = (0.48145466, 0.4578275, 0.40821073)
+OPENAI_CLIP_STD = (0.26862954, 0.26130258, 0.27577711)
 
 
 class Qwen2Adapter:
@@ -89,7 +85,7 @@ class Qwen2Adapter:
     def process_jps_target(self, image_path, prompt_text, target_text):
         """Tokenize JPS's exact user(image+prompt) -> assistant(target) chat.
 
-        Unlike UltraBreak's line-wise target appending, official JPS locates the
+        Official JPS locates the
         assistant-role boundary in Qwen's full chat template and supervises only
         assistant target tokens before ``<|im_end|>``.
         """
@@ -165,35 +161,7 @@ class Qwen2Adapter:
         return patches.reshape(grid_t * grid_h * grid_w,
                                channel * temporal_patch_size * patch_size * patch_size)
 
-    def apply_patch(self, image_tensor_batch, image_grid_thw, patch):
-        B, N, D = image_tensor_batch.shape
-        while patch.dim() > 3:
-            patch = patch.squeeze(0)
-        if self.patch_only:
-            transformed = self.preprocess_patched(patch, image_grid_thw)
-            return transformed.unsqueeze(0).expand(B, -1, -1)
-        empty = torch.full((3, self.image_size[0], self.image_size[1]), -1.0,
-                           device=patch.device, dtype=patch.dtype, requires_grad=True)
-        patched_img = apply_random_patch(empty, patch, scale_range=(0.8, 1.2), rotation_range=(-15, 15))
-        transformed = self.preprocess_patched(patched_img, image_grid_thw)
-        mask = (transformed != -1.0).float()
-        tb = transformed.unsqueeze(0).expand(B, -1, -1)
-        mb = mask.unsqueeze(0).expand(B, -1, -1)
-        return image_tensor_batch * (1 - mb) + tb * mb
 
-    def compute_loss(self, target, patch, suffix="", print_probs=False):
-        input_ids, labels, pixel_values, image_grid_thw, attention_mask, weights = self.process_target(
-            target["image"], target["text"] + suffix, target["target"], target["keywords"].split(" "))
-        embedding_matrix = self.model.get_input_embeddings().weight
-        if self.patch_only:
-            mean = torch.tensor(OPENAI_CLIP_MEAN).view(-1, 1, 1).to(self.device)
-            std = torch.tensor(OPENAI_CLIP_STD).view(-1, 1, 1).to(self.device)
-            patch = (patch - mean) / std
-        patched = self.apply_patch(pixel_values.unsqueeze(0), image_grid_thw[0], patch)
-        outputs = self.model(input_ids=input_ids, pixel_values=patched,
-                             image_grid_thw=image_grid_thw, attention_mask=attention_mask)
-        return semantic_similarity_loss(outputs.logits, labels, embedding_matrix,
-                                        weights=weights.unsqueeze(0), mode="attention", verbose=print_probs)
 
     @torch.no_grad()
     def generate(self, prompt, image_path, max_new_tokens=512):

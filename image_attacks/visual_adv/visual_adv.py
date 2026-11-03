@@ -141,8 +141,7 @@ class VisualAdvAttack(Attack):
         ]
         if self.surrogate_backend in {"qwen2", "qwen2-vl", "qwen"}:
             files.extend([
-                os.path.join(repo_root, "multi_attacks", "ultrabreak", "ultrabreak_adapter.py"),
-                os.path.join(repo_root, "multi_attacks", "ultrabreak", "ultrabreak_utils.py"),
+                os.path.join(repo_root, "multimodalmodels", "qwen2_adapter.py"),
             ])
         elif self.surrogate_backend == "llava":
             files.extend([

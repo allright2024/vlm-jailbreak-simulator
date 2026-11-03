@@ -3,12 +3,10 @@ import yaml
 
 from .adashield import AdaShieldDefense
 from .asd import AsDDefense
-from .ecso import ECSODefense
 
 DEFENSE_REGISTRY = {
     "AdaShield": AdaShieldDefense,
     "AsD": AsDDefense,
-    "ECSO": ECSODefense,
 }
 
 try:
