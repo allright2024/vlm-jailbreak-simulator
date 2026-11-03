@@ -95,16 +95,13 @@ ASR은 낮을수록, harmless rate와 accuracy는 높을수록 좋다.
   JPS import 경로 수정의 이전 해시·변경 사유는 `files.json`에 기록했다.
 
 ```bash
-# CPU 파일 검증만 수행; 모델 로딩, 네트워크, API 호출 없음.
-python reproductions/verify.py
-
 # 보존된 실행 코드의 목록과 안전한 복원. 기존 파일이 다르면 중단한다.
 python reproductions/restore_sources.py --list
 python reproductions/restore_sources.py --recipe jps_train_20261024
 ```
 
-검증 명령은 공개 파일의 무결성과 연결을 확인한다. 원시 응답을 다시 판정하거나
-논문 성능을 새로 입증하는 명령이 아니다. `runs/`, 데이터, 이미지, 모델 가중치,
+복원 명령은 복사할 실행 파일의 해시와 기존 파일 충돌을 확인한다.
+`runs/`, 데이터, 이미지, 모델 가중치,
 원시 타깃 응답과 API 로그는 이 결과 묶음에 포함하지 않는다.
 원본 집계 파일의 절대 경로와 일부 로컬 링크는 당시 실행을 기록한 것으로,
 새 머신에서 유효한 경로라는 뜻은 아니다.

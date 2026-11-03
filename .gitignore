@@ -61,3 +61,14 @@ asr_results*.txt
 !/reproductions/results/**
 !/reproductions/run_sources/runs/
 !/reproductions/run_sources/runs/**
+
+# Local-only unit/regression tests and repository verification helpers.
+**/tests/
+**/test/
+**/test_*.py
+**/*_test.py
+**/tests.py
+**/conftest.py
+/tox.ini
+/reproductions/verify.py
+/reproductions/validation.json

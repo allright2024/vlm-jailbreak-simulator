@@ -4,8 +4,7 @@ The eval target, the judge, attack surrogates (JPS, JailBound,
 VisualAdv, DeltaJP) and defense models (CIDER, JailGuard) all call these
 helpers instead of ``*.from_pretrained`` / ``torch.load`` / ``spacy.load``
 directly, so model ids, pinned revisions, dtype and device placement live in
-one place. ``core/tests/test_model_loading.py`` enforces that no code outside
-``multimodalmodels/`` loads a model itself.
+one place.
 
 When ``revision`` is None, the pinned revision from ``registry.py`` is used for
 registered model ids (local paths and unregistered ids load as given).

@@ -100,8 +100,3 @@ never accepted as a completed 5,000-step image.
 
 Outputs: `protocol.json`, `audit.json`, image manifests, `loss.jsonl`, per-cell
 `responses.jsonl`/`detoxify.jsonl`, **`table2.csv`** and **`report.md`**.
-
-```bash
-PYTHONNOUSERSITE=1 ~/.conda/envs/jb_env/bin/python -m pytest \
-  -q -c /dev/null -p no:cacheprovider attack_scripts/tests/test_visualadv_reproduction.py
-```

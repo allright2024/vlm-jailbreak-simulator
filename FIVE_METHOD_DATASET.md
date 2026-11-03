@@ -121,8 +121,3 @@ source ID, recipe, methods, split, image hashes, text line bounds, JOOD operatio
 and JPS artifact provenance. `parents.json` retains original scoring truth.
 Each phase writes `manifest.json`, `qc.json`, `status.json` and per-case JSON
 checkpoints. Preview images are separate from the 3,000 production quota.
-
-```bash
-PYTHONNOUSERSITE=1 /home/jovyan/.conda/envs/jb_env/bin/python -m unittest discover \
-  -s attack_scripts/tests -p 'test_five_method_*.py' -v
-```

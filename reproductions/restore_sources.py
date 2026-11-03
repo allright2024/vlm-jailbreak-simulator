@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 from pathlib import Path
 
-from verify import ROOT, verify
+ROOT = Path(__file__).resolve().parents[1]
 
 DEPENDENCIES = {
     "jps_train_20261024": ["jps_paper_20261024"],
@@ -15,7 +16,11 @@ DEPENDENCIES = {
 
 
 def restore(recipe: str, destination: Path, root: Path = ROOT) -> int:
-    verify(root)
+    root = root.resolve()
+    inventory = {
+        entry["path"]: entry
+        for entry in json.loads((root / "reproductions/files.json").read_text())["files"]
+    }
     source = root / "reproductions/run_sources/runs"
     available = {p.name for p in source.iterdir() if p.is_dir()}
     if recipe not in available:
@@ -27,6 +32,12 @@ def restore(recipe: str, destination: Path, root: Path = ROOT) -> int:
         for path in sorted((source / name).rglob("*")):
             if not path.is_file():
                 continue
+            entry = inventory.get(path.relative_to(root).as_posix())
+            if not entry or not path.resolve().is_relative_to(root):
+                raise ValueError(f"Unlisted archive source: {path}")
+            data = path.read_bytes()
+            if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
+                raise ValueError(f"Archive checksum mismatch: {path}")
             target = destination / "runs" / path.relative_to(source)
             if not target.resolve().is_relative_to(destination):
                 raise ValueError(f"Destination escapes workspace: {target}")

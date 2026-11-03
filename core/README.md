@@ -33,8 +33,6 @@ else calls `from_pretrained` / `torch.load` / `spacy.load`.
   given.
 - `multimodalmodels/__init__.py` is lazy: importing it (or reading a pin) does
   not import transformers; `from multimodalmodels import LLaVA_v1_5` still works.
-- `core/tests/test_model_loading.py` fails if code outside `multimodalmodels/`
-  loads a model, and checks the pins against the local HF cache.
 - `core/targets/native_hf.py` registers LLaVA-1.6/LLaVA-NeXT, Qwen3-VL
   2B/8B, and native-HF InternVL3 2B/8B targets. `multimodalmodels/surrogates.py`
   exposes the same families to the shared CE contract used by VisualAdv,
@@ -132,31 +130,3 @@ the normal three-stage and defense paths are unchanged.
 ## Registries (`core/registry.py`)
 `@register_attack("Name")` / `@register_dataset("Name")`; resolve with
 `get_attack` / `get_dataset`. Import `core.datasets` to register loaders.
-
-## Tests
-
-`pytest` always runs the code-only suite. Tests marked `data` run automatically
-when the complete external data tree is present; GPU tests remain explicitly
-gated by `RUN_GPU_TESTS=1`.
-- `python -m core.tests.test_core_contract` — full
-  dataset → attack → target → judge → JSONL flow with stand-ins (no models).
-- `python -m core.tests.test_datasets` — every loader against the real files
-  in `data/`: counts, unique ids, expected fields, image paths, eval_type split.
-- `python -m core.tests.test_pipeline` — the three stages with stand-ins,
-  including a blocking defense and Pass@k.
-- `python -m core.tests.test_figstep` — FigStep rendering, schema, and the
-  statement/instruction fallback (no model).
-- `python -m core.tests.test_jood` — AdvBenchM loader + JOOD image-mix and
-  text-mix construction, reproducibility, requirement gating (no model).
-- `python -m core.tests.test_hades` — HADES masked-prompt construction and step
-  selection against the real HADES data (no model).
-- `python -m core.tests.test_visual_adv` — VisualAdv config, corpus loading, and
-  normalize round-trip (no model; the PGD runs on GPU with the LLaVA surrogate).
-- `python -m core.tests.test_delta_jp` — DeltaJP config and affirmative
-  target; the universal-delta PGD runs on GPU with the LLaVA surrogate.
-- `python -m core.tests.test_jps` — JPS target preprocessing/prompt invariance,
-  3-agent role and token-budget contract, strict output parsing, config guards,
-  and Qwen2-VL target registration (no model).
-- `python -m core.tests.test_jailbound` — layer selection, logistic boundary
-  fitting, published losses, joint image/text gradients, L-inf projection, and
-  boundary-artifact lineage with a tiny model-free adapter.
