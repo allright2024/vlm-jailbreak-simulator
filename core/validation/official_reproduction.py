@@ -36,9 +36,9 @@ PROFILES = {
             "official_target_model": "gpt-4-turbo-2024-04-09",
         },
         "paths": [
-            "data/AdvBenchM/images/harmful", "data/AdvBenchM/images/harmless",
-            "data/AdvBenchM/prompts/all_instructions",
-            "data/AdvBenchM/prompts/eval_all_instructions",
+            "data/AdvBenchM/jood_subset/images/harmful", "data/AdvBenchM/jood_subset/images/harmless",
+            "data/AdvBenchM/jood_subset/prompts/all_instructions",
+            "data/AdvBenchM/jood_subset/prompts/eval_all_instructions",
         ],
         "env": ["OPENAI_API_KEY", "HF_TOKEN"],
     },

@@ -16,11 +16,15 @@ vlm-jailbreak-data/
 ├── advbench/
 │   └── harmful_behaviors.csv
 ├── AdvBenchM/
-│   ├── images/{harmful,harmless}/
-│   └── prompts/
-│       ├── eval_all_instructions/
-│       ├── all_instructions/
-│       └── all_instructions_harmful_annotated/
+│   ├── jood_subset/               # existing AdvBenchM loader: 170 questions
+│   │   ├── images/{harmful,harmless,harmless_text}/
+│   │   ├── prompts/{eval_all_instructions,all_instructions,all_instructions_harmful_annotated}/
+│   │   ├── scenario_def.json
+│   │   └── scenario_repr.json
+│   └── original_release/          # independent public release; optional
+│       ├── dataset/{advbench,advimage}/
+│       ├── instructions.jsonl     # 246 categorized records (231 unique texts)
+│       └── images.jsonl           # 160 primary images in 8 categories
 ├── CS-DJ/
 │   ├── llava_images/               # LLaVA-CC3M-Pretrain-595K images
 │   ├── instructions/               # five JSON files from the pinned repo
@@ -41,6 +45,19 @@ vlm-jailbreak-data/
 └── VisualAdv/
     └── derogatory_corpus.csv
 ```
+
+The dataset name `AdvBenchM` continues to load JOOD's 170 questions across
+7 categories, with one representative harmful image per category. Collecting
+`original_release/` does not switch the experiment to a different dataset.
+Its 246 records and 160 images form category-level pools, not one-to-one pairs.
+
+The loader, path resolver and data validator also accept older Drive bundles
+with `AdvBenchM/{prompts,images,scenario_*.json}` directly under the root.
+For migrated local data, relative compatibility symlinks at those old paths
+keep existing experiment manifests and absolute image paths usable. New
+configurations use `AdvBenchM/jood_subset/`. Historical settings and results
+retain the paths recorded when they were produced. The published `data.zip`
+has not been updated by this local migration.
 
 VisualAdv reads its optimization-target corpus from
 `data/VisualAdv/derogatory_corpus.csv`; its base image remains
