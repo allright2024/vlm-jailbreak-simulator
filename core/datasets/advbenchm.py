@@ -1,7 +1,8 @@
-"""AdvBench-M loader: data/AdvBenchM/ -> list[Behavior] (JOOD's benchmark).
+"""JOOD subset loader: data/AdvBenchM/jood_subset/ -> list[Behavior].
 
-AdvBench-M (from the ImgJP paper, 2402.02309) groups harmful instructions into
-7 scenarios, each with a single representative harmful image. For every
+JOOD's subset of AdvBench-M groups harmful instructions into 7 scenarios,
+each with a single representative harmful image. This is distinct from the
+8-scenario ImgJP public release stored in ``original_release/``. For every
 instruction index it ships three aligned prompt variants:
 
   eval_all_instructions/<scenario>.json          -> the ORIGINAL harmful request
@@ -17,7 +18,7 @@ prompt variants are kept in ``meta`` for the JOOD attack to consume. The
 scenario's harmful image is the single entry in ``images``.
 
 170 behaviors across 7 scenarios. The harmless image pool
-(data/AdvBenchM/images/harmless) is a shared resource the JOOD attack reads via
+(data/AdvBenchM/jood_subset/images/harmless) is a shared resource the JOOD attack reads via
 its config, not a per-behavior field.
 """
 
@@ -28,6 +29,7 @@ import os
 import re
 
 from ..dataset import Dataset
+from ..paths import advbenchm_jood_root
 from ..schema import Behavior, EvalType
 from ..registry import register_dataset
 
@@ -37,6 +39,9 @@ _HARMFUL_RE = re.compile(r"<HARMFUL>(.*?)</HARMFUL>", re.DOTALL)
 @register_dataset("AdvBenchM")
 class AdvBenchMDataset(Dataset):
     dir_name = "AdvBenchM"
+
+    def __init__(self, data_dir=None):
+        super().__init__(data_dir=advbenchm_jood_root(data_dir))
 
     def _instructions(self, kind: str, scenario: str) -> list[str]:
         path = self.path("prompts", kind, f"{scenario}.json")

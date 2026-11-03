@@ -298,7 +298,7 @@ harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니�
 | CLI 데이터셋 이름 | 로더 | 주요 입력 경로: 데이터 루트 기준 | 기대 행 수 |
 | --- | --- | --- | ---: |
 | `AdvBench` | [advbench.py](core/datasets/advbench.py) | `advbench/harmful_behaviors.csv` | 520 |
-| `AdvBenchM` | [advbenchm.py](core/datasets/advbenchm.py) | `AdvBenchM/prompts/`, `AdvBenchM/images/` | 170 |
+| `AdvBenchM` | [advbenchm.py](core/datasets/advbenchm.py) | `AdvBenchM/jood_subset/` (JOOD subset; separate from `original_release/`) | 170 |
 | `CS-DJ` | [cs_dj.py](core/datasets/cs_dj.py) | `CS-DJ/instructions/*.json` | 750 |
 | `HADES` | [hades.py](core/datasets/hades.py) | `HADES/hades.csv` 및 참조 이미지 | 750 |
 | `HarmBench` | [harmbench.py](core/datasets/harmbench.py) | `HarmBench/harmbench_standard.json` | 200 |

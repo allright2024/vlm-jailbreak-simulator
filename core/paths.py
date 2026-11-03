@@ -25,6 +25,39 @@ def _absolute(path: Pathish) -> str:
 DATA_ROOT = _absolute(os.environ.get(DATA_ROOT_ENV, os.path.join(REPO_ROOT, "data")))
 
 
+def advbenchm_jood_root(data_dir: Pathish | None = None) -> str:
+    """Select JOOD's subset, accepting the old flat data bundle as well.
+
+    An explicit directory may be either AdvBenchM/ or its jood_subset/.
+    The independent original_release/ is never selected automatically.
+    """
+    root = _absolute(data_dir) if data_dir is not None else os.path.join(DATA_ROOT, "AdvBenchM")
+    if os.path.basename(root) == "jood_subset":
+        return root
+    subset = os.path.join(root, "jood_subset")
+    if os.path.isdir(subset):
+        return subset
+    if os.path.isdir(os.path.join(root, "prompts")):
+        return root
+    return subset
+
+
+def resolve_data_path(relative: Pathish, data_root: Pathish | None = None) -> str:
+    """Resolve a data-relative path, including old/new AdvBenchM layouts."""
+    root = _absolute(data_root) if data_root is not None else DATA_ROOT
+    normalized = os.path.normpath(os.fspath(relative))
+    parts = normalized.split(os.sep)
+    if len(parts) > 1 and parts[0] == "AdvBenchM":
+        if parts[1] == "jood_subset":
+            tail = parts[2:]
+        elif parts[1] in {"prompts", "images", "scenario_def.json", "scenario_repr.json"}:
+            tail = parts[1:]
+        else:
+            return os.path.join(root, normalized)
+        return os.path.join(advbenchm_jood_root(os.path.join(root, "AdvBenchM")), *tail)
+    return os.path.join(root, normalized)
+
+
 def resolve_path(path: Pathish) -> str:
     """Resolve absolute, ``data/...``, and repository-relative paths.
 
@@ -40,7 +73,7 @@ def resolve_path(path: Pathish) -> str:
         return DATA_ROOT
     prefix = "data" + os.sep
     if normalized.startswith(prefix):
-        return os.path.join(DATA_ROOT, normalized[len(prefix):])
+        return resolve_data_path(normalized[len(prefix):])
     return os.path.join(REPO_ROOT, normalized)
 
 

@@ -136,7 +136,7 @@ class DatasetBuilder:
         weight = float(cfg.get("source_weight", 0.7))
         if not math.isfinite(weight) or not 0 < weight < 1:
             raise ValueError("JOOD source_weight must be strictly between 0 and 1")
-        pool = Path(resolve_path(cfg.get("harmless_dir", "data/AdvBenchM/images/harmless")))
+        pool = Path(resolve_path(cfg.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless")))
         files = sorted(p for p in pool.iterdir()
                        if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg"})
         if not files:

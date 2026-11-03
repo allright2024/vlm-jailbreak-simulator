@@ -13,6 +13,8 @@ import os
 
 def _image_path(path: str, data_root: str, repo_root: str) -> str:
     """Resolve references against the selected root, not import-time globals."""
+    from core.paths import resolve_data_path
+
     value = os.path.expanduser(os.fspath(path))
     if os.path.isabs(value):
         return os.path.abspath(value)
@@ -21,7 +23,7 @@ def _image_path(path: str, data_root: str, repo_root: str) -> str:
         return data_root
     prefix = "data" + os.sep
     if normalized.startswith(prefix):
-        return os.path.join(data_root, normalized[len(prefix):])
+        return resolve_data_path(normalized[len(prefix):], data_root)
     return os.path.join(repo_root, normalized)
 
 
@@ -52,6 +54,7 @@ def main() -> None:
     import core.datasets  # noqa: F401
     from core import DATA_ROOT, REPO_ROOT, get_dataset
     from core.data import DATASET_LAYOUT, EXPECTED_COUNTS
+    from core.paths import resolve_data_path
 
     data_root = (
         os.path.abspath(os.path.expanduser(args.data_root))
@@ -64,9 +67,9 @@ def main() -> None:
         raise SystemExit(f"Unknown dataset(s): {', '.join(unknown)}")
 
     missing = sorted({
-        os.path.join(data_root, relative)
+        resolve_data_path(relative, data_root)
         for name in datasets for relative in DATASET_LAYOUT[name]
-        if not os.path.exists(os.path.join(data_root, relative))
+        if not os.path.exists(resolve_data_path(relative, data_root))
     })
     if missing:
         print(f"Data root: {data_root}")

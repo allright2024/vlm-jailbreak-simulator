@@ -6,18 +6,18 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
-from .paths import DATA_ROOT, DATA_ROOT_ENV, resolve_path
+from .paths import DATA_ROOT, DATA_ROOT_ENV, resolve_data_path, resolve_path
 
 # Minimal layout needed to load each dataset. Deep validation additionally
 # loads every row and checks all referenced images.
 DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
     "AdvBench": ("advbench/harmful_behaviors.csv",),
     "AdvBenchM": (
-        "AdvBenchM/prompts/eval_all_instructions",
-        "AdvBenchM/prompts/all_instructions",
-        "AdvBenchM/prompts/all_instructions_harmful_annotated",
-        "AdvBenchM/images/harmful",
-        "AdvBenchM/images/harmless",
+        "AdvBenchM/jood_subset/prompts/eval_all_instructions",
+        "AdvBenchM/jood_subset/prompts/all_instructions",
+        "AdvBenchM/jood_subset/prompts/all_instructions_harmful_annotated",
+        "AdvBenchM/jood_subset/images/harmful",
+        "AdvBenchM/jood_subset/images/harmless",
     ),
     "CS-DJ": ("CS-DJ/instructions",),
     "HADES": ("HADES/hades.csv",),
@@ -38,7 +38,7 @@ EXPECTED_COUNTS = {
 
 
 def _data_path(relative: str) -> str:
-    return os.path.join(DATA_ROOT, relative)
+    return resolve_data_path(relative)
 
 
 def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list[str]:
@@ -83,7 +83,7 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
         train_name = str(c.get("train_dataset", "HADES"))
         return [_data_path(p) for p in DATASET_LAYOUT.get(train_name, ())]
     if name == "JOOD":
-        return [resolve_path(c.get("harmless_dir", "data/AdvBenchM/images/harmless"))]
+        return [resolve_path(c.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless"))]
     return []
 
 

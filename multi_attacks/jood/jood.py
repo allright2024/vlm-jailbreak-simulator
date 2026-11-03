@@ -32,7 +32,7 @@ import re
 import numpy as np
 
 from core.attack import Attack
-from core.dataset import DATA_ROOT, REPO_ROOT
+from core.dataset import REPO_ROOT
 from core.paths import resolve_path
 from core.registry import register_attack
 from core.schema import Behavior, TestCase
@@ -86,7 +86,7 @@ class JOODAttack(Attack):
                 f"Image: {sorted(ju.MIX_FUNCS)}; text: {sorted(ju.TEXTMIX_FUNCS)}"
             )
         # harmless pool (shared resource); default to AdvBenchM's.
-        hd = self.config.get("harmless_dir", os.path.join(DATA_ROOT, "AdvBenchM", "images", "harmless"))
+        hd = self.config.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless")
         self.harmless_dir = resolve_path(hd)
         subset = self.config.get("harmless_subset")  # None = all
         names = sorted(f for f in os.listdir(self.harmless_dir) if f.lower().endswith((".png", ".jpg", ".jpeg")))
