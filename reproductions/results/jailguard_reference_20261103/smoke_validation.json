@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "samples": 4,
+  "responses": 32,
+  "criteria": "Original source paths, 280 actual int8 layers, CPU FP32 vision, eight sequential Chat calls, finite detector, nondegenerate benign responses; no accuracy threshold.",
+  "median_seconds_per_item": 222.82530662696809
+}

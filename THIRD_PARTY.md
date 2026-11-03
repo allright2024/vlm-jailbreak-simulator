@@ -64,8 +64,9 @@ is retained for JPS and CE surrogate clients. Attack-specific optimization,
 random patch placement and semantic-loss code have been removed.
 
 Data-only experiment settings are under `configs/experiments/reproduction_settings/`.
-Dedicated reproduction wrappers, archived source copies and the result archive
-have been removed.
+Dedicated reproduction wrappers, selected project-authored runner snapshots and
+the result archive are preserved under `reproductions/` on this branch.
+Original third-party repositories and assets must be obtained separately.
 References to external sources, checkpoints, fonts and data in those records
 do not redistribute the assets or change their original terms. EchoSafe's
 historical settings refer to [EchoSafe-MLLM/EchoSafe](https://github.com/EchoSafe-MLLM/EchoSafe)

@@ -1,0 +1,41 @@
+{
+  "checked_utc": "2026-11-03T09:20:17.898525+00:00",
+  "official_commit": "419e1d3d08f4d02998a11a687f925518d2d5dd0c",
+  "tracked_source_modified": false,
+  "source_hashes_verified": 58,
+  "main_copy_change": "GPU index selection only",
+  "helper_copy_change": "Unused Gradio import only",
+  "dataset_size": 1000,
+  "labels": {
+    "Typographic+Stable Diffusion": 100,
+    "Typographic+Blank Image": 100,
+    "Visual Adversarial Attack": 200,
+    "Benign": 600
+  },
+  "completed": 139,
+  "per_shard": [
+    71,
+    68
+  ],
+  "last_completed_serials": [
+    140,
+    135
+  ],
+  "processes": {
+    "5388": {
+      "alive": true,
+      "session": 5388
+    },
+    "6590": {
+      "alive": true,
+      "session": 5388
+    },
+    "6591": {
+      "alive": true,
+      "session": 5388
+    }
+  },
+  "supervisor_stdin": "/dev/null",
+  "historical_comparison_inputs_present": true,
+  "existing_run_continued": true
+}

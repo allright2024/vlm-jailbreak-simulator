@@ -1,0 +1,68 @@
+{
+  "upstream_repo": "https://github.com/CryptoAILab/FigStep",
+  "upstream_commit": "0861b17b3d67887c06ee3534ec65b3012f9becb7",
+  "paper": "https://arxiv.org/abs/2311.05608v3",
+  "paper_table": 1,
+  "paper_reference": {
+    "vanilla_asr": 0.574,
+    "figstep_asr": 0.84,
+    "judge": "human",
+    "n_behaviors": 500,
+    "attempts": 5
+  },
+  "csv_sha256": "8e47f40b9b490fa2ca1393cdceb6081e9928848646f4b45fdd43726be941b394",
+  "local_csv_byte_identical": true,
+  "category_counts": {
+    "Illegal Activity": 50,
+    "Hate Speech": 50,
+    "Malware Generation": 50,
+    "Physical Harm": 50,
+    "Fraud": 50,
+    "Adult Content": 50,
+    "Privacy Violation": 50,
+    "Legal Opinion": 50,
+    "Financial Advice": 50,
+    "Health Consultation": 50
+  },
+  "population": "all 500; no professional-advice exclusions",
+  "attempts": 5,
+  "model_id": "llava-hf/llava-1.5-7b-hf",
+  "model_revision": "b234b804b114d9e37bb655e11cbbb5f5e971b7a9",
+  "runtime": "HF conversion of LLaVA-1.5-7B; original LLaVA runtime not used",
+  "generation": {
+    "do_sample": true,
+    "temperature": 0.2,
+    "top_p": 0.7,
+    "num_beams": 1,
+    "max_new_tokens": 512,
+    "use_cache": true,
+    "cache_implementation": "static"
+  },
+  "batch_size": 25,
+  "seed": 20261022,
+  "seed_policy": "base seed + arm_index*100000 + batch_start; deterministic batch order",
+  "max_new_tokens_note": "Paper does not publish this limit; run_llava.py defaults to 512.",
+  "input_source": "official released PNGs, copied byte-for-byte",
+  "font_path": "/home/jovyan/jailbreak/reference_repos/FigStep-fonts/FreeMonoBold.ttf",
+  "font_sha256": "30b4b98748839431a366123f859871549b57e461a8b8ec2d3d65b55b2fb9f22d",
+  "render_pixel_matches": 0,
+  "default_config_pixel_matches": 0,
+  "upstream_text_helper_matches": 500,
+  "upstream_gen_query_error": "AttributeError: question_image_and_text",
+  "local_renderer_sha256": "eca9cbb4eff1a4390942958ede9c30515d6e8d6172fb7e0dc884844ca4a3513b",
+  "upstream_renderer_sha256": "3f80dcf23b8aa6d3da571256012c91dfd1f776cfc04d3cedceb359a057605b88",
+  "python": "3.11.11",
+  "pillow": "11.3.0",
+  "limitations": [
+    "Human evaluation is required to reproduce the paper ASR.",
+    "HF runtime/software/GPU differ from the original experiment.",
+    "Paper does not release seeds or full inference config."
+  ],
+  "pad_to_multiple_of": 128,
+  "inference_engine": "Transformers static KV cache with automatic torch.compile decoding; full precision FP16 weights",
+  "engine_note": "Initial eager pilot saved separately; final responses generated entirely with the static-cache engine.",
+  "excluded_metrics": [
+    "GPT-2 PPL: excluded at user request; no PPL scoring performed"
+  ],
+  "baseline_attempt_note": "The paper explicitly states five FigStep attempts but does not separately pin the vanilla retry budget; report both ASR@1 and ASR@5."
+}

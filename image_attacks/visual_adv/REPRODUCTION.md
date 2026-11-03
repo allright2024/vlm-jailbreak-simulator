@@ -72,9 +72,11 @@ weights are in `../models/Vision-CAIR-vicuna`, and the MiniGPT-4 projection
 checkpoint is `checkpoints/pretrained_minigpt4.pth`. The original model also uses
 the cached EVA vision and BLIP2 Q-Former weights.
 
-The dedicated reproduction worker has been removed.
+The dedicated reproduction worker is `attack_scripts/visualadv_reproduction.py`
+on the `reproduction` branch.
 Historical settings remain in `configs/experiments/VisualAdv_paper.yaml` and
 `configs/experiments/reproduction_settings/visualadv_released.json` /
-`visualadv_trained.json`. The historical result archive has been removed.
+`visualadv_trained.json`. Historical results are under
+`reproductions/results/visualadv_released/` and `visualadv_trained/`.
 The simulator PGD and generic wrappers remain available. Their common
 surrogate runtime differs from the historical MiniGPT-4 worker.

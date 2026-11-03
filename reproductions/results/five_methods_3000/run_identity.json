@@ -1,0 +1,204 @@
+{
+  "identity": "4d4e27aedffbbb04fe61b8a1249a37d00f12e9a53566ab18da77a47a6486b448",
+  "config": {
+    "name": "five_methods_3000",
+    "seed": 20261025,
+    "preview_per_recipe": 3,
+    "algorithm_fidelity": "adapted_composition",
+    "paper_reproduction": false,
+    "render": {
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+      "width": 768,
+      "height": 768,
+      "max_height": 1536,
+      "font_size": 48,
+      "min_font_size": 28,
+      "margin": 32
+    },
+    "cs_dj": {
+      "config": "configs/attacks/CS-DJ.yaml",
+      "seed": 2025,
+      "embedding_batch_size": 64,
+      "show_embedding_progress": true
+    },
+    "jps": {
+      "source_run": "runs/jps_train_20261024",
+      "image": "artifacts/advbench_subset/qwen2vl_7b/full_con32|255_lr1|255_revision5_iteration5_.png",
+      "steer": "artifacts/advbench_subset/qwen2vl_7b/full_con32|255_lr1|255_revision5_iteration5_.txt",
+      "training_csv": "inputs/advbench_subset.csv"
+    },
+    "recipes": [
+      {
+        "id": "P01",
+        "methods": [
+          "FigStep",
+          "JOOD"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P02",
+        "methods": [
+          "FigStep",
+          "CS-DJ"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P03",
+        "methods": [
+          "FigStep",
+          "JPS"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P04",
+        "methods": [
+          "MML",
+          "JOOD"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P05",
+        "methods": [
+          "MML",
+          "CS-DJ"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P06",
+        "methods": [
+          "MML",
+          "JPS"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P07",
+        "methods": [
+          "JOOD",
+          "CS-DJ"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P08",
+        "methods": [
+          "JOOD",
+          "JPS"
+        ],
+        "count": 160
+      },
+      {
+        "id": "P09",
+        "methods": [
+          "CS-DJ",
+          "JPS"
+        ],
+        "count": 160
+      },
+      {
+        "id": "T01",
+        "methods": [
+          "FigStep",
+          "JOOD",
+          "CS-DJ"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T02",
+        "methods": [
+          "FigStep",
+          "JOOD",
+          "JPS"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T03",
+        "methods": [
+          "FigStep",
+          "CS-DJ",
+          "JPS"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T04",
+        "methods": [
+          "MML",
+          "JOOD",
+          "CS-DJ"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T05",
+        "methods": [
+          "MML",
+          "JOOD",
+          "JPS"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T06",
+        "methods": [
+          "MML",
+          "CS-DJ",
+          "JPS"
+        ],
+        "count": 180
+      },
+      {
+        "id": "T07",
+        "methods": [
+          "JOOD",
+          "CS-DJ",
+          "JPS"
+        ],
+        "count": 180
+      },
+      {
+        "id": "Q01",
+        "methods": [
+          "FigStep",
+          "CS-DJ",
+          "JOOD",
+          "JPS"
+        ],
+        "count": 150
+      },
+      {
+        "id": "Q02",
+        "methods": [
+          "MML",
+          "CS-DJ",
+          "JOOD",
+          "JPS"
+        ],
+        "count": 150
+      }
+    ]
+  },
+  "algorithm_fidelity": "adapted_composition",
+  "paper_reproduction": false,
+  "jps": {
+    "paths": {
+      "image": "/home/jovyan/jailbreak/vlm-jailbreak-simulator/runs/five_methods_3000_20261025/assets/jps.png",
+      "steer": "/home/jovyan/jailbreak/vlm-jailbreak-simulator/runs/five_methods_3000_20261025/assets/jps_steer.txt",
+      "training_csv": "/home/jovyan/jailbreak/vlm-jailbreak-simulator/runs/five_methods_3000_20261025/assets/jps_training.csv"
+    },
+    "hashes": {
+      "image": "670549f3dab773ade52888abdfc88762213ce789721cac7ff4b89994cdce7053",
+      "steer": "29fa933f4c33d6b9d4146249f6210a83e08a72c1c0b07895892188c46e6a8858",
+      "training_csv": "66af8279f7690e1b83f8edeeeef0ff5c9da099e994ef54ecc14bdaf5fa759de2"
+    },
+    "source_manifest_sha256": "942340fcf4a936e1a59d7a3cd9c90100750f794af7e0c2642ec4d4ecf7f14246",
+    "application": "auxiliary_image_and_steering_transfer"
+  }
+}

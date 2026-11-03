@@ -1,5 +1,14 @@
 
-# VLM-Jailbreak-Simulator
+# VLM-Jailbreak-Simulator — Reproduction
+
+**이 브랜치는 각 공격·방어 방법론의 논문 재현 실험을 위한 `reproduction` 브랜치입니다.**
+방법론별 실행기, 당시 설정, 논문 비교 결과를 관리합니다. 공통 구현과 모델 로더는
+재현 실행기의 의존성으로 유지합니다.
+
+- [재현 실행 순서와 방법론별 진입점](reproductions/WORKFLOW.md)
+- [실행기·환경 상세](reproductions/RUNNERS.md)
+- [방법론별 실험 설정](configs/experiments/reproduction_settings/README.md)
+- [기존 결과와 논문 비교](reproductions/README.md)
 
 This official open-source repository serves as a collaborative space for the participating institutions of the research project entitled *"Development of Resilient AI Technology Against Risk Factors,"* dedicated to disclosing and sharing key research outcomes and core software (SW).
 
@@ -38,7 +47,9 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 **실험 설정:** 기존 재현 실험의 설정은
 [설정 안내](configs/experiments/reproduction_settings/README.md)에 정리했습니다.
-전용 재현 실행기와 결과 모음은 저장소에서 제외했습니다.
+이 브랜치에는 전용 재현 실행기와 과거 결과 모음을 함께 보존합니다.
+논문 재현 실행은 [재현 워크플로](reproductions/WORKFLOW.md)를 기준으로 합니다.
+아래 공통 simulator 안내는 실행기의 기반 코드 사용법입니다.
 최신 [5개 방법·3,000개 조합 데이터 구성](FIVE_METHOD_DATASET.md)은 JOOD 이미지 MixUp을
 사용하며, 생성 완료와 타깃 응답·ASR 평가 완료를 구분합니다.
 

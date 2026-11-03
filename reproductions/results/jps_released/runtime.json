@@ -1,0 +1,12 @@
+{
+  "torch": "2.9.1+cu130",
+  "transformers": "4.48.2",
+  "tokenizers": "0.21.4",
+  "qwen_vl_utils": "0.0.14",
+  "gpu": "NVIDIA B200 MIG 2g.45gb",
+  "dtype": "torch.bfloat16",
+  "attention": "sdpa",
+  "processor": "Qwen2VLImageProcessor",
+  "padding_side": "left",
+  "cpu_threads": 2
+}

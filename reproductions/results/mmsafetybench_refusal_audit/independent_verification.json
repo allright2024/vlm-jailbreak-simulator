@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "n": 1680,
+  "independent_literal_and_casefold_counts_match": true,
+  "source_and_implementation_hashes_match": true,
+  "proposed_split_cross_variant_overlap": 0,
+  "artifacts": {
+    "baseline.jsonl": "9629847ea2efd5488ef6eaf4e896b11716b30d709daddb36fe39b56859d6f76b",
+    "summary.json": "d638728b62a136feaee8c6939d612815a4d24aba92b4bd647dd903ef9c9cadbb",
+    "balance_feasibility.json": "fc7eb17d576d99c7f5aebac0d38c71e338766c58b69ee6364da8c87a2901532d"
+  }
+}

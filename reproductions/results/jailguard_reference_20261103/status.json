@@ -1,0 +1,15 @@
+{
+  "stage": "full_evaluation",
+  "supervisor_pid": 5388,
+  "updated_utc": "2026-11-03T12:16:30.367628+00:00",
+  "worker_pids": [
+    6590,
+    6591
+  ],
+  "completed": 290,
+  "per_shard": [
+    150,
+    140
+  ],
+  "total": 1000
+}

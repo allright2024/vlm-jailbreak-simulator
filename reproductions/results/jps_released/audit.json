@@ -1,0 +1,78 @@
+{
+  "verdict": "adapted, not an exact end-to-end reproduction",
+  "inference_prompt_matches": 1200,
+  "expected": 1200,
+  "agent_literal_prompt_equality": {
+    "response_feedback_agent": {
+      "instruction_following": {
+        "exact": false,
+        "ignoring_whitespace": true
+      },
+      "harmfulness": {
+        "exact": false,
+        "ignoring_whitespace": true
+      }
+    },
+    "summarize_agent": {
+      "instruction_following": {
+        "exact": false,
+        "ignoring_whitespace": true
+      },
+      "harmfulness": {
+        "exact": false,
+        "ignoring_whitespace": false
+      }
+    },
+    "revision_agent": {
+      "instruction_following": {
+        "exact": false,
+        "ignoring_whitespace": false
+      },
+      "harmfulness": {
+        "exact": false,
+        "ignoring_whitespace": false
+      }
+    }
+  },
+  "matches": [
+    "affirmative target rewrite and user prompt template",
+    "two steering angles",
+    "feedback/summarize/revision architecture and token budgets",
+    "initial image optimization plus five collaborative rounds",
+    "epsilon, alpha, momentum coefficient, early-stop threshold and best-iterate selection"
+  ],
+  "fixed": [
+    "extra separator when reading released prompt files",
+    "default agent now local Qwen2.5-14B"
+  ],
+  "differences": [
+    {
+      "component": "agent prompt text",
+      "detail": "All six templates differ in whitespace. Harmfulness summarization removes example categories, instruction-following revision changes typography, and harmfulness revision shortens/edits sentences. Agent architecture matches, but prompts are not verbatim upstream."
+    },
+    {
+      "component": "PGD",
+      "detail": "Port accumulates gradients/momentum in raw pixel coordinates; upstream uses normalized image coordinates and BF16 channelwise step/constraint tensors. Exact numerical parity is not established."
+    },
+    {
+      "component": "round boundary",
+      "detail": "Upstream saves each optimized image and reloads its PNG before the next round; port retains floating-point state across rounds, quantizing only the feedback image and final artifact."
+    },
+    {
+      "component": "agent failure",
+      "detail": "Port retries malformed revision output with an additional correction prompt; upstream indexes its parsed result and can fail."
+    },
+    {
+      "component": "evaluation",
+      "detail": "Simulator HarmBench judge conditions on original behavior. JPS official main saves and judges the complete steered/prefix-constrained input; measure both explicitly."
+    },
+    {
+      "component": "inputs",
+      "detail": "Author harmbench_standard.json and clean.jpeg are absent. README links TAP training subset; released inference artifacts are available."
+    },
+    {
+      "component": "MIFR",
+      "detail": "Not included in the current full-run simulator script. Paper section 4 uses all-test denominator, section 5.1 says ASR-success denominator, while released quality_evaluate.py scores every supplied response. Do not conflate this with ASR."
+    }
+  ]
+}

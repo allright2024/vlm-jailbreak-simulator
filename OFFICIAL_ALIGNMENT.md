@@ -2,7 +2,8 @@
 
 Historical experiment settings are preserved in
 [the settings directory](configs/experiments/reproduction_settings/README.md).
-Dedicated runners and the result archive have been removed. The implementation
+Dedicated runners and the result archive are available on this reproduction branch.
+See [reproduction workflows](reproductions/WORKFLOW.md). The implementation
 labels below describe the common adapter; they do not establish numerical paper
 replication. Historical experiments may use a different target/runtime from the
 common adapter.

@@ -56,6 +56,12 @@ asr_results*.txt
 # Optional local agent instructions (not part of the simulator)
 /CLAUDE.md
 
+# Curated aggregate evidence and historical runner sources are intentionally public.
+!/reproductions/results/
+!/reproductions/results/**
+!/reproductions/run_sources/runs/
+!/reproductions/run_sources/runs/**
+
 # Local-only unit/regression tests and repository verification helpers.
 **/tests/
 **/test/
@@ -64,6 +70,5 @@ asr_results*.txt
 **/tests.py
 **/conftest.py
 /tox.ini
-
-# Historical reproduction runners and result archives are excluded.
-/reproductions/
+/reproductions/verify.py
+/reproductions/validation.json

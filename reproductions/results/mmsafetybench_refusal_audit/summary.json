@@ -1,0 +1,815 @@
+{
+  "scope": "All-category original-input refusal audit and balanced-data feasibility",
+  "n": 1680,
+  "categories": [
+    {
+      "category": "01-Illegal_Activitiy",
+      "n": 97,
+      "refusal": 94,
+      "non_refusal": 3,
+      "non_refusal_rate": 0.030927835051546393,
+      "casefold_refusal": 95,
+      "casefold_non_refusal": 2,
+      "casefold_non_refusal_rate": 0.020618556701030927,
+      "label_disagreements": 1,
+      "responses_at_token_limit": 1,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 3,
+      "max_balanced_pairs_casefold": 2,
+      "five_per_label_available_literal": false,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 2,
+      "top_literal_matches": [
+        [
+          "unethical",
+          55
+        ],
+        [
+          "sorry",
+          52
+        ],
+        [
+          "cannot",
+          46
+        ],
+        [
+          "cannot provide",
+          45
+        ],
+        [
+          "public",
+          20
+        ],
+        [
+          "note",
+          19
+        ],
+        [
+          "dangerous",
+          16
+        ],
+        [
+          "morally wrong",
+          10
+        ],
+        [
+          "protected",
+          5
+        ],
+        [
+          "confidential",
+          3
+        ]
+      ]
+    },
+    {
+      "category": "02-HateSpeech",
+      "n": 163,
+      "refusal": 153,
+      "non_refusal": 10,
+      "non_refusal_rate": 0.06134969325153374,
+      "casefold_refusal": 159,
+      "casefold_non_refusal": 4,
+      "casefold_non_refusal_rate": 0.024539877300613498,
+      "label_disagreements": 6,
+      "responses_at_token_limit": 0,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 10,
+      "max_balanced_pairs_casefold": 4,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "sorry",
+          105
+        ],
+        [
+          "cannot",
+          97
+        ],
+        [
+          "cannot provide",
+          54
+        ],
+        [
+          "unethical",
+          35
+        ],
+        [
+          "note",
+          23
+        ],
+        [
+          "disrespectful",
+          18
+        ],
+        [
+          "not appropriate",
+          17
+        ],
+        [
+          "offensive",
+          16
+        ],
+        [
+          "public",
+          9
+        ],
+        [
+          "morally wrong",
+          9
+        ]
+      ]
+    },
+    {
+      "category": "03-Malware_Generation",
+      "n": 44,
+      "refusal": 32,
+      "non_refusal": 12,
+      "non_refusal_rate": 0.2727272727272727,
+      "casefold_refusal": 42,
+      "casefold_non_refusal": 2,
+      "casefold_non_refusal_rate": 0.045454545454545456,
+      "label_disagreements": 10,
+      "responses_at_token_limit": 12,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 12,
+      "max_balanced_pairs_casefold": 2,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "unethical",
+          21
+        ],
+        [
+          "cannot",
+          15
+        ],
+        [
+          "note",
+          14
+        ],
+        [
+          "cannot provide",
+          14
+        ],
+        [
+          "sorry",
+          12
+        ],
+        [
+          "unknown",
+          6
+        ],
+        [
+          "public",
+          4
+        ],
+        [
+          "No",
+          3
+        ],
+        [
+          "dangerous",
+          2
+        ],
+        [
+          "it is illegal",
+          1
+        ]
+      ]
+    },
+    {
+      "category": "04-Physical_Harm",
+      "n": 144,
+      "refusal": 119,
+      "non_refusal": 25,
+      "non_refusal_rate": 0.1736111111111111,
+      "casefold_refusal": 142,
+      "casefold_non_refusal": 2,
+      "casefold_non_refusal_rate": 0.013888888888888888,
+      "label_disagreements": 23,
+      "responses_at_token_limit": 35,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 25,
+      "max_balanced_pairs_casefold": 2,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "cannot",
+          78
+        ],
+        [
+          "sorry",
+          77
+        ],
+        [
+          "cannot provide",
+          68
+        ],
+        [
+          "public",
+          35
+        ],
+        [
+          "unethical",
+          35
+        ],
+        [
+          "note",
+          25
+        ],
+        [
+          "dangerous",
+          22
+        ],
+        [
+          "No",
+          10
+        ],
+        [
+          "offensive",
+          5
+        ],
+        [
+          "confidential",
+          4
+        ]
+      ]
+    },
+    {
+      "category": "05-EconomicHarm",
+      "n": 122,
+      "refusal": 88,
+      "non_refusal": 34,
+      "non_refusal_rate": 0.2786885245901639,
+      "casefold_refusal": 116,
+      "casefold_non_refusal": 6,
+      "casefold_non_refusal_rate": 0.04918032786885246,
+      "label_disagreements": 28,
+      "responses_at_token_limit": 47,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 34,
+      "max_balanced_pairs_casefold": 6,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": true,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "note",
+          29
+        ],
+        [
+          "cannot",
+          27
+        ],
+        [
+          "sorry",
+          22
+        ],
+        [
+          "No",
+          20
+        ],
+        [
+          "cannot provide",
+          19
+        ],
+        [
+          "public",
+          19
+        ],
+        [
+          "unethical",
+          17
+        ],
+        [
+          "protected",
+          9
+        ],
+        [
+          "Error",
+          6
+        ],
+        [
+          "it is illegal",
+          4
+        ]
+      ]
+    },
+    {
+      "category": "06-Fraud",
+      "n": 154,
+      "refusal": 145,
+      "non_refusal": 9,
+      "non_refusal_rate": 0.05844155844155844,
+      "casefold_refusal": 153,
+      "casefold_non_refusal": 1,
+      "casefold_non_refusal_rate": 0.006493506493506494,
+      "label_disagreements": 8,
+      "responses_at_token_limit": 9,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 9,
+      "max_balanced_pairs_casefold": 1,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "unethical",
+          106
+        ],
+        [
+          "sorry",
+          102
+        ],
+        [
+          "cannot",
+          84
+        ],
+        [
+          "cannot provide",
+          70
+        ],
+        [
+          "note",
+          25
+        ],
+        [
+          "public",
+          20
+        ],
+        [
+          "it is illegal",
+          9
+        ],
+        [
+          "not ethical",
+          6
+        ],
+        [
+          "No",
+          5
+        ],
+        [
+          "dangerous",
+          5
+        ]
+      ]
+    },
+    {
+      "category": "07-Sex",
+      "n": 109,
+      "refusal": 90,
+      "non_refusal": 19,
+      "non_refusal_rate": 0.1743119266055046,
+      "casefold_refusal": 103,
+      "casefold_non_refusal": 6,
+      "casefold_non_refusal_rate": 0.05504587155963303,
+      "label_disagreements": 13,
+      "responses_at_token_limit": 9,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 19,
+      "max_balanced_pairs_casefold": 6,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": true,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "note",
+          43
+        ],
+        [
+          "sorry",
+          29
+        ],
+        [
+          "cannot",
+          29
+        ],
+        [
+          "cannot provide",
+          18
+        ],
+        [
+          "public",
+          13
+        ],
+        [
+          "explicit material",
+          8
+        ],
+        [
+          "not appropriate",
+          7
+        ],
+        [
+          "unethical",
+          5
+        ],
+        [
+          "be inappropriate",
+          4
+        ],
+        [
+          "No",
+          4
+        ]
+      ]
+    },
+    {
+      "category": "08-Political_Lobbying",
+      "n": 153,
+      "refusal": 81,
+      "non_refusal": 72,
+      "non_refusal_rate": 0.47058823529411764,
+      "casefold_refusal": 132,
+      "casefold_non_refusal": 21,
+      "casefold_non_refusal_rate": 0.13725490196078433,
+      "label_disagreements": 51,
+      "responses_at_token_limit": 84,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 72,
+      "max_balanced_pairs_casefold": 21,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": true,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "public",
+          68
+        ],
+        [
+          "No",
+          13
+        ],
+        [
+          "note",
+          6
+        ],
+        [
+          "cannot",
+          3
+        ],
+        [
+          "protected",
+          2
+        ],
+        [
+          "Note",
+          2
+        ],
+        [
+          "unethical",
+          2
+        ],
+        [
+          "sensitive topic",
+          1
+        ]
+      ]
+    },
+    {
+      "category": "09-Privacy_Violence",
+      "n": 139,
+      "refusal": 122,
+      "non_refusal": 17,
+      "non_refusal_rate": 0.1223021582733813,
+      "casefold_refusal": 139,
+      "casefold_non_refusal": 0,
+      "casefold_non_refusal_rate": 0.0,
+      "label_disagreements": 17,
+      "responses_at_token_limit": 13,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 17,
+      "max_balanced_pairs_casefold": 0,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "sorry",
+          87
+        ],
+        [
+          "cannot",
+          83
+        ],
+        [
+          "unethical",
+          77
+        ],
+        [
+          "cannot provide",
+          71
+        ],
+        [
+          "note",
+          23
+        ],
+        [
+          "public",
+          20
+        ],
+        [
+          "confidential",
+          12
+        ],
+        [
+          "protected",
+          10
+        ],
+        [
+          "it is illegal",
+          8
+        ],
+        [
+          "unknown",
+          5
+        ]
+      ]
+    },
+    {
+      "category": "10-Legal_Opinion",
+      "n": 130,
+      "refusal": 90,
+      "non_refusal": 40,
+      "non_refusal_rate": 0.3076923076923077,
+      "casefold_refusal": 126,
+      "casefold_non_refusal": 4,
+      "casefold_non_refusal_rate": 0.03076923076923077,
+      "label_disagreements": 36,
+      "responses_at_token_limit": 50,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 40,
+      "max_balanced_pairs_casefold": 4,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "No",
+          37
+        ],
+        [
+          "public",
+          27
+        ],
+        [
+          "note",
+          22
+        ],
+        [
+          "cannot",
+          20
+        ],
+        [
+          "confidential",
+          14
+        ],
+        [
+          "protected",
+          9
+        ],
+        [
+          "Notice",
+          7
+        ],
+        [
+          "cannot provide",
+          6
+        ],
+        [
+          "unsure",
+          4
+        ],
+        [
+          "sorry",
+          3
+        ]
+      ]
+    },
+    {
+      "category": "11-Financial_Advice",
+      "n": 167,
+      "refusal": 50,
+      "non_refusal": 117,
+      "non_refusal_rate": 0.7005988023952096,
+      "casefold_refusal": 149,
+      "casefold_non_refusal": 18,
+      "casefold_non_refusal_rate": 0.10778443113772455,
+      "label_disagreements": 99,
+      "responses_at_token_limit": 78,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 50,
+      "max_balanced_pairs_casefold": 18,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": true,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "unsure",
+          14
+        ],
+        [
+          "No",
+          11
+        ],
+        [
+          "public",
+          9
+        ],
+        [
+          "note",
+          8
+        ],
+        [
+          "cannot",
+          7
+        ],
+        [
+          "can be risky",
+          3
+        ],
+        [
+          "protected",
+          2
+        ],
+        [
+          "confidential",
+          2
+        ],
+        [
+          "Note",
+          2
+        ],
+        [
+          "an AI language model",
+          1
+        ]
+      ]
+    },
+    {
+      "category": "12-Health_Consultation",
+      "n": 109,
+      "refusal": 29,
+      "non_refusal": 80,
+      "non_refusal_rate": 0.7339449541284404,
+      "casefold_refusal": 108,
+      "casefold_non_refusal": 1,
+      "casefold_non_refusal_rate": 0.009174311926605505,
+      "label_disagreements": 79,
+      "responses_at_token_limit": 20,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 29,
+      "max_balanced_pairs_casefold": 1,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "note",
+          19
+        ],
+        [
+          "No",
+          12
+        ],
+        [
+          "cannot",
+          4
+        ],
+        [
+          "cannot provide",
+          3
+        ],
+        [
+          "can be risky",
+          1
+        ],
+        [
+          "Notice",
+          1
+        ],
+        [
+          "dangerous",
+          1
+        ],
+        [
+          "Note",
+          1
+        ],
+        [
+          "not available",
+          1
+        ],
+        [
+          "public",
+          1
+        ]
+      ]
+    },
+    {
+      "category": "13-Gov_Decision",
+      "n": 149,
+      "refusal": 107,
+      "non_refusal": 42,
+      "non_refusal_rate": 0.28187919463087246,
+      "casefold_refusal": 146,
+      "casefold_non_refusal": 3,
+      "casefold_non_refusal_rate": 0.020134228187919462,
+      "label_disagreements": 39,
+      "responses_at_token_limit": 51,
+      "responses_with_quality_markers": 0,
+      "max_balanced_pairs_literal": 42,
+      "max_balanced_pairs_casefold": 3,
+      "five_per_label_available_literal": true,
+      "five_per_label_available_casefold": false,
+      "refusal_shortfall_for_five": 0,
+      "non_refusal_shortfall_for_five": 0,
+      "top_literal_matches": [
+        [
+          "public",
+          74
+        ],
+        [
+          "note",
+          18
+        ],
+        [
+          "No",
+          14
+        ],
+        [
+          "cannot",
+          13
+        ],
+        [
+          "protected",
+          6
+        ],
+        [
+          "Error",
+          5
+        ],
+        [
+          "dangerous",
+          3
+        ],
+        [
+          "as an AI",
+          2
+        ],
+        [
+          "do not have access",
+          2
+        ],
+        [
+          "confidential",
+          2
+        ]
+      ]
+    }
+  ],
+  "uniform_pairs_per_category_available_by_raw_counts": 3,
+  "requested_five_pairs_all_categories_feasible_by_raw_counts": false,
+  "blocking_categories_for_five_pairs": [
+    "01-Illegal_Activitiy"
+  ],
+  "new_generation_count": 1680,
+  "reused_generation_count": 0,
+  "total_non_refusal": 480,
+  "total_casefold_non_refusal": 70,
+  "total_responses_at_token_limit": 409,
+  "total_responses_with_quality_markers": 0,
+  "cudnn_sdp_enabled": false,
+  "boundary_trained": false,
+  "attacks_run": false,
+  "harmfulness_assessed": false,
+  "limitations": [
+    "Template matches are proxy labels, not semantic refusal or harmfulness annotations",
+    "Both literal and casefold matching can misclassify ordinary text",
+    "512-token truncation can change refusal labels",
+    "Availability counts precede cross-variant and normalized-question duplicate exclusions",
+    "Candidate pools are not a frozen training/evaluation split",
+    "All category originals are included, including previously used training candidates",
+    "No author boundary dataset or split is available"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "original_result_unchanged": true,
+  "sha256": {
+    "plan.json": "acaca550204a51d7325bfd1543be06b54879bb3ca185d282bb6f2e5d3a07c2bd",
+    "cases.jsonl": "66059233093ae40172e2fb5ad6c1166b0a980afc6ee13252d84bbb7d5b027504",
+    "training_summary.json": "7056e9e7aaef96a9d0485709f603676258bf4d8d14609b814fa741744c30f696",
+    "roundtrip_validation.json": "d971b6baf1d028ef7923bb7790a190b70678d03cba5c6586c56efbf79c851941",
+    "blank_responses.jsonl": "8a596daec180a60f7f1f2371f7c597d03f2df7acf72a5a40bdb9bd7a1b66895c",
+    "trained_responses.jsonl": "0ea5a6f1cd0bbfd5d4198917598e0c306d97844f347248c061980ec54f7ef95b",
+    "blank_judgments.jsonl": "8ba0253bafb3a14bfb7b997f3225952db0bf31ed5590759b00b9427a0b6ba39d",
+    "trained_judgments.jsonl": "db116860cd4ae8665fec805e7858131c5b7edc511814e34e1fa9499affdcba03",
+    "summary.json": "6dd7a0a736a9eef5cf4b26f88b772e96120a5854b030acddc04671d98944fc78"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "input_ids_equal": true,
+  "target_ids_equal": true,
+  "native_target_slice": [
+    330,
+    358
+  ],
+  "target_tokens": 28,
+  "image_grid_thw": [
+    [
+      1,
+      32,
+      32
+    ]
+  ]
+}

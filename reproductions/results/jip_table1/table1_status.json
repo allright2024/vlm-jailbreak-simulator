@@ -1,0 +1,265 @@
+{
+  "paper_reproduction": false,
+  "original_scenarios_executed": 0,
+  "original_cells_executed": 0,
+  "expected_cells": 32,
+  "expected_llava_queries": 3200,
+  "cells": [
+    {
+      "trigger": "textual",
+      "scenario": "S",
+      "paper_asr": 0.02,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "H",
+      "paper_asr": 0.01,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "V",
+      "paper_asr": 0.0,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "SH",
+      "paper_asr": 0.0,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "HR",
+      "paper_asr": 0.0,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "S3",
+      "paper_asr": 0.02,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "H2",
+      "paper_asr": 0.0,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "textual",
+      "scenario": "V2",
+      "paper_asr": 0.01,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "S",
+      "paper_asr": 0.86,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "H",
+      "paper_asr": 0.91,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "V",
+      "paper_asr": 0.97,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "SH",
+      "paper_asr": 0.74,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "HR",
+      "paper_asr": 0.88,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "S3",
+      "paper_asr": 0.78,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "H2",
+      "paper_asr": 0.88,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "ocr",
+      "scenario": "V2",
+      "paper_asr": 0.77,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "S",
+      "paper_asr": 0.91,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "H",
+      "paper_asr": 0.95,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "V",
+      "paper_asr": 0.89,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "SH",
+      "paper_asr": 0.71,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "HR",
+      "paper_asr": 0.9,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "S3",
+      "paper_asr": 0.8,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "H2",
+      "paper_asr": 0.88,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "visual",
+      "scenario": "V2",
+      "paper_asr": 0.75,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "S",
+      "paper_asr": 0.92,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "H",
+      "paper_asr": 0.98,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "V",
+      "paper_asr": 0.96,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "SH",
+      "paper_asr": 0.74,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "HR",
+      "paper_asr": 0.88,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "S3",
+      "paper_asr": 0.82,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "H2",
+      "paper_asr": 0.89,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    },
+    {
+      "trigger": "combined",
+      "scenario": "V2",
+      "paper_asr": 0.77,
+      "measured_asr": null,
+      "judged_queries": 0,
+      "status": "original_inputs_missing"
+    }
+  ]
+}
