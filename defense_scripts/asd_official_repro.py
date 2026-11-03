@@ -227,7 +227,9 @@ def stage_generate(args):
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path=model_path, model_base=None, model_name=model_name)
     log(f"{model_path} loaded in {time.time() - t:.0f}s ({model_name}, conv llava_v1, batch={args.batch_size})")
-    patch = Image.open(PATCH_PATH).convert("RGB") if args.arm == "asd" else None
+    patch = Image.open(args.patch_path).convert("RGB") if args.arm == "asd" else None
+    if args.arm == "asd":
+        log(f"patch: {args.patch_path}")
     if args.batch_size > 1:
         model.config.tokenizer_padding_side = "left"
     pad_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else 0
@@ -524,6 +526,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("stages", nargs="+", choices=list(STAGES))
     ap.add_argument("--out", default=str(SIM_ROOT / "runs/asd_official_repro"))
+    ap.add_argument("--patch_path", default=str(PATCH_PATH),
+                    help="protective patch image (default: the released L2_noNorm_clipgrad_tips_336_LR0_1-1_1.png)")
     ap.add_argument("--arm", default="base", choices=list(ARM_TAG), help="generate: which arm")
     ap.add_argument("--arms", nargs="+", default=["base", "textonly", "asd"], choices=list(ARM_TAG), help="judge/jip stages")
     ap.add_argument("--data_type", default="SD_TYPO", choices=["SD", "SD_TYPO", "TYPO"])

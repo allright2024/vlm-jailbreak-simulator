@@ -1,9 +1,43 @@
 # 논문 재현 실험 기록
 
-2026-11-02 기준, 공격 **10종**과 방어 **6종**의 **24개 실험 기록**을 정리했다.
+2026-11-03 기준, 공격 **10종**과 방어 **7종**의 실험 및 조합 데이터 구성·진단을
+포함한 **33개 기록**을 정리했다. 진행 중인 실행은 완료 결과와 구분한다.
 완료된 실행과 논문 성능의 일치는 별개다. 아래 수치는 저장된 결과에서 가져왔으며,
 이 공개 작업에서 새 모델 추론, API 평가 또는 재학습을 수행하지 않았다.
 공식 산출물 평가, 직접 최적화, 자동 평가 대체, 소규모 검증을 구분한다.
+
+## 2026-11-03 추가 기록
+
+아래는 기존 기록 이후 추가된 결과다. ASR은 %, 차이는 percentage points(pp)이며,
+범주 평균은 macro 평균이다. 논문 비교 값은 보존한 비교표에 근거한다.
+
+| 기록 | 데이터·모델·판정 | 결과와 비교 | 상태 / 근거 |
+|---|---|---|---|
+| JOOD MiniGPT-4-7B | AdvBench-M 7범주 170문항, 7,820응답; int8 Vicuna v0; GPT-4.1 HF 선택, Llama Guard 2 ASR | vanilla → JOOD ASR 56.02 → 84.70, 논문 43.71 → 71.14; 증가폭 28.67pp / 논문 27.43pp. HF 2.86 → 8.70 / 논문 1.31 → 6.87 | 완료. HF 판정기 대체는 후보 선택에도 영향을 줌. [비교표](results/jood_minigpt4/comparison.md), [검증](results/jood_minigpt4/final_validation.json) |
+| MML-WR/R/B64/SC | SafeBench 각 500, GPT-4o-2024-08-06; GPT-4o-mini CLAS | ASR@5 순서대로 96.4 / 98.0 / 98.2 / 98.4; 논문 96.0 / 97.8 / 97.2 / 99.4 | 완료. SC는 논문 프롬프트를 로컬 렌더링, 나머지는 공개 입력. [비교표](results/mml_variants/comparison.csv) |
+| JailGuard int8 재실행 | 공식 이미지 1,000개, MiniGPT-4-13B; PL, 8개 변형을 배치 생성 | Acc 77.00 / Precision 69.23 / Recall 76.50 / FPR 22.67; 논문 82.90 / 74.00 / 88.25 / 20.67 | 완료. FPR 논문 값은 표에서 계산. 응답 ASR이 아닌 검출 지표. [비교표](results/jailguard_8bit/comparison.md) |
+| AsD 공개 방어 패치 실행 경로 검증 | MM-SafetyBench 64개, LLaVA-1.5-7B; GPT-4o 판정 | 공식 직렬 실행과 배치 어댑터 모두 13/64 unsafe, ASR 20.31; 판정 불일치 0 | 완료. 동일 공개 패치의 실행 경로 비교이며 직접 학습 패치 비교는 아님. [비교표](results/asd_released_patch_check/comparison.md) |
+| EchoSafe Table 3 Gen | MM-SafetyBench++ 공개 6범주, safe/unsafe 711쌍; Qwen2.5-VL-7B; GPT-5-mini 판정 | base → EchoSafe: Unsafe RR 22.00 → 17.74, Safe AR 99.22 → 55.26, CCR 34.77 → 26.55 | 완료. 논문의 개선을 재현하지 못함. [비교표](results/echosafe/comparison.md), [설정](results/echosafe/manifest.json) |
+| JailGuard 공식 reference 실행 | 공식 이미지 1,000개; 원본 MiniGPT-4-13B int8, 직렬 생성·CPU FP32 vision 경로 | smoke 통과, 전체 실행 진행 중; 최종 지표 없음 | [상태 스냅샷](results/jailguard_reference_20261103/status.json), [실행 조건](results/jailguard_reference_20261103/manifest.json). 스냅샷은 실시간 상태가 아님 |
+| MM-SafetyBench 비거절률 진단 | 원본 SD 1,680개, Qwen2.5-VL-7B; cuDNN SDPA 비활성화 | 백엔드 조건과 응답 퇴화를 확인한 baseline 감사; 비거절률을 harmful compliance로 취급하지 않음 | 완료. 새 공격 최적화나 boundary 학습 결과가 아님. [결과](results/mmsafetybench_refusal_audit/summary.md) |
+
+JOOD는 질문별 후보의 HF 최댓값을 선택한 뒤 ASR을 집계한다. 45개 중 하나라도
+unsafe이면 성공으로 처리하는 방식이 아니다. 길이 제한으로 잘린 3,647개 응답과 빈 응답
+9개도 원본 집계에 보존했다. 판정기 변경만으로 논문과의 차이를 설명할 수는 없다.
+
+### 조합 데이터 생성: 이전 버전과 MixUp 버전
+
+두 생성본은 각각 SafeBench **180개 원본 질문**을 18개 조합에 배정한 **3,000개 입력**이다.
+2개 방법 조합 1,440개, 3개 1,260개, 4개 300개이며, 독립적인 질문 3,000개라는 뜻은 아니다.
+타깃 답변 생성과 ASR 평가는 수행하지 않았다.
+
+- [이전 생성본](results/five_methods_3000/full/manifest.json): JOOD 단계가 밝기·대비 변형인 역사적 버전.
+- [최신 MixUp 생성본](results/five_methods_3000_mixup/full/manifest.json): JOOD 적용 1,840개에
+  원본 0.7 + 공개 harmless 이미지 0.3을 혼합. 원본 캔버스 크기를 유지하는 변형으로,
+  공식 JOOD의 전체 45개 후보 선택 실험과 구분한다.
+- [재생성 감사](results/five_methods_3000_mixup/regeneration_audit.json)와
+  [구성·실행 안내](../FIVE_METHOD_DATASET.md)에 입력 해시, 조합 규칙과 검증을 기록했다.
+  JPS는 기존에 최적화한 이미지·steering을 재사용하며 각 조합에서 다시 최적화하지 않았다.
 
 ## 공격 결과
 

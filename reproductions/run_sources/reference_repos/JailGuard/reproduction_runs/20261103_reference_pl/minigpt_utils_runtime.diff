@@ -1,0 +1,11 @@
+--- /home/jovyan/jailbreak/reference_repos/JailGuard/JailGuard/utils/minigpt_utils.py
++++ minigpt_utils_runtime.py
+@@ -6,7 +6,7 @@
+ import numpy as np
+ import torch
+ import torch.backends.cudnn as cudnn
+-import gradio as gr
++# Unused Gradio UI import omitted for command-line inference.
+ import sys
+ sys.path.append('YOUR MINIGPT4 DIR')
+ from minigpt4.common.config import Config

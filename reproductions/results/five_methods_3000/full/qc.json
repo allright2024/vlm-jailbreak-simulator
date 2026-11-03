@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "n_cases": 3000,
+  "counts": {
+    "P01": 160,
+    "P02": 160,
+    "P03": 160,
+    "P04": 160,
+    "P05": 160,
+    "P06": 160,
+    "P07": 160,
+    "P08": 160,
+    "P09": 160,
+    "T01": 180,
+    "T02": 180,
+    "T03": 180,
+    "T04": 180,
+    "T05": 180,
+    "T06": 180,
+    "T07": 180,
+    "Q01": 150,
+    "Q02": 150
+  },
+  "unique_inputs": 3000,
+  "n_source_instructions": 180,
+  "clipped_layouts": 0,
+  "identity": "4d4e27aedffbbb04fe61b8a1249a37d00f12e9a53566ab18da77a47a6486b448",
+  "test_cases_sha256": "88f3eff4983932c015350476829777dcb4890a8b92c844363dfd934d01295dc1",
+  "manifest_sha256": "efafba3288e16392dd4439a920155327c04d7f7eaf75f2311a963051ae9c34f6"
+}

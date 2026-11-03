@@ -36,10 +36,12 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ## Code and workflow guide
 
-**논문 재현 결과:** [공격 10종·방어 6종의 실험 기록](reproductions/README.md)에
-24개 실험의 측정값, 논문 비교, 평가 모델, 남은 차이와 실행 코드를 정리했습니다.
+**논문 재현 결과:** [공격 10종·방어 7종의 실험 기록](reproductions/README.md)에
+33개 실험·진단·데이터 구성 기록의 측정값, 논문 비교, 평가 모델, 남은 차이와 실행 코드를 정리했습니다.
 공식 산출물 평가와 직접 최적화, 자동 평가 대체와 인간 평가를 구분합니다.
 집계 파일은 `python reproductions/verify.py`로 모델 실행 없이 검증할 수 있습니다.
+최신 [5개 방법·3,000개 조합 데이터 구성](FIVE_METHOD_DATASET.md)은 JOOD 이미지 MixUp을
+사용하며, 생성 완료와 타깃 응답·ASR 평가 완료를 구분합니다.
 
 이 문서는 코드 구조, 데이터 로딩, 단일 공격, 방어,
 공격 조합 생성 및 평가 실행 방법을 정리합니다. 데이터·모델 가중치는 별도 준비하며,

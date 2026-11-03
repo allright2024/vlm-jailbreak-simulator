@@ -1,0 +1,2 @@
+# Install in the existing simulator environment, after requirements.txt.
+fonttools>=4.50,<5

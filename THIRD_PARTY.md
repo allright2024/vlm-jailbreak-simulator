@@ -64,6 +64,14 @@ Historical reproduction metadata and project-written run wrappers are indexed
 under `reproductions/`. References to external source files, checkpoints, fonts
 and data in those records do not redistribute those assets or change their terms.
 
+The EchoSafe reproduction wrappers in `defense_scripts/` load a separately
+obtained [EchoSafe-MLLM/EchoSafe](https://github.com/EchoSafe-MLLM/EchoSafe)
+checkout at `f956a15976c3256c7b38a1f0ff48957c5579ec59`. Its source, released
+MM-SafetyBench++ images and model weights are not bundled with these wrappers;
+consult their upstream terms separately. The archived JailGuard reference
+runner includes project-written orchestration and runtime diffs; obtain the
+original source at the revision recorded in its manifest before applying them.
+
 The AdaShield defense adapter in `defenses/adashield.py` follows
 [SaFo-Lab/AdaShield](https://github.com/SaFo-Lab/AdaShield) at
 `b6d02c6747bd6984a99ee2e1db1e52736a6a05cc`. The upstream repository had no

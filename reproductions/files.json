@@ -805,6 +805,377 @@
       "sha256": "47038e1730cae80f6961dbe8419d6f5decbd307f2dd4c26f1de3c85c1099546e",
       "bytes": 254,
       "kind": "supporting_audit"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/summary.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/summary.json",
+      "sha256": "ad98b6daaa61b6e19fb506fef5c530226d458c8d9e53d07677196b4bb28e76f4",
+      "bytes": 4337,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/comparison.csv",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/comparison.csv",
+      "sha256": "770b7d8d6dfa3069c97fa8fe44209f373a3722704790db8052418cc0d46defb7",
+      "bytes": 1367,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/comparison.md",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/comparison.md",
+      "sha256": "a76e76fc6bd994d83fb556e8dce2fd9064124fe31f387d663a5311bbb7fe3626",
+      "bytes": 2082,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/manifest.json",
+      "sha256": "6b095f438b47b80b8944da227237193c49180b7d9969f609b774b2aa39d9fd23",
+      "bytes": 6561,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/final_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/final_validation.json",
+      "sha256": "d030ed0bc948ed79686b8c7f3fb6f5b91476c42130eb1ee76ce6489991fd4819",
+      "bytes": 269,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jood_minigpt4/hf_complete.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jood_minigpt4_7b_90g2_20261102/hf_complete.json",
+      "sha256": "b616321f5d26f14e8b5cdf4f597ee1cbf2a27c70bbe48e2b013768bcba45c6ac",
+      "bytes": 123,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/summary.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/summary.json",
+      "sha256": "f2b87eda5afedcbe3e503c52b70fcab975f35496ce93cf7210a921b40a02fefb",
+      "bytes": 5052,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/comparison.csv",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/comparison.csv",
+      "sha256": "741c10f29d7861c552d589cf39632fa1f0e0e930d4f9ef66ce2d7d556b6aa539",
+      "bytes": 418,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/manifest.json",
+      "sha256": "71086eaf851ed174ad8a2c15c98bf633e2e4679c703984ab7993968685dd52fa",
+      "bytes": 3718,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/final_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/final_validation.json",
+      "sha256": "bcbd33a70506b14ab6484e8399fa34f40a7cd16ad24c9ffcf502967681c09e82",
+      "bytes": 256,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/render_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/render_validation.json",
+      "sha256": "26a87ff0c915461e30f6e345491dd62e52afc2315b872dc7feab28728fc9be97",
+      "bytes": 881,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mml_variants/smoke_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mml_variants_reproduction_20261102/smoke_validation.json",
+      "sha256": "efd3a56904086fa550b687607cb4325e5756c88de7c68f438b1ea2a98b122a50",
+      "bytes": 263,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/summary_pl.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/summary_pl.json",
+      "sha256": "119ac0eade106ff7ecee430af12a2a223f85f452dd2a6076a0e5757141533adb",
+      "bytes": 5808,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/summary_pl.md",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/summary_pl.md",
+      "sha256": "a5a64a6f79480f04274d194135327ae819b5c32e951eeb12a2f342b86f2f5d37",
+      "bytes": 1529,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/comparison.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/comparison.json",
+      "sha256": "44057c2eba45750e076deca233f442f20559e48f5d70b99b9f5c3c25cf32aec4",
+      "bytes": 1077,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/comparison.md",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/comparison.md",
+      "sha256": "286243c16a353195ef713405a7160a96cf8646341d4b62bd100e93d9aade59c7",
+      "bytes": 549,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/manifest.json",
+      "sha256": "3acd1ee9dbee827604d2bd1542ea16dd6dc4888c95dcc69dce406c2233eeea9b",
+      "bytes": 250089,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/smoke_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/smoke_validation.json",
+      "sha256": "5d328d202e36ba08c244901afdabfda4473070663dcd226870d5af0ceaa7f26b",
+      "bytes": 197,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_8bit/README.md",
+      "source_path": "vlm-jailbreak-simulator/runs/jailguard_8bit_20261102/README.md",
+      "sha256": "be6184bac960743b0bd9360faa891659b0a1f3f8d5e2c3b1d3f77b2c872beb9d",
+      "bytes": 2057,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/asd_released_patch_check/summary.json",
+      "source_path": "vlm-jailbreak-simulator/runs/asd_released_patch_check_20261102/summary.json",
+      "sha256": "10f7a3c8e7890ee9c0beb9a25ecfbec61b9d783c30ef3e27082677753840b418",
+      "bytes": 858,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/asd_released_patch_check/comparison.md",
+      "source_path": "vlm-jailbreak-simulator/runs/asd_released_patch_check_20261102/comparison.md",
+      "sha256": "df07972a32694bc269e0de512d3af37708d9b5970b64ec73abebe12fa7cf02d5",
+      "bytes": 685,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/asd_released_patch_check/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/asd_released_patch_check_20261102/manifest.json",
+      "sha256": "df9c4510d1849af8df9b1c008c14eb7bd510a542077a3fd52520dc5cef41767b",
+      "bytes": 9870,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/asd_released_patch_check/input_equivalence_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/asd_released_patch_check_20261102/input_equivalence_validation.json",
+      "sha256": "a6c1c1b5deaa10df44f5966e7dbf6a8be1a02ecda9b17905440def0053f23ce5",
+      "bytes": 205,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/asd_released_patch_check/runtime.json",
+      "source_path": "vlm-jailbreak-simulator/runs/asd_released_patch_check_20261102/runtime.json",
+      "sha256": "70b3449fbf750c84052da0135d2eb4bcbb761e9fa6cc655c0e5ee517ac63e5af",
+      "bytes": 3650,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/summary.json",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/summary.json",
+      "sha256": "e55d8b899a0cbd9734f1615127dcfebc2c5cd6ff0f6e5550aac20a9b0f03eb6a",
+      "bytes": 10815,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/comparison.md",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/comparison.md",
+      "sha256": "474699f6d1c359ca2d2d3cef39a9cf5f41c302983614dbbbb873d5353e62f824",
+      "bytes": 2830,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/manifest.json",
+      "sha256": "2a690399d7630c12f26e82905683dc04015c267653a15fab247c2ac448279fa5",
+      "bytes": 14704,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/final_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/final_validation.json",
+      "sha256": "888b23136ab2085bc3a91754787569506da7705bf2b5c949e1a40cd8947514a8",
+      "bytes": 206,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/smoke_validation.json",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/smoke_validation.json",
+      "sha256": "b018b11fe161965febdbaaa0ed4ae4a283ba1e06df146afb93362afec4d3f286",
+      "bytes": 352,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/echosafe/README.md",
+      "source_path": "vlm-jailbreak-simulator/runs/echosafe_reproduction_20261103/README.md",
+      "sha256": "5e70dd5de343d1fefc0fd0cd9a70f864148ebdddde26aa0baf69f2b3f87e0db2",
+      "bytes": 5925,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000/run_identity.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_20261025/run_identity.json",
+      "sha256": "19a2e8af23cf519997de7160ca7f90cdf4637bf2a186ad55187e31abbb62e89a",
+      "bytes": 4404,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000/full/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_20261025/full/manifest.json",
+      "sha256": "efafba3288e16392dd4439a920155327c04d7f7eaf75f2311a963051ae9c34f6",
+      "bytes": 655,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000/full/qc.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_20261025/full/qc.json",
+      "sha256": "43c7e6632322d11387eb7244d54b83d29f4cf1eae4dd576aac2d98c601e6a691",
+      "bytes": 693,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/run_identity.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_jood_image_mix_20261103/run_identity.json",
+      "sha256": "8d24ece30520c3b4132b6545a25a6389c4b80502f2cce31f0165de6180deaed1",
+      "bytes": 6123,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/full/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_jood_image_mix_20261103/full/manifest.json",
+      "sha256": "83cf58afa57a76879a51291b323989eaf8c379228bde9d6cf4b03f5caa4e0bd1",
+      "bytes": 2213,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/full/qc.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_jood_image_mix_20261103/full/qc.json",
+      "sha256": "4ba3d25218c82a3fe171918106a17d7a34f2c0f6a92df6c564d68c50ea3364de",
+      "bytes": 1058,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/five_methods_3000_mixup/regeneration_audit.json",
+      "source_path": "vlm-jailbreak-simulator/runs/five_methods_3000_jood_image_mix_20261103/regeneration_audit.json",
+      "sha256": "529c9460f3b5e4d6b496fd04608c440b58602681ea584e1869ffdb240c66355b",
+      "bytes": 742,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/worker.py",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/worker.py",
+      "sha256": "46304802e25741b8c81771bd9ec886ba0b09c247c17b032960bff9433c8cd20e",
+      "bytes": 9799,
+      "kind": "historical_runner_source"
+    },
+    {
+      "path": "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/supervise.py",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/supervise.py",
+      "sha256": "a341820cbc3947d2d7fd303c34f6db14036a814f4f5e0dc585df80e78c9ac55c",
+      "bytes": 8243,
+      "kind": "historical_runner_source"
+    },
+    {
+      "path": "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/main_img_runtime.diff",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/main_img_runtime.diff",
+      "sha256": "9e914d49704491f0473add3f64b4965134fc318768fa8b6ad0db99a86eb54f65",
+      "bytes": 302,
+      "kind": "historical_runner_source"
+    },
+    {
+      "path": "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/minigpt_utils_runtime.diff",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/minigpt_utils_runtime.diff",
+      "sha256": "9d3d1c1ce999e9005e3620fe350ab01964c80259443aae58b7a6e682860aafcb",
+      "bytes": 380,
+      "kind": "historical_runner_source"
+    },
+    {
+      "path": "reproductions/run_sources/reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/minigpt4_eval.yaml",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/minigpt4_eval.yaml",
+      "sha256": "82d5cccc8a9532e8992223b0c3748f7b21ce1e4992d8e4a58b5b1199f3cbf817",
+      "bytes": 686,
+      "kind": "historical_runner_source"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/manifest.json",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/manifest.json",
+      "sha256": "354f69e68a400c5155edc8dd54c25bc74fcbef73a866e4290bdcad8c78bc14e7",
+      "bytes": 11264,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/smoke_validation.json",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/smoke_validation.json",
+      "sha256": "fce230bfeb966f822388af264d1ff58c6f88a33f0b22fd63de49668bbbe39149",
+      "bytes": 287,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/smoke.runtime.json",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/smoke.runtime.json",
+      "sha256": "8f2c95eee44905db4e8dd732e45e135d7c735c9dd8db54b4c4949139e5e75c27",
+      "bytes": 1410,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/status.json",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/status.json",
+      "sha256": "3c0aa58f85bc1e52ae818bec1cebda3539b8316bdd4ec3abd79bdaa44ac88040",
+      "bytes": 228,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/jailguard_reference_20261103/README.md",
+      "source_path": "reference_repos/JailGuard/reproduction_runs/20261103_reference_pl/README.md",
+      "sha256": "3aef3d74782f94e1106ce4d26e3fc5fa40fa10ea1383bb349fa8f484f181a997",
+      "bytes": 2247,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/summary.md",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/summary.md",
+      "sha256": "b5efb9488b18fa9c7a5308b62e2f1eedb9ed45b6126230755af9fe2a90858ff5",
+      "bytes": 1806,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/summary.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/summary.json",
+      "sha256": "d638728b62a136feaee8c6939d612815a4d24aba92b4bd647dd903ef9c9cadbb",
+      "bytes": 17291,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/manifest.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/manifest.json",
+      "sha256": "e6d5d4287e3ab5ef5824a770c108d1975f1b77a6328b79ec0835c3710e908a58",
+      "bytes": 7501,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/runtime.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/runtime.json",
+      "sha256": "8d0af6488cd3a84b9ea67b01933068d80ff49d9f57895dd6e8e799acc7e25fdb",
+      "bytes": 2279,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/backend_paired_comparison.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/backend_paired_comparison.json",
+      "sha256": "1da7c500bbf78c40e2761136356e70f8100d433089af1d43fe5fc6720d8dc339",
+      "bytes": 6778,
+      "kind": "aggregate_or_protocol"
+    },
+    {
+      "path": "reproductions/results/mmsafetybench_refusal_audit/independent_verification.json",
+      "source_path": "vlm-jailbreak-simulator/runs/mmsafetybench_baseline_cudnn_off_20261024/independent_verification.json",
+      "sha256": "01cf1d7cbe63a67a78cc0cd26656c9f54efcb01bffcd754f632dfbc8e3be1042",
+      "bytes": 485,
+      "kind": "aggregate_or_protocol"
     }
   ]
 }

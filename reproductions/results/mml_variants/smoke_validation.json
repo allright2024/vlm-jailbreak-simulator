@@ -1,0 +1,6 @@
+{
+  "completed_jobs": 4,
+  "sampling": "First fixed behavior ID in each variant; all results retained in full evaluation",
+  "pass_criterion": "Transport, exact model IDs, result schema and judge parsing; no ASR threshold",
+  "no_outcome_based_selection": true
+}

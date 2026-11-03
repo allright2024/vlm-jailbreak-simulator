@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "n_cases": 3000,
+  "jood_image_mixed_cases": 1840,
+  "jood_recipe_counts": {
+    "P01": 160,
+    "P04": 160,
+    "P07": 160,
+    "P08": 160,
+    "T01": 180,
+    "T02": 180,
+    "T04": 180,
+    "T05": 180,
+    "T07": 180,
+    "Q01": 150,
+    "Q02": 150
+  },
+  "provided_image_counts": {
+    "airpodmax": 399,
+    "apple": 335,
+    "watch": 358,
+    "iphone": 270,
+    "soccerball": 478
+  },
+  "unchanged_non_jood_cases": 1160,
+  "unchanged_jps_auxiliary_cases": 1680,
+  "pixel_exact_mixup_examples_checked": 55,
+  "source_parents_prompts_splits_and_layouts_preserved": true,
+  "original_run_artifact_hashes_unchanged": true,
+  "test_cases_sha256": "a55731e42ae930904eb903b369cbf2ebb280da9aa31020ae4a6d9c9cc77f56e4"
+}

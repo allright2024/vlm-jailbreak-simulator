@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "n_cases": 3000,
+  "counts": {
+    "P01": 160,
+    "P02": 160,
+    "P03": 160,
+    "P04": 160,
+    "P05": 160,
+    "P06": 160,
+    "P07": 160,
+    "P08": 160,
+    "P09": 160,
+    "T01": 180,
+    "T02": 180,
+    "T03": 180,
+    "T04": 180,
+    "T05": 180,
+    "T06": 180,
+    "T07": 180,
+    "Q01": 150,
+    "Q02": 150
+  },
+  "unique_inputs": 3000,
+  "n_source_instructions": 180,
+  "clipped_layouts": 0,
+  "identity": "f46dfd17a8fc211859ec2a5ca45f450b99d70e992e745da73e124dfc8dc65de5",
+  "test_cases_sha256": "a55731e42ae930904eb903b369cbf2ebb280da9aa31020ae4a6d9c9cc77f56e4",
+  "manifest_sha256": "83cf58afa57a76879a51291b323989eaf8c379228bde9d6cf4b03f5caa4e0bd1",
+  "jood_image_mixed_cases": 1840,
+  "jood_counts": {
+    "P01": 160,
+    "P04": 160,
+    "P07": 160,
+    "P08": 160,
+    "T01": 180,
+    "T02": 180,
+    "T04": 180,
+    "T05": 180,
+    "T07": 180,
+    "Q01": 150,
+    "Q02": 150
+  },
+  "jood_harmless_images": {
+    "airpodmax": 399,
+    "apple": 335,
+    "watch": 358,
+    "iphone": 270,
+    "soccerball": 478
+  }
+}
