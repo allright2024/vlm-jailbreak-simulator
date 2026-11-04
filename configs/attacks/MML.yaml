@@ -1,14 +1,14 @@
 # Released-data replay experiment (wangyu-ovo/MML @ 5966fca). Download the
-# official Drive `dataset` directory into data/MML. run_mml.sh evaluates the
+# official Drive `dataset` directory into data/method_assets/MML. run_mml.sh evaluates the
 # four released MML formats separately; `variant` is the single-run default.
 experiment_profile: official
 input_mode: precomputed
-precomputed_root: data/MML
+precomputed_root: data/method_assets/MML
 # The upstream repository has no explicit license, so its prompts are not
 # redistributed here. Official runs parse these literals (without executing the
 # file) from the exact reviewed checkout.
 prompt_source: upstream
-upstream_const_path: data/MML/upstream/const.py
+upstream_const_path: data/method_assets/MML/upstream/const.py
 upstream_const_sha256: 89d7480ff98a4872b50f16c8bf4271f37074127fa0c1cfdd46a1f50b2cdce9a7
 variant: word_replacement
 variants: [word_replacement, mirror, rotate, base64]

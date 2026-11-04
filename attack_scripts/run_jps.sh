@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run JPS on its compatible benchmark(s): test-cases -> completions -> judge.
-# Requires the upstream-only advbench_subset.csv and clean.jpeg under data/JPS.
+# Requires the upstream-only advbench_subset.csv and clean.jpeg under data/method_assets/JPS.
 #
 # Usage:
 #   bash attack_scripts/run_jps.sh              # full datasets, slow

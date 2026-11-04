@@ -14,10 +14,11 @@ RECIPES="${RECIPES:-}"
 PER_RECIPE="${PER_RECIPE:-}"
 
 # Allow the MML word-replacement stage to use a repository-local NLTK data
-# install (for example: python -m nltk.downloader -d data/nltk_data
+# install (for example: python -m nltk.downloader -d data/method_assets/nltk_data
 # averaged_perceptron_tagger). An explicitly supplied NLTK_DATA wins.
-if [[ -z "${NLTK_DATA:-}" && -d "data/nltk_data" ]]; then
-  export NLTK_DATA="$PWD/data/nltk_data"
+nltk_assets_path="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/method_assets/nltk_data"
+if [[ -z "${NLTK_DATA:-}" && -d "$nltk_assets_path" ]]; then
+  export NLTK_DATA="$nltk_assets_path"
 fi
 
 args=(

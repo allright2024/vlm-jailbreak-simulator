@@ -4,8 +4,8 @@
 # NB: still a model substitution (LLaVA-1.5 surrogate), so not an exact paper repro.
 experiment_profile: official
 surrogate: LLaVA_v1_5
-image_path: data/FORCE/clean.jpeg
-target_path: data/VisualAdv/derogatory_corpus.csv
+image_path: data/method_assets/FORCE/clean.jpeg
+target_path: data/method_assets/VisualAdv/derogatory_corpus.csv
 epsilon: 32
 alpha: 1
 n_iters: 5000

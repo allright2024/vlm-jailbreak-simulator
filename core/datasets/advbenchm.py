@@ -1,8 +1,8 @@
-"""JOOD subset loader: data/AdvBenchM/jood_subset/ -> list[Behavior].
+"""JOOD subset loader: data/method_assets/JOOD/ -> list[Behavior].
 
 JOOD's subset of AdvBench-M groups harmful instructions into 7 scenarios,
 each with a single representative harmful image. This is distinct from the
-8-scenario ImgJP public release stored in ``original_release/``. For every
+8-scenario ImgJP public release stored in ``data/benchmarks/AdvBenchM/``. For every
 instruction index it ships three aligned prompt variants:
 
   eval_all_instructions/<scenario>.json          -> the ORIGINAL harmful request
@@ -18,7 +18,7 @@ prompt variants are kept in ``meta`` for the JOOD attack to consume. The
 scenario's harmful image is the single entry in ``images``.
 
 170 behaviors across 7 scenarios. The harmless image pool
-(data/AdvBenchM/jood_subset/images/harmless) is a shared resource the JOOD attack reads via
+(data/method_assets/JOOD/images/harmless) is a shared resource the JOOD attack reads via
 its config, not a per-behavior field.
 """
 

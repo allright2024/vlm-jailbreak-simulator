@@ -1,4 +1,4 @@
-"""MM-SafetyBench loader: data/MM-SafetyBench/<scenario>/<scenario>.json -> list[Behavior].
+"""MM-SafetyBench loader: data/benchmarks/MM-SafetyBench/<scenario>/<scenario>.json -> list[Behavior].
 
 Each scenario folder holds a question JSON keyed by index ("0", "1", ...) and
 three image variants per index: SD/, SD_TYPO/, TYPO/ (``<index>.jpg``). One

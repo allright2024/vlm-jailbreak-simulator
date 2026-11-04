@@ -1,7 +1,7 @@
 # Paths are relative to the simulator root. Use separate Python environments
 # compatible with the pinned upstream code; do not replace these models with 1.5.
 upstream: ../reference_repos/VisualAdv_upstream
-rtp_path: data/VisualAdv/rtp_prompts.jsonl
+rtp_path: data/method_assets/VisualAdv/rtp_prompts.jsonl
 rtp_revision: f21629712ffd6a3d13a54fd2807ccd521c55ef74
 # Ai2's pinned public release has 1199 challenging=True rows; paper states 1225.
 rtp_expected_prompts: 1199

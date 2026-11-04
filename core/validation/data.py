@@ -17,7 +17,10 @@ def _image_path(path: str, data_root: str, repo_root: str) -> str:
 
     value = os.path.expanduser(os.fspath(path))
     if os.path.isabs(value):
-        return os.path.abspath(value)
+        absolute = os.path.abspath(value)
+        if os.path.commonpath((absolute, data_root)) == data_root:
+            return resolve_data_path(os.path.relpath(absolute, data_root), data_root)
+        return absolute
     normalized = os.path.normpath(value)
     if normalized == "data":
         return data_root
@@ -86,7 +89,7 @@ def main() -> None:
     total = 0
     for name in datasets:
         dataset_class = get_dataset(name)
-        dataset_dir = os.path.join(data_root, dataset_class.dir_name or dataset_class.name)
+        dataset_dir = resolve_data_path(dataset_class.dir_name or dataset_class.name, data_root)
         behaviors = dataset_class(data_dir=dataset_dir).load()
         expected = EXPECTED_COUNTS[name]
         if len(behaviors) != expected:

@@ -188,11 +188,11 @@ VS Code·노트북에서도 위 환경의 Python 인터프리터·커널을 선�
 데이터는 [3절](#3-dataset-loading), 방어용 이미지·확산 모델 자산은
 [7절](#7-jailbreak-defenses)에 따라 준비합니다.
 MML 단어 치환과 조합 데이터 생성에 필요한 영어 품사 태깅 모델은
-`data.zip`의 `data/nltk_data/`에 포함됩니다. 여러 실행이 공유하는 자산이며,
+`data.zip`의 `data/method_assets/nltk_data/`에 포함됩니다. 여러 실행이 공유하는 자산이며,
 누락된 경우 아래 명령으로 준비합니다.
 
 ```bash
-export NLTK_DATA="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/nltk_data"
+export NLTK_DATA="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/method_assets/nltk_data"
 python -m nltk.downloader -d "$NLTK_DATA" averaged_perceptron_tagger
 ```
 
@@ -223,84 +223,98 @@ API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
 
 ## 3. Dataset loading
 
+### Benchmark inputs and method assets
+
+`data/`는 다음 두 디렉터리로 관리합니다. 실행 결과는 `runs/<실험명>/`에 저장합니다.
+
+| 디렉터리 | 역할 | 예시 |
+| --- | --- | --- |
+| `data/benchmarks/` | 공격·방어 평가에 사용하는 벤치마크 원본 | AdvBench, AdvBench-M 원본 공개본, HADES, MM-SafetyBench, SafeBench |
+| `data/method_assets/` | 각 방법론의 샘플 생성·최적화·재현에 필요한 입력과 공용 자산 | CS-DJ 이미지 풀, JOOD 부분집합·혼합 이미지, MML 공식 이미지, NLTK 태거 |
+
+```text
+data/
+├── benchmarks/
+│   ├── advbench/
+│   ├── AdvBenchM/                    # 이전 original_release/의 전체 내용
+│   ├── HADES/
+│   ├── MM-SafetyBench/
+│   └── SafeBench/
+└── method_assets/
+    ├── CS-DJ/
+    ├── JOOD/                         # 이전 AdvBenchM/jood_subset/의 전체 내용
+    ├── JailbreakInPieces/
+    ├── VisualAdv/
+    ├── nltk_data/
+    └── MML/                          # 공식 replay용 선택 자산, 별도 다운로드
+```
+
+AdvBench-M 원본 공개본은 246개 질문 레코드와 160장 이미지의 범주별 풀입니다.
+JOOD의 170문항·대표 이미지·혼합용 이미지는 `method_assets/JOOD/`에 따로 보관합니다.
+이번 변경은 저장 위치만 분리합니다. 기존 CLI 이름 `--dataset AdvBenchM`은
+JOOD의 170문항을 계속 읽으며, 원본 공개본의 246문항으로 자동 전환하지 않습니다.
+두 구성을 같은 평가 데이터로 집계하지 마세요.
+
 ### Download and extract
 
-`data.zip`은 벤치마크 원본과 여러 실행에서 재사용하는 공용 자산을 묶은 파일입니다.
-**새 ZIP에서는 공식 MML 재현용 `data/MML/`을 제외하고 `data/nltk_data/`는 유지합니다.**
-실행 중 생성한 공격 이미지·모델 응답·평가 결과는 `runs/<실험명>/`에 저장합니다.
+새 `data.zip`에는 위의 `benchmarks/`와 `method_assets/` 구조가 들어 있습니다.
+**공식 MML replay용 `method_assets/MML/`은 기본 ZIP에서 제외하고,
+단어 치환 생성에 필요한 `method_assets/nltk_data/`는 유지합니다.**
+MML을 직접 생성하는 조합 모드는 공식 MML 이미지 대신 이 NLTK 태거를 사용합니다.
+공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
+`data/method_assets/MML/`에 별도로 배치하세요.
 
-[Google Drive의 기존 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)도
-사용할 수 있습니다. 기존 배포본에는 `data/MML/`이 포함되어 있을 수 있으므로,
-아래 명령은 해당 폴더를 제외하고 압축을 풉니다. 새 ZIP에도 같은 명령을 사용할 수 있습니다.
+[Google Drive의 기존 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)은
+이전 평면 구조의 배포본입니다. 기존 ZIP을 사용하면 압축 해제 후 아래 이전 명령을 실행하세요.
+이미 새 구조인 데이터에는 이전 명령을 다시 실행해도 파일을 옮기지 않습니다.
+기존 ZIP에 AdvBench-M 원본 공개본이 없다면 이전 명령이 이를 새로 다운로드하지는 않습니다.
+원본까지 포함한 새 ZIP을 사용하거나 [공식 데이터 출처](https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model/tree/fd98910ae4075fe587a1944095c00660aa24cc54/dataset)를
+참고해 `benchmarks/AdvBenchM/`에 별도로 준비하세요.
 다운로드 파일과 압축 해제본을 함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
 
 ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에서 압축을 해제**하여
 `vlm-jailbreak-simulator/data/`에 배치합니다. `data/` 안에서 다시 압축을 풀어
 `data/data/`가 되지 않도록 주의하세요.
 
-브라우저에서 다운로드한 파일을 저장소의 상위 폴더에 `data.zip`으로 두거나,
-저장소 루트에서 아래 명령으로 다운로드합니다. `curl`과 `unzip`이 필요합니다.
-
 ```bash
-# vlm-jailbreak-simulator/에서 실행: ZIP은 상위 폴더에 저장
+# vlm-jailbreak-simulator/에서 실행: 기존 ZIP 다운로드는 필요한 경우에만 수행
 curl --fail --location --retry 3 \
   'https://drive.usercontent.google.com/download?id=1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i&export=download&confirm=t' \
   --output ../data.zip
 
-# 다운로드한 ZIP의 무결성 검사
 unzip -tq ../data.zip
-
-# 기존 파일은 덮어쓰지 않고, 공식 MML 데이터를 제외한 data/ 폴더를 배치
-unzip -n ../data.zip -d . -x 'data/MML' 'data/MML/*'
-
+unzip -n ../data.zip -d .
 export VLM_JAILBREAK_DATA_ROOT="$PWD/data"
+
+# 이전 ZIP을 두 디렉터리 구조로 정리: 기존 대상 파일은 덮어쓰지 않음
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT" --dry-run
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
+export NLTK_DATA="$VLM_JAILBREAK_DATA_ROOT/method_assets/nltk_data"
 ```
 
-Drive의 다운로드 확인 화면이나 용량 제한 안내가 나오면 위 공유 링크를 브라우저에서 열어 다운로드하세요.
-
-완료 후 주요 경로는 다음과 같습니다.
-
-```text
-vlm-jailbreak-simulator/
-├── README.md
-├── run_generate_test_cases.py
-├── data/                            # 원본 입력과 재사용하는 공용 자산
-│   ├── SafeBench/safebench.csv
-│   ├── advbench/harmful_behaviors.csv
-│   ├── HADES/hades.csv
-│   ├── nltk_data/taggers/            # MML 단어 치환용 영어 품사 태깅 모델
-│   └── ...
-└── runs/<실험명>/                   # 생성 이미지·모델 응답·평가 결과
-```
-
-기본 데이터 경로는 `<repo>/data`입니다. 위의 `export`는 이미 설정된 다른 데이터 루트가
-있더라도 방금 압축을 해제한 폴더를 사용하도록 지정합니다.
 다른 위치에 압축을 풀었다면 `VLM_JAILBREAK_DATA_ROOT`를 그 안의 `data/` 폴더로 지정하세요.
-
-공식 MML 이미지·메타데이터로 재현하려면 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
-별도 다운로드하여 `data/MML/`에 배치하세요. MML 단어 치환을 직접 생성하는 조합 모드는
-이 공식 이미지 폴더 대신 `nltk_data/`의 품사 태깅 모델을 사용합니다.
-위 압축 해제 명령은 이미 존재하는 로컬 `data/MML/` 폴더를 삭제하지 않습니다.
+이전된 파일의 내용과 기존 실행 기록은 수정하지 않습니다. 이동 기록은
+`method_assets/provenance/data_layout_migration.json`에 남깁니다.
+새 설정은 두 디렉터리 경로를 사용하고, 공통 resolver는 이전 `data/HADES/...`,
+`data/AdvBenchM/jood_subset/...` 같은 설정 경로도 계속 읽습니다.
 
 ### Validate the data
 
 ```bash
-# 기본 데이터셋의 필수 경로 확인
 python -m core.validation.data --dataset SafeBench --dataset AdvBench --layout-only
-
-# 행 수, ID 중복, 참조 이미지까지 확인
 python -m core.validation.data --dataset SafeBench --dataset AdvBench
 ```
 
-`--dataset NAME`을 반복하여 사용할 데이터셋을 선택합니다.
-전체 등록 데이터셋의 자산을 준비한 경우에는 `--dataset`을 생략하여 모두 검사할 수 있습니다.
-개별 공격의 공식 설정에 필요한 추가 이미지·폰트·프롬프트는
-[4절](#4-jailbreak-attacks)의 준비 조건과 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 함께 확인하세요.
+`--dataset NAME`을 반복하여 검사할 데이터셋을 선택합니다. 전체 등록 데이터셋의
+자산을 준비한 경우에는 `--dataset`을 생략하여 모두 검사할 수 있습니다.
+공식 AdvBench-M 원본의 파일별 해시와 공개 범위는
+`data/benchmarks/AdvBenchM/{manifest.json,availability.json}`에 기록되어 있습니다.
+방법론별 필수 파일은 [4절](#4-jailbreak-attacks)과 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
-[core/paths.py](core/paths.py)는 설정의 논리 경로 `data/foo`를
-`$VLM_JAILBREAK_DATA_ROOT/foo`로 해석합니다. 절대 경로는 그대로 사용하고,
-그 밖의 상대 경로는 저장소 기준입니다. 로더는 원본 파일을 수정하지 않습니다.
-개별 생성 CLI는 필요한 데이터와 공격 자산을 검사하고, 누락 시 생성 전에 실패합니다.
+[core/paths.py](core/paths.py)는 `data/benchmarks/...`, `data/method_assets/...`를
+`$VLM_JAILBREAK_DATA_ROOT` 아래로 해석합니다. 기본 루트는 `<repo>/data`입니다.
+데이터 루트 밖의 절대 경로는 그대로 사용하고, 그 밖의 상대 경로는 저장소 기준입니다.
+생성 CLI는 필요한 입력과 방법론 자산을 검사하고, 누락 시 생성 전에 실패합니다.
 
 ### Registered loaders
 
@@ -312,7 +326,7 @@ harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니�
 | CLI 데이터셋 이름 | 로더 | 주요 입력 경로: 데이터 루트 기준 | 기대 행 수 |
 | --- | --- | --- | ---: |
 | `AdvBench` | [advbench.py](core/datasets/advbench.py) | `advbench/harmful_behaviors.csv` | 520 |
-| `AdvBenchM` | [advbenchm.py](core/datasets/advbenchm.py) | `AdvBenchM/jood_subset/` (JOOD subset; separate from `original_release/`) | 170 |
+| `AdvBenchM` | [advbenchm.py](core/datasets/advbenchm.py) | `method_assets/JOOD/` (historical JOOD subset; original release is `benchmarks/AdvBenchM/`) | 170 |
 | `CS-DJ` | [cs_dj.py](core/datasets/cs_dj.py) | `CS-DJ/instructions/*.json` | 750 |
 | `HADES` | [hades.py](core/datasets/hades.py) | `HADES/hades.csv` 및 참조 이미지 | 750 |
 | `HarmBench` | [harmbench.py](core/datasets/harmbench.py) | `HarmBench/harmbench_standard.json` | 200 |
@@ -321,8 +335,8 @@ harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니�
 
 `CS-DJ`는 공격 이름인 동시에 데이터셋 등록 이름입니다.
 데이터셋 로딩에 필요한 자산과 공격 최적화에 필요한 추가 자산은 서로 다를 수 있습니다.
-VisualAdv의 최적화 목표 코퍼스는 `data/VisualAdv/derogatory_corpus.csv`에 두고,
-기저 이미지는 `data/FORCE/clean.jpeg`를 사용합니다.
+VisualAdv의 최적화 목표 코퍼스는 `data/method_assets/VisualAdv/derogatory_corpus.csv`에 두고,
+기저 이미지는 `data/method_assets/FORCE/clean.jpeg`를 사용합니다.
 
 ### Schema and harmful-only policy
 

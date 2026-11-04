@@ -165,11 +165,11 @@ upstream sources listed.
 
 | Component                                                  | Upstream                                                                                                | Upstream License (as observed) | Vendored here? |
 | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------- |
-| HarmBench standard behaviors (`data/HarmBench/`) | [centerforaisafety/HarmBench](https://github.com/centerforaisafety/HarmBench) | MIT | No; external local data |
-| AdvBench harmful-behavior CSVs (`data/advbench/`)          | [llm-attacks/llm-attacks](https://github.com/llm-attacks/llm-attacks)                                    | MIT                            | No; external local data |
-| `data/VisualAdv/derogatory_corpus.csv` (VisualAdv targets) | Derived from the Visual Adversarial Examples upstream repo (see §1) | No explicit license | No; external local data |
-| `data/FORCE/clean.jpeg` (VisualAdv base image)              | Per the Visual Adversarial Examples upstream repo                                                       | Refer to upstream              | No; external local data |
-| LLaVA-CC3M-Pretrain-595K images (`data/CS-DJ/llava_images/`) | [liuhaotian/LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K) | Refer to the dataset card and source-image terms | No |
+| HarmBench standard behaviors (`data/benchmarks/HarmBench/`) | [centerforaisafety/HarmBench](https://github.com/centerforaisafety/HarmBench) | MIT | No; external local data |
+| AdvBench harmful-behavior CSVs (`data/benchmarks/advbench/`)          | [llm-attacks/llm-attacks](https://github.com/llm-attacks/llm-attacks)                                    | MIT                            | No; external local data |
+| `data/method_assets/VisualAdv/derogatory_corpus.csv` (VisualAdv targets) | Derived from the Visual Adversarial Examples upstream repo (see §1) | No explicit license | No; external local data |
+| `data/method_assets/FORCE/clean.jpeg` (VisualAdv base image)              | Per the Visual Adversarial Examples upstream repo                                                       | Refer to upstream              | No; external local data |
+| LLaVA-CC3M-Pretrain-595K images (`data/method_assets/CS-DJ/llava_images/`) | [liuhaotian/LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K) | Refer to the dataset card and source-image terms | No |
 
 > ℹ️ JOOD's `configs/attacks/JOOD.yaml` additionally references
 > an external **AdvBenchM** image / prompt set (`data/AdvBenchM/...`).

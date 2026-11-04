@@ -11,9 +11,9 @@ never imported or executed because upstream declares no software license.
 Prepare the two external inputs as follows:
 
 ```bash
-git clone https://github.com/wangyu-ovo/MML.git data/MML/upstream
-git -C data/MML/upstream checkout 5966fca529011e8b5ccff61d70365997d6466abc
-# Download the Drive `dataset` contents into data/MML/{safebench,mm-safebench,hades}
+git clone https://github.com/wangyu-ovo/MML.git data/method_assets/MML/upstream
+git -C data/method_assets/MML/upstream checkout 5966fca529011e8b5ccff61d70365997d6466abc
+# Download the Drive `dataset` contents into data/method_assets/MML/{safebench,mm-safebench,hades}
 ```
 
 `run_generate_completions.py --protocol mml_official` implements the released online control flow: query the
@@ -44,7 +44,7 @@ not released, so generated mode is not an official reproduction profile.
 The upstream repository does not release its image-generation code or rendering
 settings. It instead links to an external Drive folder containing prepared
 images and `data.json` files. For exact asset replay, download that folder to
-`data/MML/` and use the default `configs/attacks/MML.yaml`; the expected structure
+`data/method_assets/MML/` and use the default `configs/attacks/MML.yaml`; the expected structure
 is documented in `DATA_LAYOUT.md`. The official metadata is also the filter:
 rows absent from it—including MM-SafetyBench rows removed by CLAS moderation—are
 reported as skipped rather than aborting the run.

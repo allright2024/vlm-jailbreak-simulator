@@ -1,4 +1,4 @@
-"""SafeBench (FigStep) loader: data/SafeBench/safebench.csv -> list[Behavior].
+"""SafeBench (FigStep) loader: data/benchmarks/SafeBench/safebench.csv -> list[Behavior].
 
 SafeBench has 500 questions (10 categories x 50). Besides the original
 ``question`` it ships an ``instruction`` column: the declarative rephrase

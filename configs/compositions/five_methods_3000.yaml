@@ -18,7 +18,7 @@ cs_dj:
   show_embedding_progress: true
 jood:
   operation: mixup
-  harmless_dir: data/AdvBenchM/jood_subset/images/harmless
+  harmless_dir: data/method_assets/JOOD/images/harmless
   # JOOD's source-image alpha; the provided harmless image receives 30%.
   source_weight: 0.7
 jps:

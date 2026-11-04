@@ -11,19 +11,19 @@ from .paths import DATA_ROOT, DATA_ROOT_ENV, resolve_data_path, resolve_path
 # Minimal layout needed to load each dataset. Deep validation additionally
 # loads every row and checks all referenced images.
 DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
-    "AdvBench": ("advbench/harmful_behaviors.csv",),
+    "AdvBench": ("benchmarks/advbench/harmful_behaviors.csv",),
     "AdvBenchM": (
-        "AdvBenchM/jood_subset/prompts/eval_all_instructions",
-        "AdvBenchM/jood_subset/prompts/all_instructions",
-        "AdvBenchM/jood_subset/prompts/all_instructions_harmful_annotated",
-        "AdvBenchM/jood_subset/images/harmful",
-        "AdvBenchM/jood_subset/images/harmless",
+        "method_assets/JOOD/prompts/eval_all_instructions",
+        "method_assets/JOOD/prompts/all_instructions",
+        "method_assets/JOOD/prompts/all_instructions_harmful_annotated",
+        "method_assets/JOOD/images/harmful",
+        "method_assets/JOOD/images/harmless",
     ),
-    "CS-DJ": ("CS-DJ/instructions",),
-    "HADES": ("HADES/hades.csv",),
-    "HarmBench": ("HarmBench/harmbench_standard.json",),
-    "MM-SafetyBench": ("MM-SafetyBench",),
-    "SafeBench": ("SafeBench/safebench.csv",),
+    "CS-DJ": ("method_assets/CS-DJ/instructions",),
+    "HADES": ("benchmarks/HADES/hades.csv",),
+    "HarmBench": ("benchmarks/HarmBench/harmbench_standard.json",),
+    "MM-SafetyBench": ("benchmarks/MM-SafetyBench",),
+    "SafeBench": ("benchmarks/SafeBench/safebench.csv",),
 }
 
 EXPECTED_COUNTS = {
@@ -46,11 +46,11 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
     c = config or {}
     if name == "VisualAdv":
         return [
-            resolve_path(c.get("image_path", "data/FORCE/clean.jpeg")),
-            resolve_path(c.get("target_path", "data/VisualAdv/derogatory_corpus.csv")),
+            resolve_path(c.get("image_path", "data/method_assets/FORCE/clean.jpeg")),
+            resolve_path(c.get("target_path", "data/method_assets/VisualAdv/derogatory_corpus.csv")),
         ]
     if name == "JPS":
-        paths = [resolve_path(c.get("base_image", "data/JPS/clean.jpeg"))]
+        paths = [resolve_path(c.get("base_image", "data/method_assets/JPS/clean.jpeg"))]
         train_csv = c.get("train_csv")
         if train_csv:
             paths.append(resolve_path(train_csv))
@@ -59,7 +59,7 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
             paths.extend(_data_path(p) for p in DATASET_LAYOUT.get(train_name, ()))
         return paths
     if name == "CS-DJ":
-        paths = [resolve_path(c.get("image_dir", "data/CS-DJ/llava_images"))]
+        paths = [resolve_path(c.get("image_dir", "data/method_assets/CS-DJ/llava_images"))]
         if c.get("strict_font") and c.get("font_path"):
             paths.append(resolve_path(c["font_path"]))
         return paths
@@ -70,10 +70,10 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
         train_name = str(c.get("probe_dataset", "MM-SafetyBench"))
         return [_data_path(path) for path in DATASET_LAYOUT.get(train_name, ())]
     if name == "MML" and str(c.get("input_mode", "generated")).lower() == "precomputed":
-        paths = [resolve_path(c.get("precomputed_root", "data/MML"))]
+        paths = [resolve_path(c.get("precomputed_root", "data/method_assets/MML"))]
         if str(c.get("prompt_source", "clean_room")).lower() == "upstream":
             paths.append(resolve_path(c.get(
-                "upstream_const_path", "data/MML/upstream/const.py"
+                "upstream_const_path", "data/method_assets/MML/upstream/const.py"
             )))
         return paths
     if name == "DeltaJP":
@@ -83,7 +83,7 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
         train_name = str(c.get("train_dataset", "HADES"))
         return [_data_path(p) for p in DATASET_LAYOUT.get(train_name, ())]
     if name == "JOOD":
-        return [resolve_path(c.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless"))]
+        return [resolve_path(c.get("harmless_dir", "data/method_assets/JOOD/images/harmless"))]
     return []
 
 

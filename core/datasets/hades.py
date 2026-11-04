@@ -1,4 +1,4 @@
-"""HADES loader: data/HADES/hades.csv -> list[Behavior].
+"""HADES loader: data/benchmarks/HADES/hades.csv -> list[Behavior].
 
 HADES ships, per harmful instruction, a keyword, a keyword type
 (behavior/object/concept), and 6 optimization-step images. All of that maps
@@ -21,7 +21,14 @@ class HadesDataset(Dataset):
         behaviors = []
         with open(self.path("hades.csv"), encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                images = [row[f"image_step{s}"] for s in range(6)]  # repo-root-relative already
+                images = []
+                for step in range(6):
+                    image = row[f"image_step{step}"]
+                    for prefix in ("data/benchmarks/HADES/", "data/HADES/"):
+                        if image.startswith(prefix):
+                            image = self.rel(self.path(image[len(prefix):]))
+                            break
+                    images.append(image)
                 behaviors.append(
                     Behavior(
                         behavior_id=row["hades_id"],

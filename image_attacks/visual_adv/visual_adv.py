@@ -57,8 +57,8 @@ class VisualAdvAttack(Attack):
             "surrogate_revision",
             default_revision(self.surrogate),
         )
-        self.image_path = c.get("image_path", os.path.join(DATA_ROOT, "FORCE", "clean.jpeg"))
-        self.target_path = c.get("target_path", os.path.join(DATA_ROOT, "VisualAdv", "derogatory_corpus.csv"))
+        self.image_path = c.get("image_path", os.path.join(DATA_ROOT, "method_assets", "FORCE", "clean.jpeg"))
+        self.target_path = c.get("target_path", os.path.join(DATA_ROOT, "method_assets", "VisualAdv", "derogatory_corpus.csv"))
         self.epsilon = float(c.get("epsilon", 32)) / 255.0
         self.alpha = float(c.get("alpha", 1)) / 255.0
         self.n_iters = int(c.get("n_iters", 5000))

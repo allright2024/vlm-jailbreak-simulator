@@ -141,7 +141,7 @@ class MMLAttack(Attack):
         if self.prompt_source == "upstream" and self.variant == "shift":
             raise ValueError("The released MML source has no shift-cipher prompt constant")
         self.upstream_const_path = resolve_path(
-            self.config.get("upstream_const_path", "data/MML/upstream/const.py")
+            self.config.get("upstream_const_path", "data/method_assets/MML/upstream/const.py")
         )
         expected = self.config.get("upstream_const_sha256")
         self.upstream_const_sha256 = str(expected) if expected else None
@@ -180,7 +180,7 @@ class MMLAttack(Attack):
             raise ValueError("MML pos_tagger must be 'nltk' or 'heuristic'")
 
         self.precomputed_root = resolve_path(
-            self.config.get("precomputed_root", "data/MML")
+            self.config.get("precomputed_root", "data/method_assets/MML")
         )
         self._font_source: str | None = None
         self._precomputed_indices: dict[str, dict[str, dict[str, Any]]] = {}

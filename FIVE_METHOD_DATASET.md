@@ -87,7 +87,7 @@ with the measured renderer. CS-DJ retains Qwen question decomposition, CLIP
 greedy contrast retrieval and the nine-image/three-card collage.
 
 JOOD now performs actual image mixing with the five provided harmless images
-under `data/AdvBenchM/jood_subset/images/harmless`: airpodmax, apple, iphone, soccerball and
+under `data/method_assets/JOOD/images/harmless`: airpodmax, apple, iphone, soccerball and
 watch. Each source behavior deterministically selects one provided image.
 MixUp uses `0.7 * source + 0.3 * harmless`, with the weight configured under
 `jood.source_weight`. The provided image is resized with its aspect ratio intact

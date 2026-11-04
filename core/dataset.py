@@ -1,6 +1,6 @@
 """Dataset loader base class: benchmark files -> list[Behavior].
 
-A loader reads one benchmark from ``data/<name>/`` and yields normalized
+A loader reads one benchmark from ``data/benchmarks/<name>/`` and yields normalized
 ``Behavior`` objects. It never mutates the source files; it only maps columns
 onto the shared schema. Enrichment (keyword extraction, rephrasing) that a
 dataset doesn't natively provide is a separate, cached step and does not belong
@@ -13,14 +13,14 @@ import os
 from typing import Iterable, Optional
 
 from .schema import Behavior, EvalType
-from .paths import DATA_ROOT, REPO_ROOT, portable_path
+from .paths import DATA_ROOT, REPO_ROOT, portable_path, resolve_data_path, resolve_path
 
 
 class Dataset:
     """Base class for benchmark loaders.
 
     Subclasses set ``name`` (via @register_dataset) and implement ``load``.
-    ``data_dir`` defaults to ``data/<dir_name>/`` (``dir_name`` falls back to
+    ``data_dir`` defaults to ``data/benchmarks/<dir_name>/`` (``dir_name`` falls back to
     ``name``) but can be overridden per instance.
     """
 
@@ -28,7 +28,8 @@ class Dataset:
     dir_name: Optional[str] = None  # folder under data/ when it differs from `name`
 
     def __init__(self, data_dir: Optional[str] = None):
-        self.data_dir = data_dir or os.path.join(DATA_ROOT, self.dir_name or self.name)
+        self.data_dir = (resolve_path(data_dir) if data_dir is not None
+                         else resolve_data_path(self.dir_name or self.name))
 
     def path(self, *parts: str) -> str:
         """Absolute path inside this dataset's directory."""

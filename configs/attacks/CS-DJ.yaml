@@ -3,7 +3,7 @@
 # LLaVA-CC3M-Pretrain-595K. The upstream font is required: no fallback font is
 # accepted by this profile.
 experiment_profile: official
-image_dir: data/CS-DJ/llava_images
+image_dir: data/method_assets/CS-DJ/llava_images
 seed: 0
 num_images: 10000
 retrieval_count: 15
@@ -27,7 +27,7 @@ tile_height: 500
 images_per_row: 3
 text_font_size: 50
 number_font_size: 20
-font_path: data/CS-DJ/Super Moods.ttf
+font_path: data/method_assets/CS-DJ/Super Moods.ttf
 number_font_path: null
 strict_font: true
 

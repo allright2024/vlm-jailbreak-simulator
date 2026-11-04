@@ -86,7 +86,7 @@ class JOODAttack(Attack):
                 f"Image: {sorted(ju.MIX_FUNCS)}; text: {sorted(ju.TEXTMIX_FUNCS)}"
             )
         # harmless pool (shared resource); default to AdvBenchM's.
-        hd = self.config.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless")
+        hd = self.config.get("harmless_dir", "data/method_assets/JOOD/images/harmless")
         self.harmless_dir = resolve_path(hd)
         subset = self.config.get("harmless_subset")  # None = all
         names = sorted(f for f in os.listdir(self.harmless_dir) if f.lower().endswith((".png", ".jpg", ".jpeg")))

@@ -3,7 +3,7 @@
 # then reuse it for every dataset (no per-dataset re-optimization).
 # Optimizes ONE image + steer prompt, then reuses both. The default retains the
 # official attack settings and local/HF Qwen2.5-14B agents. The upstream-only
-# advbench_subset.csv and clean.jpeg must be present under data/JPS.
+# advbench_subset.csv and clean.jpeg must be present under data/method_assets/JPS.
 #
 # Usage:
 #   bash attack_scripts/run_jps_full.sh

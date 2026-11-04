@@ -203,7 +203,7 @@ class CSDJAttack(Attack):
     def __init__(self, config=None):
         super().__init__(config)
         self.image_dir_config = str(
-            self.config.get("image_dir", "data/CS-DJ/llava_images")
+            self.config.get("image_dir", "data/method_assets/CS-DJ/llava_images")
         )
         self.image_dir = resolve_path(self.image_dir_config)
         self.seed = int(self.config.get("seed", 0))

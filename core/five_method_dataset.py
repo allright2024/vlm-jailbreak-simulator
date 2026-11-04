@@ -118,7 +118,7 @@ class DatasetBuilder:
         self.identity = json_hash({"config": config, "jps": self.jps["hashes"],
                                    "jood": self.jood["hashes"], "reuse": self.reuse,
                                    "font_sha256": digest(self.font),
-                                   "dataset_sha256": digest(resolve_path("data/SafeBench/safebench.csv")),
+                                   "dataset_sha256": digest(resolve_path("data/benchmarks/SafeBench/safebench.csv")),
                                    "code": {str(p): digest(p) for p in code}})
         if identity_path.exists():
             if json.loads(identity_path.read_text())["identity"] != self.identity:
@@ -136,7 +136,7 @@ class DatasetBuilder:
         weight = float(cfg.get("source_weight", 0.7))
         if not math.isfinite(weight) or not 0 < weight < 1:
             raise ValueError("JOOD source_weight must be strictly between 0 and 1")
-        pool = Path(resolve_path(cfg.get("harmless_dir", "data/AdvBenchM/jood_subset/images/harmless")))
+        pool = Path(resolve_path(cfg.get("harmless_dir", "data/method_assets/JOOD/images/harmless")))
         files = sorted(p for p in pool.iterdir()
                        if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg"})
         if not files:

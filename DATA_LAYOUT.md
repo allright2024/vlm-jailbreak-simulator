@@ -1,123 +1,113 @@
-# External benchmark data
+# Benchmark inputs and method assets
 
-Benchmark data and generated artifacts are intentionally not tracked by Git.
-Download the data bundle from the project Drive, then point the simulator at
-its root before running a command:
+Benchmark inputs and reusable method resources are stored separately. Neither
+data nor run outputs are tracked by Git. Set `VLM_JAILBREAK_DATA_ROOT` to the
+directory containing both sections, not to either section itself.
+
+```text
+data/
+├── benchmarks/
+│   ├── advbench/harmful_behaviors.csv
+│   ├── AdvBenchM/                     # the former original_release/ contents
+│   │   ├── dataset/{advbench,advimage}/
+│   │   ├── instructions.jsonl         # 246 records, 231 unique instruction texts
+│   │   ├── images.jsonl               # 160 primary images in eight categories
+│   │   ├── manifest.json
+│   │   └── availability.json
+│   ├── HADES/{hades.csv,images/}
+│   ├── MM-SafetyBench/
+│   ├── SafeBench/safebench.csv
+│   └── HarmBench/harmbench_standard.json  # optional JPS query/target split
+└── method_assets/
+    ├── CS-DJ/
+    │   ├── llava_images/              # LLaVA-CC3M image pool
+    │   ├── instructions/              # method-specific 750-instruction set
+    │   └── Super Moods.ttf
+    ├── JOOD/                          # former AdvBenchM/jood_subset/
+    │   ├── images/{harmful,harmless,harmless_text}/
+    │   ├── prompts/{eval_all_instructions,all_instructions,all_instructions_harmful_annotated}/
+    │   ├── scenario_def.json
+    │   └── scenario_repr.json
+    ├── JailbreakInPieces/{meth_pill.png,white.jpeg}
+    ├── VisualAdv/{derogatory_corpus.csv,rtp_prompts.jsonl}
+    ├── nltk_data/taggers/             # English POS models for MML generation
+    ├── MML/                           # optional; excluded from the default ZIP
+    │   ├── upstream/const.py
+    │   ├── safebench/<class>/{data.json,images_wr/,images_mirror/,images_rotate/,images_base64/}
+    │   ├── mm-safebench/<class>/...
+    │   └── hades/<class>/...
+    ├── FORCE/clean.jpeg               # optional method input
+    ├── JPS/{advbench_subset.csv,clean.jpeg}  # optional method inputs
+    ├── UltraBreak/{images/,train_configs/}  # optional method inputs
+    └── provenance/data_layout_migration.json
+```
+
+`runs/<experiment>/` contains generated attack images, model responses, fitted
+patches and evaluation results. Those outputs do not belong in either data
+section. A benchmark image distributed by its authors remains benchmark input;
+an image pool or training corpus required by an attack belongs in method assets.
+
+## AdvBench-M and JOOD
+
+The original public AdvBench-M release is under `benchmarks/AdvBenchM/`.
+It has 246 categorized question records (231 unique texts), 160 primary images,
+and a separate 483-record prompt pool. Questions and images are associated by
+category, not as one-to-one pairs. The released files do not contain all 240
+images described in the paper. The source manifest and availability record
+retain that limitation; no missing images or pairings are invented.
+
+`method_assets/JOOD/` holds the complete former `jood_subset/`: 170 evaluation
+questions in seven categories, seven representative harmful images and ten
+mixing assets. To preserve historical experiments, the existing CLI dataset
+name `AdvBenchM` still reads this JOOD subset. Reorganizing files does not replace
+that evaluation set with the original release. The `CS-DJ` dataset loader also
+continues reading its method-specific instruction set under method assets.
+
+## Existing bundles and historical paths
+
+The current Drive link may still supply a flat bundle containing only the JOOD
+subset of AdvBench-M. Migration does not download missing benchmark releases.
+Use the new bundle for the collected original release, or supply those files
+separately under `benchmarks/AdvBenchM/`. After extraction run:
 
 ```bash
-export VLM_JAILBREAK_DATA_ROOT=/path/to/vlm-jailbreak-data
-python -m core.validation.data
+export VLM_JAILBREAK_DATA_ROOT=/path/to/data
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT" --dry-run
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
 ```
 
-The external directory must have this layout:
+The migration checks all destinations before moving files and refuses to
+overwrite existing data. It moves original file bytes, removes the obsolete
+JOOD compatibility symlinks at the old AdvBenchM wrapper, and preserves wrapper
+metadata under `method_assets/JOOD/provenance/previous_AdvBenchM/`.
+Re-running it on the separated layout makes no moves. Existing run records and
+historical reproduction settings are left unchanged.
 
-```text
-vlm-jailbreak-data/
-├── advbench/
-│   └── harmful_behaviors.csv
-├── AdvBenchM/
-│   ├── jood_subset/               # existing AdvBenchM loader: 170 questions
-│   │   ├── images/{harmful,harmless,harmless_text}/
-│   │   ├── prompts/{eval_all_instructions,all_instructions,all_instructions_harmful_annotated}/
-│   │   ├── scenario_def.json
-│   │   └── scenario_repr.json
-│   └── original_release/          # independent public release; optional
-│       ├── dataset/{advbench,advimage}/
-│       ├── instructions.jsonl     # 246 categorized records (231 unique texts)
-│       └── images.jsonl           # 160 primary images in 8 categories
-├── CS-DJ/
-│   ├── llava_images/               # LLaVA-CC3M-Pretrain-595K images
-│   ├── instructions/               # five JSON files from the pinned repo
-│   └── Super Moods.ttf
-├── FORCE/
-│   └── clean.jpeg
-├── HADES/
-│   ├── hades.csv
-│   └── images/
-├── HarmBench/
-│   └── harmbench_standard.json     # JPS query/target evaluation split
-├── JPS/
-│   ├── advbench_subset.csv
-│   └── clean.jpeg
-├── MM-SafetyBench/
-├── SafeBench/
-│   └── safebench.csv
-└── VisualAdv/
-    └── derogatory_corpus.csv
-```
+`core.paths` resolves new paths against the configured data root and accepts
+legacy flat paths, including `AdvBenchM/original_release/` and
+`AdvBenchM/jood_subset/`. The former maps to the benchmark release and the latter
+to JOOD assets; they are never interchanged. Old absolute paths within the
+selected data root are also remapped by the common resolver. Archived standalone
+scripts that open old paths directly must be given the new paths explicitly.
 
-The dataset name `AdvBenchM` continues to load JOOD's 170 questions across
-7 categories, with one representative harmful image per category. Collecting
-`original_release/` does not switch the experiment to a different dataset.
-Its 246 records and 160 images form category-level pools, not one-to-one pairs.
+## Method-specific preparation
 
-The loader, path resolver and data validator also accept older Drive bundles
-with `AdvBenchM/{prompts,images,scenario_*.json}` directly under the root.
-For migrated local data, relative compatibility symlinks at those old paths
-keep existing experiment manifests and absolute image paths usable. New
-configurations use `AdvBenchM/jood_subset/`. Historical settings and results
-retain the paths recorded when they were produced. The published `data.zip`
-has not been updated by this local migration.
+- MML official replay requires the separately downloaded upstream `dataset`
+  tree and hash-pinned `upstream/const.py` at commit `5966fca5`. Its images are
+  excluded from the default ZIP. Generated word-replacement compositions use
+  `method_assets/nltk_data/`, which remains in the ZIP.
+- Set `NLTK_DATA="$VLM_JAILBREAK_DATA_ROOT/method_assets/nltk_data"`. The pinned
+  NLTK 3.8.1 uses `averaged_perceptron_tagger`; newer versions may use the `_eng`
+  resource. Both are reusable dependencies, not VLM training examples.
+- CS-DJ needs its CC3M image pool, instructions and exact font. The default
+  config samples 10,000 images and rejects font fallback.
+- JPS needs the `goal,target` CSV and base image required by the selected
+  config. Upstream does not distribute every referenced file; record the source
+  of any separately supplied input.
+- VisualAdv reads its target corpus under `method_assets/VisualAdv/`; its base
+  image remains the selected FORCE asset. JailbreakInPieces requires the two
+  fixed source images, whose expected hashes are recorded in provenance.
 
-VisualAdv reads its optimization-target corpus from
-`data/VisualAdv/derogatory_corpus.csv`; its base image remains
-`data/FORCE/clean.jpeg`. Older bundles kept this CSV under `legacy/`: relocate
-the CSV to `VisualAdv/` when upgrading. The remaining `legacy/` data is not
-required by the registered dataset loaders or the current composition plan.
-Archived pre-refactor runners that request other HarmBench files require those
-optional inputs to be supplied separately; they are not part of this layout.
-
-For MML, download the public `dataset` directory linked by the upstream README
-and preserve this layout under `data/MML/` (or set
-`precomputed_root` to an equivalent location):
-
-```text
-MML/
-├── upstream/
-│   └── const.py                     # pinned repo @ 5966fca5; hash-verified
-├── safebench/
-│   └── <class>/
-│       ├── data.json
-│       ├── images_wr/<id>.png
-│       ├── images_mirror/<id>.png
-│       ├── images_rotate/<id>.png
-│       └── images_base64/<id>.png
-├── mm-safebench/
-│   └── <class>/...
-└── hades/
-    └── <class>/
-        ├── data.json
-        └── images_<variant>/<id>.jpg
-```
-
-The adapter indexes `data.json` by `original_prompt` and matches it against the
-normalized simulator behavior's `statement` and `instruction`. Rows missing
-from the released metadata are explicitly skipped. This is required for the
-paper's MM-SafetyBench subset: CLAS filtering retains 1,180 of 1,680 queries.
-The four exact attack prompts and exact CLAS judge prompt are parsed from the
-hash-pinned `upstream/const.py` without executing it.
-
-Paths beginning with `data/` in attack YAML files are logical paths. When
-`VLM_JAILBREAK_DATA_ROOT` is set, the resolver maps, for example,
-`data/FORCE/clean.jpeg` to
-`$VLM_JAILBREAK_DATA_ROOT/FORCE/clean.jpeg`. Absolute paths in custom configs
-remain valid.
-
-The two `JPS/` files are required by `JPS.yaml`. Obtain the training CSV
-linked by the JPS README and preserve its `goal,target` columns. The original
-`clean.jpeg` is not distributed; record the provenance of the supplied base image.
-
-`CS-DJ/llava_images/` is required only when running CS-DJ. Download the
-LLaVA-CC3M-Pretrain-595K image archive referenced by the upstream project and
-place its image files directly in that directory. Copy the upstream five
-`instructions/*.json` files and `Super Moods.ttf` as shown above. `CS-DJ.yaml`
-samples 10,000 images and rejects font fallback.
-
-`python -m core.validation.data` verifies expected row counts, unique behavior IDs, and all
-dataset image references. Use `--layout-only` for a fast presence check or
-repeat `--dataset NAME` to validate selected datasets only.
-
-Historical experiment settings are retained under
-`configs/experiments/reproduction_settings/`. CS-DJ, JOOD and MML require
-API credentials when their selected backend uses remote services; supply
-credentials through environment variables, never configuration snapshots.
+Validate selected datasets with `python -m core.validation.data --dataset NAME`;
+add `--layout-only` to check presence without loading rows. Original AdvBench-M
+files can additionally be checked against their own `manifest.json`.

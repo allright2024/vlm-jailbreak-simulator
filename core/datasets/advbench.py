@@ -1,4 +1,4 @@
-"""AdvBench loader: data/advbench/harmful_behaviors.csv -> list[Behavior].
+"""AdvBench loader: data/benchmarks/advbench/harmful_behaviors.csv -> list[Behavior].
 
 520 harmful behaviors, each with a ``target`` affirmative prefix
 ("Sure, here is ...") used by optimization attacks. Text-only and
