@@ -4,6 +4,26 @@
 생성 설정, 원본 질문, 이미지 해시와 적용 단계를 기록하며,
 타깃 응답과 ASR은 생성된 입력을 대상으로 별도 평가합니다.
 
+## 다운로드
+
+[Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)에 다음 파일이 있습니다.
+
+| 파일 | 용도 |
+| --- | --- |
+| `data.zip` | 벤치마크 데이터셋과 방법론별 생성 자산 |
+| `3000_samples.zip` | 조합·분해 방식으로 생성한 3,000개 샘플 |
+
+필요한 ZIP을 내려받아 저장소 상위 디렉터리에 놓은 뒤, 저장소 루트에서 압축을 풉니다.
+
+```bash
+unzip -tq ../data.zip
+unzip -n ../data.zip -d .
+unzip -tq ../3000_samples.zip
+unzip -n ../3000_samples.zip -d .
+```
+
+입력 자산은 `data/`, 생성 샘플은 `runs/`에 복원됩니다.
+
 ## 5개 방법 · 3,000개 입력
 
 [설정](configs/compositions/five_methods_3000.yaml)은 FigStep, CS-DJ, MML, JOOD, JPS를 사용합니다.

@@ -254,17 +254,20 @@ CLI 이름 `--dataset AdvBenchM`은 `method_assets/JOOD/`의 170문항을 읽습
 
 ### Download and extract
 
+[Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)에서 다음 두 ZIP을 다운로드할 수 있습니다.
+
+| 파일 | 내용 | 압축 해제 위치 |
+| --- | --- | --- |
+| `data.zip` | 벤치마크 원본과 방법론별 생성 자산 | 저장소 루트의 `data/` |
+| `3000_samples.zip` | 조합·분해 방식으로 생성한 3,000개 샘플 | 저장소 루트의 `runs/` |
+
 새 `data.zip`에는 위의 `benchmarks/`와 `method_assets/` 구조가 들어 있습니다.
 MML 단어 치환 생성과 조합 모드에서 사용하는 NLTK 태거는
 `method_assets/nltk_data/`에 포함됩니다.
 공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
 `data/method_assets/MML/`에 별도로 배치하세요.
 
-[Google Drive의 기존 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)은
-이전 평면 구조의 배포본입니다. 기존 ZIP을 사용하면 압축 해제 후 아래 이전 명령을 실행하세요.
-이미 새 구조인 데이터에는 이전 명령을 다시 실행해도 파일을 옮기지 않습니다.
-AdvBench-M 원본은 새 ZIP을 사용하거나 [공식 데이터 출처](https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model/tree/fd98910ae4075fe587a1944095c00660aa24cc54/dataset)를
-참고해 `benchmarks/AdvBenchM/`에 별도로 준비하세요.
+공유 폴더에서 `data.zip`을 내려받아 저장소 상위 디렉터리의 `../data.zip`에 놓습니다.
 다운로드 파일과 압축 해제본을 함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
 
 ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에서 압축을 해제**하여
@@ -272,16 +275,12 @@ ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에
 `data/data/`가 되지 않도록 주의하세요.
 
 ```bash
-# vlm-jailbreak-simulator/에서 실행: 기존 ZIP 다운로드는 필요한 경우에만 수행
-curl --fail --location --retry 3 \
-  'https://drive.usercontent.google.com/download?id=1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i&export=download&confirm=t' \
-  --output ../data.zip
-
+# vlm-jailbreak-simulator/에서 실행: 공유 폴더에서 내려받은 data.zip 사용
 unzip -tq ../data.zip
 unzip -n ../data.zip -d .
 export VLM_JAILBREAK_DATA_ROOT="$PWD/data"
 
-# 이전 ZIP을 두 디렉터리 구조로 정리: 기존 대상 파일은 덮어쓰지 않음
+# 기존 평면 구조를 두 디렉터리로 정리: 새 구조는 그대로 유지
 python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT" --dry-run
 python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
 export NLTK_DATA="$VLM_JAILBREAK_DATA_ROOT/method_assets/nltk_data"
@@ -587,6 +586,8 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 ## 8. Composed jailbreak generation
 
 [조합 생성 안내](COMPOSED_GENERATION.md)에서 설정, 실행, 검증과 결과 파일을 설명합니다.
+미리 생성한 조합·분해 샘플 3,000개는 [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)의
+`3000_samples.zip`에서 다운로드할 수 있습니다. 벤치마크·방법론 자산은 같은 폴더의 `data.zip`에 있습니다.
 
 | 구성 | 설정 / 안내 | 레시피 | 생성 수량 |
 | --- | --- | ---: | ---: |
