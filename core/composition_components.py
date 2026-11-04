@@ -3,7 +3,7 @@
 The adapters in this module deliberately distinguish two cases:
 
 * ``full stage`` adapters call the existing attack implementation with its
-  configured optimization loop intact (JPS, JailBound, FigStep, MML).
+  configured optimization loop intact (JPS, FigStep, MML).
 * ``decomposed`` adapters extract one operation from a method so that another
   method can consume its output (CS-DJ splitting, HADES top patch, JOOD
   augmentation).  These are always labelled adaptations.
@@ -76,7 +76,7 @@ def _derived_behavior(artifact: ComposedArtifact, source: Behavior) -> Behavior:
     """Feed the current payload to a full attack without altering score truth."""
 
     metadata = copy.deepcopy(source.meta)
-    # JailBound and similar attacks must consume the immediately preceding
+    # Full attacks must consume the immediately preceding
     # artifact, not silently jump back to a dataset-specific original image.
     metadata.pop("images_by_type", None)
     return Behavior(
@@ -278,8 +278,6 @@ class CSDJFullComponent(FullAttackComponent):
         )
 
 
-
-
 class FigStepRenderComponent(FullAttackComponent):
     component_name = "figstep_render"
     attack_name = "FigStep"
@@ -295,13 +293,6 @@ class MMLLayoutComponent(FullAttackComponent):
 class JPSJointComponent(FullAttackComponent):
     component_name = "jps_joint"
     attack_name = "JPS"
-
-
-class JailBoundJointComponent(FullAttackComponent):
-    component_name = "jailbound_joint"
-    attack_name = "JailBound"
-
-
 
 
 class HADESPatchComponent(AttackBackedComponent):
@@ -470,7 +461,6 @@ class JOODAugComponent(CompositionComponent):
         )
 
 
-
 COMPONENTS: dict[str, type[CompositionComponent]] = {
     cls.component_name: cls
     for cls in (
@@ -479,7 +469,6 @@ COMPONENTS: dict[str, type[CompositionComponent]] = {
         FigStepRenderComponent,
         MMLLayoutComponent,
         JPSJointComponent,
-        JailBoundJointComponent,
         HADESPatchComponent,
         DeltaJPComponent,
         JOODAugComponent,

@@ -63,12 +63,6 @@ def attack_requirements(name: str, config: dict[str, Any] | None = None) -> list
         if c.get("strict_font") and c.get("font_path"):
             paths.append(resolve_path(c["font_path"]))
         return paths
-    if name == "JailBound":
-        artifact = c.get("boundary_artifact")
-        if artifact:
-            return [resolve_path(artifact)]
-        train_name = str(c.get("probe_dataset", "MM-SafetyBench"))
-        return [_data_path(path) for path in DATASET_LAYOUT.get(train_name, ())]
     if name == "MML" and str(c.get("input_mode", "generated")).lower() == "precomputed":
         paths = [resolve_path(c.get("precomputed_root", "data/method_assets/MML"))]
         if str(c.get("prompt_source", "clean_room")).lower() == "upstream":

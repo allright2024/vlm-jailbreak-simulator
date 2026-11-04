@@ -76,7 +76,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--per-recipe",
         type=int,
-        help="pilot override for final samples per recipe (e.g. 3 -> 54 total)",
+        help="pilot override for final samples per selected recipe",
     )
     parser.add_argument("--seed", type=int, help="override global selection/split seed")
     parser.add_argument(
@@ -692,7 +692,7 @@ def _legacy_main() -> None:
         # The configured reserve is part of the dataset contract: a run is
         # complete only when both the raw structurally-valid quota and the
         # selected-final quota are exact. This prevents a nominally complete
-        # 3,000-final run from silently containing fewer than 3,600 raw rows.
+        # full run from silently containing fewer than the configured raw rows.
         enough = len(recipe_valid) == raw_count and len(selected_final) == final_count
         incomplete = incomplete or not enough
         recipe_manifests.append({

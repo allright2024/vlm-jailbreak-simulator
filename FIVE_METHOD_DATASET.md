@@ -1,8 +1,9 @@
 # Five-method composed dataset
 
-This adds a separate adapted-composition generator. Existing official-profile
-attack renderers and previous runs are untouched. All target responses and ASR
-measurements are outside this generation workflow.
+This generator combines FigStep, CS-DJ, MML, JOOD and JPS using
+[the five-method plan](configs/compositions/five_methods_3000.yaml).
+The [composition guide](COMPOSED_GENERATION.md) explains configuration, data assets,
+generation, validation and evaluation. Target responses and ASR are measured after generation.
 
 The plan has nine pairs at 160 samples each, seven triples at 180 each and two
 quadruples at 150 each: 3,000 final model inputs. Each recipe shares its first
@@ -11,12 +12,35 @@ source statements from the harmful-only SafeBench pool. JPS training questions
 and duplicate normalized source questions are excluded. All derivatives of one
 source instruction share a deterministic train/validation/test split.
 
+## Recipe plan
+
+| ID | Methods | Production inputs |
+| --- | --- | ---: |
+| P01 | FigStep → JOOD | 160 |
+| P02 | FigStep → CS-DJ | 160 |
+| P03 | FigStep → JPS | 160 |
+| P04 | MML → JOOD | 160 |
+| P05 | MML → CS-DJ | 160 |
+| P06 | MML → JPS | 160 |
+| P07 | JOOD → CS-DJ | 160 |
+| P08 | JOOD → JPS | 160 |
+| P09 | CS-DJ → JPS | 160 |
+| T01 | FigStep → JOOD → CS-DJ | 180 |
+| T02 | FigStep → JOOD → JPS | 180 |
+| T03 | FigStep → CS-DJ → JPS | 180 |
+| T04 | MML → JOOD → CS-DJ | 180 |
+| T05 | MML → JOOD → JPS | 180 |
+| T06 | MML → CS-DJ → JPS | 180 |
+| T07 | JOOD → CS-DJ → JPS | 180 |
+| Q01 | FigStep → CS-DJ → JOOD → JPS | 150 |
+| Q02 | MML → CS-DJ → JOOD → JPS | 150 |
+
 ## Run
 
 Use the simulator environment and install the additional font-inspection dependency:
 
 ```bash
-/home/jovyan/.conda/envs/jb_env/bin/python -m pip install -r requirements-five-methods.txt
+python -m pip install -r requirements-five-methods.txt
 bash attack_scripts/run_five_method_dataset.sh preview
 # To change only JOOD mixing while reusing the existing, verified source renders:
 # bash attack_scripts/run_five_method_dataset.sh preview --reuse-from runs/five_methods_3000_20261025

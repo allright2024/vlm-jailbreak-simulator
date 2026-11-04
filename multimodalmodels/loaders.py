@@ -1,6 +1,6 @@
 """Centralized model loading: every model this repo uses is loaded here.
 
-The eval target, the judge, attack surrogates (JPS, JailBound,
+The eval target, the judge, attack surrogates (JPS,
 VisualAdv, DeltaJP) and defense models (CIDER, JailGuard) all call these
 helpers instead of ``*.from_pretrained`` / ``torch.load`` / ``spacy.load``
 directly, so model ids, pinned revisions, dtype and device placement live in
@@ -8,7 +8,7 @@ one place.
 
 When ``revision`` is None, the pinned revision from ``registry.py`` is used for
 registered model ids (local paths and unregistered ids load as given).
-Attack-specific loss functions and JailBound's layer hooks stay in the attacks;
+Attack-specific loss functions and layer hooks stay in the attacks;
 shared model preprocessing lives in multimodalmodels.qwen2_adapter.
 
 Heavy imports (torch, transformers, spacy) are deferred to call time so that

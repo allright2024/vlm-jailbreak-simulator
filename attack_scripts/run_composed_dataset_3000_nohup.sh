@@ -20,7 +20,7 @@ Usage:
   bash attack_scripts/run_composed_dataset_3000_nohup.sh --dry-run
 
 Optional environment variables:
-  OUTPUT_ROOT  Dataset/output directory (default: runs/composed_jailbreak_pruned_20261103)
+  OUTPUT_ROOT  Dataset/output directory (default: runs/composed_generation)
   CONFIG       Composition YAML (default: configs/compositions/jailbreak_dataset_v3.yaml)
   PYTHON       Python executable (worker defaults to the jb_env interpreter)
   LOG_FILE     Combined nohup log (default: <OUTPUT_ROOT>/nohup.log)
@@ -61,7 +61,7 @@ case "$MODE" in
     ;;
 esac
 
-RUN_ROOT="$(resolve_path "${OUTPUT_ROOT:-runs/composed_jailbreak_pruned_20261103}")"
+RUN_ROOT="$(resolve_path "${OUTPUT_ROOT:-runs/composed_generation}")"
 CONFIG_PATH="$(resolve_path "${CONFIG:-configs/compositions/jailbreak_dataset_v3.yaml}")"
 LOG_PATH="$(resolve_path "${LOG_FILE:-$RUN_ROOT/nohup.log}")"
 PID_PATH="$(resolve_path "${PID_FILE:-$RUN_ROOT/nohup.pid}")"

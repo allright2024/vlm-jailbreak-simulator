@@ -25,7 +25,7 @@ does not require editing the pipeline.
 
 ## Model loading (`multimodalmodels/`)
 Every model the repo uses — the eval target, the HarmBench judge, attack
-surrogates (JPS, JailBound, VisualAdv, DeltaJP) and defense models
+surrogates (JPS, VisualAdv, DeltaJP) and defense models
 (CIDER, JailGuard) — is loaded through `multimodalmodels/loaders.py`; nothing
 else calls `from_pretrained` / `torch.load` / `spacy.load`.
 - `multimodalmodels/registry.py` pins each HF model id to an exact revision
@@ -37,7 +37,7 @@ else calls `from_pretrained` / `torch.load` / `spacy.load`.
   2B/8B, and native-HF InternVL3 2B/8B targets. `multimodalmodels/surrogates.py`
   exposes the same families to the shared CE contract used by VisualAdv,
   DeltaJP, and HADES white-box via `--surrogate-profile`. Model-specific
-  JPS/JailBound adapters are deliberately not inferred from
+  JPS adapters are deliberately not inferred from
   target compatibility.
 
 ## Datasets (`core/datasets/`)
@@ -81,30 +81,23 @@ Import `core.attacks` to register them. Ported so far:
 | `VisualAdv` | any (+ benign base image) | **White-box (foundational).** PGD-optimizes a perturbation on a benign image (`requires_surrogate`; LLaVA) so the model emits toxic strings from a derogatory corpus (CE loss); one universal image reused per behavior. `constrained` = L_inf-bounded. Config: `configs/attacks/VisualAdv.yaml`. |
 | `DeltaJP` | datasets with per-behavior images (AdvBenchM/HADES/MM-SafetyBench) | **White-box.** A universal L_inf perturbation (delta) added to each behavior's own image (`requires_surrogate`+`requires_images`), fit over a training subset toward affirmative targets, then applied per behavior. Paper: Niu et al. 2402.02309 (deltaJP). Config: `configs/attacks/DeltaJP.yaml`. |
 | `JPS` | AdvBench, HarmBench, MM-SafetyBench | **White-box, collaborative.** Co-optimizes a global 32/255 visual perturbation on Qwen2-VL and two textual steer prompts through the official feedback→summarize→revision loop. `JPS.yaml` requires the external upstream CSV/base image and uses Qwen2.5-14B-Instruct. Default target: `qwen2_vl_7b`. Needs `qwen-vl-utils`. |
-| `JailBound` | datasets with images (native probe: MM-SafetyBench) | **White-box, per-sample, multimodal.** Trains layer-wise logistic safety boundaries, then jointly updates an L-inf image perturbation and a discrete 20-token suffix with the paper's alignment/semantic/geometric objectives. The paper has no public code; LLaVA-1.5, last-token pooling and suffix NLL are documented adaptations. Config: `configs/attacks/JailBound.yaml`. |
 
 Run stage 1: `python run_generate_test_cases.py --attack FigStep --dataset SafeBench --save_dir runs/<name>`.
 
 ## Compositions (`core/composition*.py`)
 
-`run_generate_composed_dataset.py` executes the versioned 8-recipe plan in
-`configs/compositions/jailbreak_dataset_v3.yaml`. `ComposedArtifact` carries the
-current text/images, while every `StageRecord` authenticates its input and
-output text hash, ordered image paths and SHA-256 values, effective config,
-duration, and iteration completion. Continuity is enforced between adjacent
-records and the final sample identity is SHA-256(normalized text + ordered
-image SHA-256 values).
+[Composition guide](../COMPOSED_GENERATION.md) describes both generators and their configurations.
+`core.five_method_dataset` builds the five-method, 18-recipe, 3,000-input dataset.
+`core.composition` and `core.composition_components` run the configured general stage plan.
 
-Components that run an existing optimizer preserve its configured loop.
-Decomposed stages are separately labelled `adapted_decomposition`; the final
-artifact is always `adapted_composition`, never an official paper reproduction.
-JOOD-Aug generates its configured candidates and chooses one by deterministic
-hash, not ASR. DeltaJP and VisualAdv are excluded by config validation.
-Periodic transactional checkpoints persist cases and lineage every 10 candidates
-and at recipe boundaries; an incomplete checkpoint is eligible for strict resume.
-`core.validation.composed_dataset` independently checks harmful-only
-parents, counts, duplicate hashes, artifact existence, stage continuity, and
-source-group split isolation.
+`ComposedArtifact` carries the current text and images. Each `StageRecord` records input/output
+hashes, effective config, source method, duration and iteration completion.
+Stage continuity and final content identity are checked independently.
+Final samples use `adapted_composition` provenance and a source-group train/validation/test split.
+
+Transactional checkpoints persist completed candidates every 10 attempts and at recipe boundaries.
+`core.validation.composed_dataset` checks harmful-only parents, quotas, duplicate hashes,
+image artifacts, stage continuity and split isolation.
 
 ## Validation (`core/validation/`)
 

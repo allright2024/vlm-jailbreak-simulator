@@ -46,7 +46,6 @@ authors.
 | `multi_attacks/jood/`                | [naver-ai/JOOD](https://github.com/naver-ai/JOOD) — full upstream `LICENSE` file is preserved at `multi_attacks/jood/UPSTREAM_LICENSE`                         | **Apache-2.0**                 |
 | `multi_attacks/cs_dj/`               | [TeamPigeonLab/CS-DJ](https://github.com/TeamPigeonLab/CS-DJ) — upstream notice is preserved at `multi_attacks/cs_dj/UPSTREAM_LICENSE`                         | **MIT**                        |
 | `multi_attacks/mml/`                 | [wangyu-ovo/MML](https://github.com/wangyu-ovo/MML) at `5966fca529011e8b5ccff61d70365997d6466abc`; released images are replayed, while the unreleased renderer is a clean-room adapter. Exact prompt literals are read from a user-supplied, hash-pinned checkout and are not redistributed. | No explicit license            |
-| `multi_attacks/jailbound/`           | [JailBound, arXiv:2505.19610v3](https://arxiv.org/abs/2505.19610); clean-room implementation of the published equations because no author source repository is publicly linked | No upstream code distributed; paper terms apply |
 | `defenses/cider.py`, `defenses/cider_models/` | [PandragonXIII/CIDER](https://github.com/PandragonXIII/CIDER) at `3c08d7e2d52e27b47d1e428a030e8ffda5efae3e` | **Apache-2.0** |
 | `defenses/jailguard.py`, `defenses/JailGuard_utils/` | [shiningrain/JailGuard](https://github.com/shiningrain/JailGuard) at `419e1d3d08f4d02998a11a687f925518d2d5dd0c` | No explicit license |
 | `defenses/asd.py`, `defenses/asd_assets/` | [AngelAlita/AsD](https://github.com/AngelAlita/AsD) at `ba71efe0972c92e38da156ec76911f9122bbe12f`; upstream notice preserved at `defenses/asd_assets/UPSTREAM_LICENSE` | **MIT** |
@@ -167,7 +166,7 @@ upstream sources listed.
 | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------- |
 | HarmBench standard behaviors (`data/benchmarks/HarmBench/`) | [centerforaisafety/HarmBench](https://github.com/centerforaisafety/HarmBench) | MIT | No; external local data |
 | AdvBench harmful-behavior CSVs (`data/benchmarks/advbench/`)          | [llm-attacks/llm-attacks](https://github.com/llm-attacks/llm-attacks)                                    | MIT                            | No; external local data |
-| `data/method_assets/VisualAdv/derogatory_corpus.csv` (VisualAdv targets) | Derived from the Visual Adversarial Examples upstream repo (see §1) | No explicit license | No; external local data |
+| `data/method_assets/VisualAdv/derogatory_corpus.csv` (VisualAdv targets) | Derived from the Visual Adversarial Examples upstream repo (see `1) | No explicit license | No; external local data |
 | `data/method_assets/FORCE/clean.jpeg` (VisualAdv base image)              | Per the Visual Adversarial Examples upstream repo                                                       | Refer to upstream              | No; external local data |
 | LLaVA-CC3M-Pretrain-595K images (`data/method_assets/CS-DJ/llava_images/`) | [liuhaotian/LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K) | Refer to the dataset card and source-image terms | No |
 

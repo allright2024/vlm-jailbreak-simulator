@@ -43,14 +43,13 @@ KNOWN_COMPONENTS = {
     "hades_patch",
     "delta_jp",
     "jps_joint",
-    "jailbound_joint",
 }
 COMPONENT_ATTACKS = {
     "cs_dj_split": "CS-DJ", "cs_dj_full": "CS-DJ",
     "figstep_render": "FigStep",
     "mml_layout": "MML", "jood_aug": "JOOD",
     "hades_patch": "HADES", "delta_jp": "DeltaJP",
-    "jps_joint": "JPS", "jailbound_joint": "JailBound",
+    "jps_joint": "JPS",
 }
 
 

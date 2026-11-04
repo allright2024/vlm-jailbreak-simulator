@@ -358,7 +358,7 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 
 ## 4. Jailbreak attacks
 
-[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 9개입니다.
+[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 8개입니다.
 기본 설정 경로는 `configs/attacks/<CLI 이름>.yaml`이며,
 실행 시 `--config`로 다른 프로필을 명시할 수 있습니다.
 
@@ -370,7 +370,6 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 | `HADES` | [multi_attacks/hades/](multi_attacks/hades/) | 기본 white-box 상단 패치 3,000 epochs. 별도 official 설정은 공개 이미지 6단계 replay | [run_hades.sh](attack_scripts/run_hades.sh) |
 | `JOOD` | [multi_attacks/jood/](multi_attacks/jood/) | benign 항목과 Mixup/CutMix/ResizeMix/RandAug. 개별 runner는 AdvBenchM 대상 | [run_jood.sh](attack_scripts/run_jood.sh) |
 | `JPS` | [multi_attacks/jps/](multi_attacks/jps/) | Qwen2 시각 최적화와 Qwen2.5-14B 에이전트의 피드백·수정. 공식 CSV·기저 이미지 별도 필요 | [run_jps.sh](attack_scripts/run_jps.sh) |
-| `JailBound` | [multi_attacks/jailbound/](multi_attacks/jailbound/) | 안전 경계 probe 학습 후 이미지·20-token suffix 공동 최적화. 논문 기반 adapted 구현 | [run_jailbound.sh](attack_scripts/run_jailbound.sh) |
 | `VisualAdv` | [image_attacks/visual_adv/](image_attacks/visual_adv/) | CE/PGD universal 이미지. 기저 이미지·목표 문장 코퍼스·미분 가능 surrogate | [run_visualadv.sh](attack_scripts/run_visualadv.sh) |
 | `DeltaJP` | [image_attacks/delta_jp/](image_attacks/delta_jp/) | 원본 이미지에 universal delta 적용. 이미지 있는 데이터셋과 학습 분리 필요 | [run_deltajp.sh](attack_scripts/run_deltajp.sh) |
 
@@ -385,8 +384,6 @@ CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사
 - CS-DJ는 CC3M 이미지 풀·공식 폰트가 필요합니다.
 - MML replay에 필요한 공식 이미지·메타데이터와 hash-pinned upstream `const.py`는
   [준비 안내](multi_attacks/mml/README.md)에 따라 별도로 준비합니다.
-- JailBound는 논문 기반 adapted 구현이며 LLaVA-1.5, pooling, suffix 목적함수의
-  구체적인 설정을 manifest에 기록합니다.
 - `algorithm_fidelity`는 코드의 충실도, `experiment_profile`은 실행 설정,
   `paper_reproduction`은 공격 생성 측 재현 조건을 기록합니다.
 
@@ -405,7 +402,6 @@ CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사
 | `run_jood.sh` | 기본 GPT-4 Turbo 대상, AdvBenchM, 네 `AUGS`를 각각 실행 |
 | `run_jps.sh` | 기본 `MODEL=qwen2_vl_7b`, `CONFIG` 지정 가능 |
 | `run_mml.sh` | 기본 GPT-4o snapshot 대상. `VARIANTS`, `JUDGE_MODEL`, `EVALUATE_LLAMA_GUARD` 지원 |
-| `run_jailbound.sh` | **단수** `DATASET`, 기본 MM-SafetyBench·1행. `RUN_DIR`, `BOUNDARY` 지정 가능 |
 | [run_transfer.sh](attack_scripts/run_transfer.sh) | VisualAdv/DeltaJP의 Qwen2 surrogate → 별도 target 전이 실행 |
 | [run_jps_full.sh](attack_scripts/run_jps_full.sh), [run_visualadv_full.sh](attack_scripts/run_visualadv_full.sh) | 장시간 프로필과 lineage 검증 캐시 실행 |
 
@@ -454,7 +450,7 @@ python run_generate_test_cases.py \
 ```
 
 공통 CE 프로필은 원본 RGB 텐서를 각 모델의 미분 가능한 전처리에 통과시킵니다.
-JPS는 공통 Qwen2 adapter, JailBound는 LLaVA-1.5 전용 내부 adapter를 사용합니다.
+JPS는 공통 Qwen2 adapter를 사용합니다.
 CIDER는 LLaVA-1.5 target의 encoder를 사용합니다.
 
 ## 6. Single-attack pipeline
@@ -590,55 +586,49 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 
 ## 8. Composed jailbreak generation
 
-최신 3,000개 생성 워크플로는 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md)를 참고하세요.
-FigStep, CS-DJ, MML, JOOD, JPS의 18개 조합으로 구성합니다.
+[조합 생성 안내](COMPOSED_GENERATION.md)에서 설정, 실행, 검증과 결과 파일을 설명합니다.
 
-일반 조합 엔진의 [v3 설정](configs/compositions/jailbreak_dataset_v3.yaml)은
-**8개 조합, 최종 1,450개 / 후보 1,740개**로 구성합니다.
+| 구성 | 설정 / 안내 | 레시피 | 생성 수량 |
+| --- | --- | ---: | ---: |
+| 5개 방법 조합 | [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml) / [상세 안내](FIVE_METHOD_DATASET.md) | 18 | 3,000 |
+| 일반 단계 조합 | [jailbreak_dataset_v3.yaml](configs/compositions/jailbreak_dataset_v3.yaml) | 3 | 최종 600 / 후보 720 |
+
+5개 방법 구성은 FigStep, CS-DJ, MML, JOOD, JPS를 사용하며
+JOOD 이미지 MixUp과 JPS 자산의 출처를 각 샘플에 기록합니다.
+`preview` → `review-preview` → `full` → `validate` 순서로 실행합니다.
+
+```bash
+bash attack_scripts/run_five_method_dataset.sh preview
+bash attack_scripts/run_five_method_dataset.sh review-preview --review-note '실제 이미지 검토 내용'
+bash attack_scripts/run_five_method_dataset.sh full
+bash attack_scripts/run_five_method_dataset.sh validate
+```
+
+일반 단계 조합의 현재 레시피는 다음과 같습니다.
 
 | ID | 적용 순서 | 최종 수량 |
 | --- | --- | ---: |
 | P01 | CS-DJ-Split → FigStep | 200 |
 | P02 | CS-DJ-Split → MML | 200 |
 | P03 | FigStep → JOOD | 200 |
-| P05 | HADES → JailBound | 200 |
-| P08 | JPS → JailBound | 200 |
-| T01 | CS-DJ-Split → FigStep → JailBound | 150 |
-| T02 | CS-DJ-Split → MML → JailBound | 150 |
-| T04 | JPS → JailBound → JOOD | 150 |
 
 ```bash
-# 설정 검사: 데이터·모델 로딩 없음
 python run_generate_composed_dataset.py --dry-run
-# 데이터·수량·설정 사전 검사
 python run_generate_composed_dataset.py --preflight
-# 레시피당 3개, 총 24개 pilot. 최적화 단계는 GPU와 시간이 필요합니다.
 python run_generate_composed_dataset.py --per-recipe 3 \
-  --save-dir runs/composed_jailbreak_pruned_pilot
-python -m core.validation.composed_dataset runs/composed_jailbreak_pruned_pilot
+  --save-dir runs/composed_pilot
+python -m core.validation.composed_dataset runs/composed_pilot
 ```
 
-`--recipes P01,T01`로 범위를 제한할 수 있습니다. 단계별 구현은
-[core/composition_components.py](core/composition_components.py)에 있습니다.
-소수 입력에서도 설정된 HADES·JPS·JailBound 최적화 루프를 수행합니다.
-JPS는 `configs/attacks/JPS.yaml`의 학습 CSV와 초기 이미지를 준비해야 합니다.
+전체 그룹 실행은 `attack_scripts/run_composed_dataset_3000.sh`,
+백그라운드 실행은 `attack_scripts/run_composed_dataset_3000_nohup.sh`를 사용합니다.
+실행 수량과 그룹은 선택한 YAML에서 읽습니다. `CONFIG`, `OUTPUT_ROOT`, `PYTHON`,
+`PREFLIGHT_ONLY`로 실행 조건을 지정할 수 있습니다.
+재개 시 설정·입력·코드·아티팩트 해시를 검증합니다.
 
-그룹 실행은 `attack_scripts/run_composed_dataset_3000.sh`,
-백그라운드 실행은 `run_composed_dataset_3000_nohup.sh`를 사용합니다.
-스크립트 이름과 별개로 현재 YAML의 수량을 따르며, 기본 출력은
-`runs/composed_jailbreak_pruned_20261103`입니다. `CONFIG`, `OUTPUT_ROOT`,
-`PYTHON`, `PREFLIGHT_ONLY`로 실행 조건을 지정할 수 있습니다.
-최신 5개 방법·3,000개 생성기와 이 일반 조합 실행기는 별개의 워크플로입니다.
-
-후보 체크포인트는 10회마다 저장하며 설정·입력·코드 해시가 일치해야 재개합니다.
-`nohup` 실행은 SSH·VS Code 종료 후에도 유지되지만 서버 재시작을 견디지는 않습니다.
-
-모든 조합 결과는 `adapted_composition`, `paper_reproduction: false`로 기록합니다.
-원본 질문별 split을 유지하고, 구조·중복·결정적 순서로 최종 선별합니다.
-대상 응답이나 ASR로 성공한 입력만 고르는 과정은 없습니다.
-출력은 `test_cases.jsonl`, `behaviors.jsonl`, 이미지 및
-`composition_manifest.json`/`composition_qc.json`입니다.
-타깃 추론과 판정은 [6절](#6-single-attack-pipeline)의 별도 단계에서 실행합니다.
+조합 결과는 `adapted_composition`, `paper_reproduction: false`로 기록합니다.
+원본 질문별 split과 단계별 lineage를 유지하고 구조·중복·결정적 순서로 선별합니다.
+타깃 응답 생성과 ASR 평가는 [6절](#6-single-attack-pipeline)에 따라 실행합니다.
 
 ## 9. Evaluation and metrics
 
@@ -725,6 +715,7 @@ python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot
 
 | 문서 | 내용 |
 | --- | --- |
+| [COMPOSED_GENERATION.md](COMPOSED_GENERATION.md) | 조합 구성·실행·검증·평가 안내 |
 | [DATA_LAYOUT.md](DATA_LAYOUT.md) | 별도 배포 데이터와 공격 자산의 경로 계약 |
 | [core/README.md](core/README.md) | 스키마·인터페이스·registry |
 | [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md) | 공식 소스 revision, 재현 수준, 대체 사항 |
