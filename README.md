@@ -480,20 +480,43 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 
 ## 8. Composed jailbreak generation
 
-[조합 생성 안내](COMPOSED_GENERATION.md)에서 설정, 실행, 검증과 결과 파일을 설명합니다.
-미리 생성한 조합·분해 샘플 3,000개는 [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)의
-`3000_samples.zip`에서 다운로드할 수 있습니다. 벤치마크·방법론 자산은 같은 폴더의 `data.zip`에 있습니다.
+실제 3,000개 생성에 사용한 설정은 [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml)입니다.
+FigStep·CS-DJ·MML·JOOD·JPS의 18개 조합을 사용하며, seed는 `20261104`입니다.
 
-| 구성 | 설정 / 안내 | 레시피 | 생성 수량 |
-| --- | --- | ---: | ---: |
-| 5개 방법 조합 | [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml) / [상세 안내](FIVE_METHOD_DATASET.md) | 18 | 3,000 |
-| 일반 단계 조합 | [jailbreak_dataset_v3.yaml](configs/compositions/jailbreak_dataset_v3.yaml) | 3 | 최종 600 / 후보 720 |
+| 원본 데이터셋 | 선택한 질문 | 생성 샘플 |
+| --- | ---: | ---: |
+| SafeBench | 60 | 1,000 |
+| HADES | 60 | 1,000 |
+| MM-SafetyBench | 60 | 1,000 |
+| 합계 | 180 | 3,000 |
 
-5개 방법 구성은 FigStep, CS-DJ, MML, JOOD, JPS를 사용합니다.
-SafeBench·HADES·MM-SafetyBench에서 원본 질문을 각각 60개씩 선택해
-벤치마크별 조합 결과를 1,000개씩 생성합니다.
-JOOD MixUp은 원본 이미지 가중치 5~95%의 19단계를 균등하게 배정합니다.
-미리보기 생성 → 이미지 검토 → 전체 생성 → 검증 순서로 실행합니다.
+| ID | 방법 조합 | 샘플 수 |
+| --- | --- | ---: |
+| P01 | FigStep + JOOD | 160 |
+| P02 | FigStep + CS-DJ | 160 |
+| P03 | FigStep + JPS | 160 |
+| P04 | MML + JOOD | 160 |
+| P05 | MML + CS-DJ | 160 |
+| P06 | MML + JPS | 160 |
+| P07 | JOOD + CS-DJ | 160 |
+| P08 | JOOD + JPS | 160 |
+| P09 | CS-DJ + JPS | 160 |
+| T01 | FigStep + JOOD + CS-DJ | 180 |
+| T02 | FigStep + JOOD + JPS | 180 |
+| T03 | FigStep + CS-DJ + JPS | 180 |
+| T04 | MML + JOOD + CS-DJ | 180 |
+| T05 | MML + JOOD + JPS | 180 |
+| T06 | MML + CS-DJ + JPS | 180 |
+| T07 | JOOD + CS-DJ + JPS | 180 |
+| Q01 | FigStep + CS-DJ + JOOD + JPS | 150 |
+| Q02 | MML + CS-DJ + JOOD + JPS | 150 |
+| **합계** | **18개 조합** | **3,000** |
+
+JOOD가 포함된 1,840개 샘플은 원본 이미지 가중치 5~95%를 5% 간격으로 배정합니다.
+19개 비율은 각각 96~97회, 무해 이미지 5종은 각각 368회 사용합니다.
+
+미리보기 54개 생성 → 이미지 검토 → 전체 3,000개 생성 → 검증 순서입니다.
+JPS 이미지·steer prompt·학습 CSV는 YAML의 `jps.source_run`에 준비합니다.
 
 ```bash
 python -m pip install -r requirements-five-methods.txt
@@ -504,24 +527,13 @@ bash attack_scripts/run_five_method_dataset.sh full
 bash attack_scripts/run_five_method_dataset.sh validate
 ```
 
-일반 단계 조합의 현재 레시피는 다음과 같습니다.
+위 명령은 [run_generate_five_method_dataset.py](run_generate_five_method_dataset.py)와 위 YAML을 사용합니다.
+기본 출력은 `runs/five_methods_3000_mixed_sources_jood_ratios_20261104/`이며, 최종 샘플은 `full/test_cases.jsonl`에 저장됩니다.
+다른 출력 경로는 모든 단계에 같은 `--output`을 지정합니다.
 
-| ID | 적용 순서 | 최종 수량 |
-| --- | --- | ---: |
-| P01 | CS-DJ-Split → FigStep | 200 |
-| P02 | CS-DJ-Split → MML | 200 |
-| P03 | FigStep → JOOD | 200 |
-
-```bash
-python run_generate_composed_dataset.py --dry-run
-python run_generate_composed_dataset.py --preflight
-python run_generate_composed_dataset.py --per-recipe 3 \
-  --save-dir runs/composed_pilot
-python -m core.validation.composed_dataset runs/composed_pilot
-```
-
-전체 실행은 `attack_scripts/run_composed_dataset_3000.sh`, 백그라운드 실행은 `attack_scripts/run_composed_dataset_3000_nohup.sh`를 사용합니다.
-`CONFIG`와 `OUTPUT_ROOT`로 설정과 출력 경로를 지정합니다. 응답 생성과 ASR 평가는 [6절](#6-single-attack-pipeline)을 따릅니다.
+완성 샘플은 [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)의 `3000_samples.zip`,
+입력 자산은 같은 폴더의 `data.zip`에 있습니다.
+상세 구성은 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md), 응답 생성·ASR 평가는 [6절](#6-single-attack-pipeline)을 참고하세요.
 
 ## 9. Evaluation and metrics
 
