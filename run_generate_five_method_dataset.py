@@ -70,6 +70,8 @@ def validate_phase(root, recipes, phase, identity):
                     or meta["source_instruction_hash"] != row["instruction_hash"]
                     or meta["source_record_sha256"] != json_hash(parents[case["behavior_id"]])):
                 raise ValueError("sample differs from its planned original benchmark record")
+            if row.get("draw_index") is not None and meta.get("source_draw_index") != row["draw_index"]:
+                raise ValueError("sample differs from its question draw assignment")
             if phase == "preview" and case["behavior_id"] not in plan["preview_behavior_ids"][rid]:
                 raise ValueError("preview parent differs from the declared representative subset")
             source = meta["source_dataset"]
@@ -109,6 +111,22 @@ def validate_phase(root, recipes, phase, identity):
         raise ValueError(f"recipe quota mismatch: {dict(counts)} != {expected}")
     if plan:
         declared = manifest["source_selection"]
+        if phase == "full":
+            actual_pairs = {(c["meta"]["recipe_id"], c["behavior_id"]) for c in cases}
+            if actual_pairs != set(planned) or len(actual_pairs) != len(cases):
+                raise ValueError("full output does not contain exactly one case per planned question/recipe pair")
+            if declared.get("selection_policy") == "full_pool_cycles_one_recipe_per_draw":
+                for name, stats in declared["pools"].items():
+                    draws = Counter(c["behavior_id"] for c in cases if c["meta"]["source_dataset"] == name)
+                    pool_size = stats["unique_after_cross_dataset_deduplication"]
+                    expected_unique = min(pool_size, declared["full_source_counts"][name])
+                    histogram = dict(Counter(draws.values()))
+                    if pool_size > len(draws):
+                        histogram[0] = pool_size - len(draws)
+                    if (len(draws) != expected_unique or len(draws) != stats["selected_parents"]
+                            or max(histogram) - min(histogram) > 1
+                            or {str(k): v for k, v in histogram.items()} != stats["draws_per_parent"]):
+                        raise ValueError(f"full source-pool coverage/reuse mismatch: {name}")
         for recipe in recipes:
             target = (dict(Counter(planned[(recipe.id, bid)]["dataset"] for bid in plan["preview_behavior_ids"][recipe.id])) if phase == "preview"
                       else declared["recipe_source_counts"][recipe.id])
@@ -143,6 +161,10 @@ def validate_phase(root, recipes, phase, identity):
               "manifest_sha256": digest(manifest_path)}
     if plan:
         report.update({"source_counts": dict(source_counts),
+                       "selection_policy": manifest["source_selection"]["selection_policy"],
+                       "unique_parents_per_source": {
+                           name: len({c["behavior_id"] for c in cases if c["meta"]["source_dataset"] == name})
+                           for name in source_counts},
                        "recipe_source_counts": {k: dict(v) for k, v in recipe_sources.items()},
                        "source_categories": {k: dict(v) for k, v in source_categories.items()}})
     if manifest.get("jood"):
@@ -214,7 +236,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["preview", "review-preview", "full", "validate"])
     parser.add_argument("--config", default="configs/compositions/five_methods_3000.yaml")
-    parser.add_argument("--output", default="runs/five_methods_3000_mixed_sources_jood_ratios_20261104")
+    parser.add_argument("--output", default="runs/five_methods_3000_full_pool_one_recipe_20261104")
     parser.add_argument("--reuse-from", help="Completed source run whose verified pre-JOOD renders are reused")
     parser.add_argument("--validate-phase", choices=["preview", "full"], default="full")
     parser.add_argument("--review-note", help="Visual observations after inspecting all 18 contact sheets")

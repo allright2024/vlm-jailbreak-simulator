@@ -72,6 +72,9 @@ def source_names(config):
     names = list(config.get("sources", {}).get("datasets", ["SafeBench"]))
     if config.get("sources", {}).get("balance", "equal") != "equal":
         raise ValueError("sources.balance must be equal")
+    if config.get("sources", {}).get("sampling", "minimum_shared_pool") not in {
+            "minimum_shared_pool", "full_pool_cycles"}:
+        raise ValueError("unsupported sources.sampling")
     if (not names or len(set(names)) != len(names)
             or not set(names) <= set(SUPPORTED_SOURCES)):
         raise ValueError("sources.datasets must contain distinct supported benchmarks")
@@ -109,6 +112,84 @@ def recipe_source_quotas(recipes, names):
     return quotas
 
 
+def _full_pool_plans(config, recipes, owned, stats, quotas):
+    """One sampled question gets one recipe; exhaust each source before reuse."""
+    import random
+    from collections import Counter, defaultdict, deque
+    names = source_names(config)
+    queues = {name: deque() for name in names}
+    cycles, usage, selected, plans = Counter(), Counter(), {}, {}
+    all_ids = [b.behavior_id for name in names for b in owned[name]]
+    if len(all_ids) != len(set(all_ids)):
+        raise ValueError("source behavior IDs must be distinct across benchmarks")
+
+    def new_cycle(name):
+        groups = defaultdict(list)
+        cycle = cycles[name]
+        cycles[name] += 1
+        for behavior in owned[name]:
+            groups[behavior.category or "__uncategorized__"].append(behavior)
+        categories = sorted(groups)
+        randomizer = random.Random(json_hash([config["seed"], name, cycle]))
+        randomizer.shuffle(categories)
+        for category in categories:
+            groups[category].sort(key=lambda b: b.behavior_id)
+            randomizer.shuffle(groups[category])
+        ordered = []
+        while any(groups.values()):
+            for category in categories:
+                if groups[category]:
+                    ordered.append(groups[category].pop())
+        return deque(ordered)
+
+    for name in names:
+        maximum = max(counts[name] for counts in quotas.values())
+        if len(owned[name]) < maximum:
+            raise ValueError(f"not enough unique {name} questions for one recipe: {len(owned[name])}/{maximum}")
+    for recipe in recipes:
+        counts, plan, used = quotas[recipe.id], [], set()
+        for index in range(max(counts.values())):
+            for name in names:
+                if index >= counts[name]:
+                    continue
+                if not queues[name]:
+                    queues[name] = new_cycle(name)
+                for _ in range(len(queues[name])):
+                    behavior = queues[name].popleft()
+                    if behavior.behavior_id not in used:
+                        break
+                    queues[name].append(behavior)
+                else:
+                    raise ValueError("unable to avoid a repeated question/recipe pair")
+                used.add(behavior.behavior_id)
+                usage[behavior.behavior_id] += 1
+                selected[behavior.behavior_id] = behavior
+                plan.append(behavior)
+        plans[recipe.id] = plan
+    parents = list(selected.values())
+    totals = {name: sum(quotas[r.id][name] for r in recipes) for name in names}
+    for name in names:
+        values = [usage[b.behavior_id] for b in owned[name]]
+        if max(values) - min(values) > 1:
+            raise ValueError("full-pool question draws are not balanced")
+        stats[name].update({
+            "selected_parents": sum(value > 0 for value in values),
+            "selected_categories": dict(Counter(b.category or "__uncategorized__"
+                                                 for b in parents if b.dataset == name)),
+            "sampled_inputs": totals[name], "sampling_cycles": cycles[name],
+            "draws_per_parent": {str(k): v for k, v in sorted(Counter(values).items())},
+        })
+    return parents, plans, {
+        "datasets": names, "selection_policy": "full_pool_cycles_one_recipe_per_draw",
+        "assignment_policy": "one_recipe_per_sampled_question",
+        "resampling": "only_after_source_pool_exhaustion",
+        "deduplication": "normalized_instruction_across_all_sources",
+        "jps_training_excluded": True, "pools": stats,
+        "recipe_source_counts": quotas, "full_source_counts": totals,
+        "unique_parents": len(parents), "total_draws": sum(totals.values()),
+    }
+
+
 def select_source_parents(config, recipes, pools, training_keys):
     from collections import Counter, defaultdict
     names = source_names(config)
@@ -135,6 +216,10 @@ def select_source_parents(config, recipes, pools, training_keys):
         owner = min(choices, key=lambda b: json_hash(
             [seed, "source_owner", key, b.dataset, b.behavior_id]))
         owned[owner.dataset].append(owner)
+    for name in names:
+        stats[name]["unique_after_cross_dataset_deduplication"] = len(owned[name])
+    if config.get("sources", {}).get("sampling") == "full_pool_cycles":
+        return _full_pool_plans(config, recipes, owned, stats, quotas)
     selected = {}
     for name in names:
         pool = owned[name]
@@ -272,6 +357,11 @@ class DatasetBuilder:
             raise ValueError(f"selected source font lacks glyphs: {[hex(c) for c in sorted(missing)]}")
         self._jood_plan = plan_jood_variants(
             config, recipes, self._parent_plans, len(self.jood["paths"]))
+        self._draw_indices = {
+            (recipe.id, behavior.behavior_id): index
+            for index, (recipe, behavior) in enumerate(
+                (recipe, behavior) for recipe in recipes for behavior in self._parent_plans[recipe.id])
+        }
         if reuse_from is None and recorded_identity:
             recorded_reuse = recorded_identity.get("reuse")
             if recorded_reuse:
@@ -303,6 +393,7 @@ class DatasetBuilder:
             "identity": self.identity, "source_selection": self.source_selection,
             "preview_behavior_ids": {r.id: [b.behavior_id for b in self.parents_for_recipe(r, "preview")] for r in recipes},
             "recipes": {r.id: [{"behavior_id": b.behavior_id, "dataset": b.dataset,
+                               "draw_index": self._draw_indices[(r.id, b.behavior_id)],
                                "instruction_hash": json_hash(instruction_key(b.instruction)),
                                "jood": self._jood_plan.get((r.id, b.behavior_id))}
                               for b in self._parent_plans[r.id]] for r in recipes},
@@ -641,6 +732,7 @@ class DatasetBuilder:
         case = TestCase(test_case_id=stem, behavior_id=behavior.behavior_id,
                         attack="+".join(recipe.methods), text=text, images=images,
                         meta={"recipe_id": recipe.id, "methods": list(recipe.methods),
+                              "source_draw_index": self._draw_indices[(recipe.id, behavior.behavior_id)],
                               "arity": len(recipe.methods), "identity": self.identity,
                               "source_behavior_id": behavior.behavior_id, "source_dataset": behavior.dataset,
                               "source_category": behavior.category,

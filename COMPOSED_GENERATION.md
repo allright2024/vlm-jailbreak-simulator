@@ -37,10 +37,11 @@ unzip -n ../3000_samples.zip -d .
 | 네 방법 | 2 | 150 | 300 |
 | 전체 | 18 | | 3,000 |
 
-원본 질문은 SafeBench·HADES·MM-SafetyBench에서 각각 60개씩 선택합니다.
-벤치마크별 조합 결과는 정확히 1,000개씩이며 레시피 안에서도 세 출처를 균등하게
-배정합니다. JPS 학습 질문과 출처 간 중복 질문을 제외하고, 원본 질문의 모든 파생
-샘플에 같은 train/validation/test split을 적용합니다.
+질문을 한 번 샘플링할 때 18개 중 조합 하나만 적용합니다.
+SafeBench·HADES·MM-SafetyBench의 전체 가용 질문 풀을 순환하며 각각 1,000개씩 생성합니다.
+서로 다른 원본은 각각 349·750·972개, 총 2,071개입니다. 각 출처의 풀을 모두 사용한 뒤에만
+재샘플링하며 동일한 질문·조합 쌍은 중복되지 않습니다. JPS 학습 질문과 출처 간 중복 질문을
+제외하고, 같은 원본 질문에는 같은 train/validation/test split을 적용합니다.
 
 JOOD 원본 이미지 가중치는 0.05~0.95의 19단계입니다. JOOD 입력 1,840개에서
 각 비율은 96~97회, 무해 이미지 5종은 각각 368회 사용합니다.
@@ -65,7 +66,7 @@ bash attack_scripts/run_five_method_dataset.sh validate
 JOOD 미리보기는 원본 이미지 가중치 5%·50%·95%를 포함합니다.
 contact sheet와 원본 이미지를 검토한 뒤
 해당 이미지 해시에 연결된 review record를 저장합니다. `full`은 이 기록을 확인합니다.
-기본 출력은 `runs/five_methods_3000_mixed_sources_jood_ratios_20261104/`입니다.
+기본 출력은 `runs/five_methods_3000_full_pool_one_recipe_20261104/`입니다.
 새 실행은 `--output`으로 별도 경로를 지정할 수 있습니다.
 
 ```bash

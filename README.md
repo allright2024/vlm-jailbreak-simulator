@@ -491,12 +491,16 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 실제 3,000개 생성에 사용한 설정은 [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml)입니다.
 FigStep·CS-DJ·MML·JOOD·JPS의 18개 조합을 사용하며, seed는 `20261104`입니다.
 
-| 원본 데이터셋 | 선택한 질문 | 생성 샘플 |
+**질문을 한 번 샘플링할 때 18개 중 조합 하나만 적용합니다.**
+각 벤치마크의 전체 가용 질문 풀을 순환하며 1,000개씩 생성하고, 풀을 모두 사용한 뒤에만 재샘플링합니다.
+동일한 질문·조합 쌍은 중복되지 않습니다.
+
+| 원본 데이터셋 | 서로 다른 원본 질문 | 생성 샘플 |
 | --- | ---: | ---: |
-| SafeBench | 60 | 1,000 |
-| HADES | 60 | 1,000 |
-| MM-SafetyBench | 60 | 1,000 |
-| 합계 | 180 | 3,000 |
+| SafeBench | 349 | 1,000 |
+| HADES | 750 | 1,000 |
+| MM-SafetyBench | 972 | 1,000 |
+| 합계 | 2,071 | 3,000 |
 
 | ID | 방법 조합 | 샘플 수 |
 | --- | --- | ---: |
@@ -536,11 +540,10 @@ bash attack_scripts/run_five_method_dataset.sh validate
 ```
 
 위 명령은 [run_generate_five_method_dataset.py](run_generate_five_method_dataset.py)와 위 YAML을 사용합니다.
-기본 출력은 `runs/five_methods_3000_mixed_sources_jood_ratios_20261104/`이며, 최종 샘플은 `full/test_cases.jsonl`에 저장됩니다.
+기본 출력은 `runs/five_methods_3000_full_pool_one_recipe_20261104/`이며, 최종 샘플은 `full/test_cases.jsonl`에 저장됩니다.
 다른 출력 경로는 모든 단계에 같은 `--output`을 지정합니다.
 
-완성 샘플은 [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)의 `3000_samples.zip`,
-입력 자산은 같은 폴더의 `data.zip`에 있습니다.
+공유 ZIP 다운로드는 [3절](#3-dataset-loading)을 참고하세요. ZIP의 생성 구성은 내부 실행 기록에서 확인합니다.
 상세 구성은 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md), 응답 생성·ASR 평가는 [6절](#6-single-attack-pipeline)을 참고하세요.
 
 ## 9. Evaluation and metrics

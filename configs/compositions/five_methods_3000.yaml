@@ -1,4 +1,4 @@
-# Balanced benchmark sources and a 19-level JOOD source-image weight grid.
+# Sample from full benchmark pools, assigning one recipe to each question draw.
 name: five_methods_3000
 seed: 20261104
 preview_per_recipe: 3
@@ -153,3 +153,4 @@ sources:
   - HADES
   - MM-SafetyBench
   balance: equal
+  sampling: full_pool_cycles

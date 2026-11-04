@@ -51,6 +51,12 @@ def main():
     if sources:
         html.append('<p><strong>벤치마크별 전체 입력:</strong> ' +
                     ' · '.join(f'{escape(k)} {v:,}개' for k,v in sources.items()) + '</p>')
+    selection = identity.get("source_selection", {})
+    if selection.get("selection_policy") == "full_pool_cycles_one_recipe_per_draw":
+        html.append('<p><strong>샘플링:</strong> 전체 가용 질문 풀을 사용하고, 질문을 한 번 뽑을 때 조합 하나만 적용합니다. '
+                    '각 출처의 전체 풀을 모두 사용한 뒤 필요한 만큼 재샘플링합니다.</p>')
+        html.append(f'<p>서로 다른 원본 질문: {selection["unique_parents"]:,}개. '
+                    '같은 원본 질문·조합 쌍은 중복되지 않습니다.</p>')
     html.append('<nav>' + ''.join(f'<a href="#{escape(k)}">{escape(k)}</a>' for k in grouped) + '</nav>')
     for recipe, items in grouped.items():
         methods = ' + '.join(items[0]["meta"]["methods"])
