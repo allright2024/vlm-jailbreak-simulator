@@ -327,7 +327,7 @@ python -m core.validation.data --dataset SafeBench --dataset AdvBench
 | --- | --- |
 | FigStep·HADES·VisualAdv·DeltaJP | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
 | `run_cs_dj.sh` | 기본 `MODEL=gpt-4o-mini`, `DATASETS=CS-DJ` |
-| `run_jood.sh` | 기본 GPT-4 Turbo 대상, AdvBenchM, 네 `AUGS`를 각각 실행 |
+| `run_jood.sh` | AdvBenchM의 네 `AUGS`를 각각 실행 |
 | `run_jps.sh` | 기본 `MODEL=qwen2_vl_7b`, `CONFIG` 지정 가능 |
 | `run_mml.sh` | 기본 GPT-4o snapshot 대상. `VARIANTS`, `JUDGE_MODEL`, `EVALUATE_LLAMA_GUARD` 지원 |
 | [run_transfer.sh](attack_scripts/run_transfer.sh) | VisualAdv/DeltaJP의 Qwen2 surrogate → 별도 target 전이 실행 |
@@ -350,7 +350,7 @@ Target은 생성된 공격을 **평가할 모델**, surrogate는 공격 생성 �
 | `qwen2_5_vl_7b` | `Qwen/Qwen2.5-VL-7B-Instruct` |
 | `qwen3_vl_2b`, `qwen3_vl_8b` | `Qwen/Qwen3-VL-{2B,8B}-Instruct` |
 | `internvl3_2b`, `internvl3_8b` | `OpenGVLab/InternVL3-{2B,8B}-hf` |
-| `gpt-4o-mini`, `gpt-4o`, `gpt-4o-2024-08-06`, `gpt-4-turbo-2024-04-09` | OpenAI API |
+| `gpt-4o-mini`, `gpt-4o`, `gpt-4o-2024-08-06` | OpenAI API |
 
 전체 alias는 [core/targets/__init__.py](core/targets/__init__.py)를 참고하세요.
 
@@ -650,9 +650,8 @@ This project is released under a **dual-scope** licensing arrangement:
     components, and most Python dependencies;
   - **MIT** — governs the FigStep, HADES, and HarmBench upstream
     repositories that the simulator vendors or imports from;
-  - the **OpenAI Terms of Use** — govern the `gpt-3.5-turbo` and
-    `gpt-4-turbo-2024-04-09` API calls made by the Hades and JOOD
-    pipelines;
+  - the **OpenAI Terms of Use** — govern OpenAI API calls made by
+    the HADES and JOOD pipelines;
   - the original copyright of the **Arial** typeface (Monotype /
     Microsoft) — applies to the `Arial.ttf` font asset required by
     Hades;
