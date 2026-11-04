@@ -7,9 +7,11 @@ The [shared Google Drive folder](https://drive.google.com/drive/folders/1zxLWKwm
 - `data.zip`: benchmark inputs and method-specific generation assets.
 - `3000_samples.zip`: the 3,000 samples generated through method composition and decomposition.
 
-Extract the archives at the repository root. The input bundle restores `data/`;
-the generated-sample bundle restores `runs/`. See the
-[download and extraction guide](COMPOSED_GENERATION.md#다운로드).
+Extract the archives at the repository root. `data.zip` restores
+`data/benchmarks/` (original benchmark inputs) and `data/method_assets/`
+(method-specific images, corpora and shared resources). `3000_samples.zip`
+restores generated samples under `runs/`. See the
+[data layout](DATA_LAYOUT.md) and [extraction guide](COMPOSED_GENERATION.md#다운로드).
 
 This generator combines FigStep, CS-DJ, MML, JOOD and JPS using
 [the five-method plan](configs/compositions/five_methods_3000.yaml).
