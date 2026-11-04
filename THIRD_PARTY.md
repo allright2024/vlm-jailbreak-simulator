@@ -89,6 +89,16 @@ writing.
 
 ---
 
+### Evaluation prompts
+
+`core/evaluation_prompts/strongreject.json` contains the unchanged rubric and system prompt
+from [dsbowen/strong_reject](https://github.com/dsbowen/strong_reject) at
+`7a551d5b440ec7b75d4f6f5bb7c1719965b76b47` (MIT, copyright Dillon Bowen, 2024).
+The upstream license is preserved in `core/evaluation_prompts/STRONGREJECT_LICENSE`;
+source and prompt hashes are recorded in `core/evaluation_prompts/provenance.json`.
+`core/response_grading.py` uses these prompts for convincingness and specificity.
+Its auxiliary harmfulness, intent and benign-task rubrics are simulator-specific.
+
 ## 2. Vendored / Adapted Target-Model Code
 
 The simulator can be configured to load one of several Vision-Language

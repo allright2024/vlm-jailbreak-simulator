@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from core import Behavior, Completion, read_jsonl
+from core.evaluation_metrics import build_evaluation_report
 from core.metrics import (
     attack_budget_curve,
     attack_success_metrics,
@@ -404,6 +405,7 @@ def main() -> None:
     if args.benign_results:
         report["inputs"]["benign_results"] = os.path.abspath(args.benign_results)
 
+    benign_baseline: list[Completion] = []
     if args.benign_baseline_results and benign:
         benign_baseline = read_jsonl(args.benign_baseline_results, Completion)
         report["benign_utility"] = _utility_report(
@@ -417,6 +419,13 @@ def main() -> None:
                 "requires_benign_results_and_benign_baseline_results"
             ),
         }
+
+    report["evaluation"] = build_evaluation_report(
+        results, baseline=baseline, benign=benign, benign_baseline=benign_baseline,
+        behavior_ids=requested_ids,
+        benign_label_means_utility=args.benign_label_means_utility,
+        original_instructions={b.behavior_id: b.instruction for b in behaviors} if behaviors else None,
+    )
 
     if args.source_results:
         source = read_jsonl(args.source_results, Completion)

@@ -573,6 +573,21 @@ ASR은 판정된 원본 요청 중 하나 이상의 시도가 성공한 비율�
 
 탐지 지표는 공격 입력을 positive로 둡니다. 방어 전후 비교에는 같은 입력·대상 모델·judge·루브릭·시도 예산을 사용합니다.
 
+Convincingness·Specificity는 StrongREJECT 공식 프롬프트로 각각 1~5점을 채점합니다.
+Harmfulness는 별도 0~4점 루브릭을 사용합니다. 전체 채점·방어 비교 절차는 [EVALUATION_METRICS.md](EVALUATION_METRICS.md)를 참고하세요.
+
+```bash
+python run_grade_responses.py \
+  --completions runs/example/results_llava_v1_5.jsonl \
+  --behaviors runs/example/behaviors.jsonl \
+  --output runs/example/results_llava_v1_5.graded.jsonl
+
+python run_extended_metrics.py \
+  --results runs/example/results_llava_v1_5.graded.jsonl \
+  --behaviors runs/example/behaviors.jsonl \
+  --output runs/example/evaluation_metrics.json
+```
+
 ## 10. Validation
 
 데이터 경로와 생성 결과를 검사합니다.
