@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Merge complete recipe-group runs into one validated composition dataset.
 
-The 3,000-sample production job is intentionally split across several Python
+The configured production job is intentionally split across several Python
 processes so model objects from earlier attack families cannot accumulate on
 the GPU.  This tool performs a strict, lossless merge of those process outputs.
 It rejects configuration drift, missing recipes, short raw/final quotas,

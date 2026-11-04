@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Examples:
 #   PER_RECIPE=3 bash attack_scripts/run_composed_dataset.sh
-#   RECIPES=P03,P04 SAVE_DIR=runs/composed_offline_smoke \
+#   RECIPES=P01,P03 SAVE_DIR=runs/composed_offline_smoke \
 #     bash attack_scripts/run_composed_dataset.sh
-# Omit PER_RECIPE and RECIPES for the configured 3,000-sample full run.
+# Omit PER_RECIPE and RECIPES for the configured full run.
 
 PYTHON_BIN="${PYTHON:-python}"
 CONFIG="${CONFIG:-configs/compositions/jailbreak_dataset_v3.yaml}"

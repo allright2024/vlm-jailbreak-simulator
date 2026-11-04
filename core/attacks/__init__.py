@@ -14,7 +14,6 @@ import multi_attacks.figstep     # noqa: F401  (registers "FigStep")
 import multi_attacks.hades       # noqa: F401  (registers "HADES")
 import multi_attacks.jood        # noqa: F401  (registers "JOOD")
 import multi_attacks.jps         # noqa: F401  (registers "JPS")
-import multi_attacks.jailbound   # noqa: F401  (registers "JailBound")
 import multi_attacks.mml         # noqa: F401  (registers "MML")
 
 __all__: list[str] = []

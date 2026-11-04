@@ -12,7 +12,7 @@ set -euo pipefail
 # Optional overrides:
 #   PYTHON=/path/to/python
 #   CONFIG=configs/compositions/jailbreak_dataset_v3.yaml
-#   OUTPUT_ROOT=runs/composed_jailbreak_pruned_20261103
+#   OUTPUT_ROOT=runs/composed_generation
 #   PREFLIGHT_ONLY=1  # validate prerequisites/quotas, then stop
 #
 # A completed recipe group is validated and reused on a later invocation. A
@@ -33,7 +33,7 @@ else
 fi
 
 CONFIG="${CONFIG:-configs/compositions/jailbreak_dataset_v3.yaml}"
-OUTPUT_ROOT="${OUTPUT_ROOT:-runs/composed_jailbreak_pruned_20261103}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-runs/composed_generation}"
 OUTPUT_ROOT="$(realpath -m -- "$OUTPUT_ROOT")"
 PARTS_DIR="$OUTPUT_ROOT/_parts"
 LOG_DIR="$OUTPUT_ROOT/logs"

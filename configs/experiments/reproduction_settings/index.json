@@ -82,11 +82,6 @@
       "settings": "configs/experiments/reproduction_settings/visualadv_trained.json"
     },
     {
-      "experiment_id": "jailbound",
-      "method": "JailBound",
-      "settings": "configs/experiments/reproduction_settings/jailbound.json"
-    },
-    {
       "experiment_id": "adashield_figstep",
       "method": "AdaShield",
       "settings": "configs/experiments/reproduction_settings/adashield_figstep.json"
@@ -160,11 +155,6 @@
       "experiment_id": "jailguard_reference_20261103",
       "method": "JailGuard",
       "settings": "configs/experiments/reproduction_settings/jailguard_reference_20261103.json"
-    },
-    {
-      "experiment_id": "mmsafetybench_refusal_audit",
-      "method": "JailBound prerequisite audit",
-      "settings": "configs/experiments/reproduction_settings/mmsafetybench_refusal_audit.json"
     }
   ],
   "existing_configuration_hashes": {
@@ -180,7 +170,6 @@
     "configs/attacks/HADES_white_box_mid.yaml": "44b272d59e55806daea7f47dce2cb8d66dbc96d63925c1d0f39b4240e77a71f5",
     "configs/attacks/JOOD.yaml": "87fa37d93eb1ecf2d4a3c19a2dc57103dccc043f731be843d27e86a8d15a78b3",
     "configs/attacks/JPS.yaml": "35f336f0aad1af078696f5d8de4faf95dcbda46a94ea04a8865ddb4b01b02f37",
-    "configs/attacks/JailBound.yaml": "2cf7e3a6f305b5705e9c02ef703a57d85884877dab0c0feb0b7bd69d00c9d763",
     "configs/attacks/MML.yaml": "4e82151f483ee8af03c299ef496ab4fd9353674ec2b903f1ceab0e30f2a03e0e",
     "configs/attacks/VisualAdv.yaml": "196113f3bf9a62e3389a3fa7dd6fe48dd6c9a20e68e3d2a146663c9b8217a863",
     "configs/attacks/VisualAdv_constrained32.yaml": "8c85d77c7bfb5819032c3c1367fd5460e0e7b14cbda8706158021d31dc554568",

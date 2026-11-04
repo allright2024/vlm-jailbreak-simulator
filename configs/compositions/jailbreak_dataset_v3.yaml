@@ -1,7 +1,6 @@
-# Pruned plan: 8 recipes, 1,740 raw candidates, 1,450 selected inputs.
-# Uses the configured JPS training CSV and base image.
+# Configured harmful-only stage compositions; quotas and groups are explicit.
 schema_version: 1
-name: jailbreak_dataset_v3_pruned_20261103
+name: jailbreak_dataset_v3
 seed: 20261018
 candidate_multiplier: 1.2
 checkpoint_every: 10
@@ -14,8 +13,8 @@ split:
   validation: 0.1
   test: 0.2
 expected_totals:
-  final: 1450
-  raw: 1740
+  final: 600
+  raw: 720
 controls:
   included_in_jailbreak_set: false
   total: 600
@@ -28,17 +27,6 @@ execution_groups:
   - P01
   - P02
   - P03
-- name: 02_jailbound_render
-  recipes:
-  - T01
-  - T02
-- name: 05_hades
-  recipes:
-  - P05
-- name: 08_jps
-  recipes:
-  - P08
-  - T04
 recipes:
 - id: P01
   name: CS-DJ-Split -> FigStep
@@ -67,8 +55,7 @@ recipes:
   raw_count: 240
   stages:
   - *id001
-  - &id004
-    component: mml_layout
+  - component: mml_layout
     attack: MML
     config: configs/attacks/MML.yaml
     overrides:
@@ -86,8 +73,7 @@ recipes:
   raw_count: 240
   stages:
   - *id002
-  - &id006
-    component: jood_aug
+  - component: jood_aug
     attack: JOOD
     config: configs/attacks/JOOD.yaml
     overrides:
@@ -103,66 +89,3 @@ recipes:
       - 0.8
       - 0.9
       seed: 0
-- id: P05
-  name: HADES(top) -> JailBound
-  arity: 2
-  datasets:
-  - HADES
-  final_count: 200
-  raw_count: 240
-  stages:
-  - component: hades_patch
-    attack: HADES
-    config: configs/attacks/HADES.yaml
-  - &id003
-    component: jailbound_joint
-    attack: JailBound
-    config: configs/attacks/JailBound.yaml
-- id: P08
-  name: JPS -> JailBound
-  arity: 2
-  datasets:
-  - AdvBench
-  final_count: 200
-  raw_count: 240
-  stages:
-  - &id005
-    component: jps_joint
-    attack: JPS
-    config: configs/attacks/JPS.yaml
-  - *id003
-- id: T01
-  name: CS-DJ-Split -> FigStep -> JailBound
-  arity: 3
-  datasets:
-  - SafeBench
-  - AdvBench
-  final_count: 150
-  raw_count: 180
-  stages:
-  - *id001
-  - *id002
-  - *id003
-- id: T02
-  name: CS-DJ-Split -> MML -> JailBound
-  arity: 3
-  datasets:
-  - SafeBench
-  - AdvBench
-  final_count: 150
-  raw_count: 180
-  stages:
-  - *id001
-  - *id004
-  - *id003
-- id: T04
-  name: JPS -> JailBound -> JOOD
-  arity: 3
-  datasets:
-  - AdvBench
-  final_count: 150
-  raw_count: 180
-  stages:
-  - *id005
-  - *id003
-  - *id006
