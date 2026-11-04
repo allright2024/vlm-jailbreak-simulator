@@ -490,12 +490,14 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 
 ## 8. Composed jailbreak generation
 
-실제 3,000개 생성에 사용한 설정은 [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml)입니다.
-FigStep·CS-DJ·MML·JOOD·JPS의 18개 조합을 사용하며, seed는 `20261104`입니다.
+`3000_samples.zip`은 FigStep·CS-DJ·MML·JOOD·JPS의 18개 조합으로 생성한 **3,000개 입력**입니다.
+실제 생성 설정은 [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml)이며, seed는 `20261104`입니다.
+
+### Sample composition
 
 **질문을 한 번 샘플링할 때 18개 중 조합 하나만 적용합니다.**
-각 벤치마크의 전체 가용 질문 풀을 순환하며 1,000개씩 생성하고, 풀을 모두 사용한 뒤에만 재샘플링합니다.
-동일한 질문·조합 쌍은 중복되지 않습니다.
+각 벤치마크의 전체 가용 질문 풀을 사용한 뒤 재샘플링합니다.
+원본 질문 2,071개와 재샘플링 929회로 구성하며, 동일한 질문·조합 쌍은 중복되지 않습니다.
 
 | 원본 데이터셋 | 서로 다른 원본 질문 | 생성 샘플 |
 | --- | ---: | ---: |
@@ -526,27 +528,52 @@ FigStep·CS-DJ·MML·JOOD·JPS의 18개 조합을 사용하며, seed는 `2026110
 | Q02 | MML + CS-DJ + JOOD + JPS | 150 |
 | **합계** | **18개 조합** | **3,000** |
 
-JOOD가 포함된 1,840개 샘플은 원본 이미지 가중치 5~95%를 5% 간격으로 배정합니다.
+JOOD가 포함된 1,840개 입력은 원본 이미지 가중치 5~95%를 5% 간격으로 배정합니다.
 19개 비율은 각각 96~97회, 무해 이미지 5종은 각각 368회 사용합니다.
 
-미리보기 54개 생성 → 이미지 검토 → 전체 3,000개 생성 → 검증 순서입니다.
-JPS 이미지·steer prompt·학습 CSV는 YAML의 `jps.source_run`에 준비합니다.
+### Use the generated samples
+
+[3절](#3-dataset-loading)의 두 ZIP을 저장소 상위 폴더에 두고, 저장소 루트에서 압축을 풉니다.
+
+```bash
+unzip -n ../data.zip -d .
+unzip -n ../3000_samples.zip -d .
+```
+
+샘플은 `runs/five_methods_3000_full_pool_one_recipe_20261104/`에 복원됩니다.
+
+| 파일 | 내용 |
+| --- | --- |
+| `full/test_cases.jsonl` | 평가할 3,000개 텍스트·이미지 입력 |
+| `full/behaviors.jsonl` | 원본 질문 2,071개와 평가 정보 |
+| `preview/`, `index.html` | 별도 미리보기 54개와 갤러리 |
+| `sample_plan.json`, `generation_report.json`, `full/qc.json` | 샘플 배정과 생성 검증 결과 |
+
+`full/`을 `--run_dir`로 지정해 응답과 ASR을 평가합니다. 아래 예시는 다중 이미지 입력을 지원하는 Qwen3-VL을 사용합니다.
+
+```bash
+RUN_DIR=runs/five_methods_3000_full_pool_one_recipe_20261104/full
+python run_generate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --batch_size 1
+python run_evaluate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --judge_batch_size 1
+```
+
+### Generate a new dataset
+
+환경과 방법론 자산을 준비하고, YAML의 `jps.source_run`에 JPS 이미지·steer prompt·학습 CSV를 지정합니다.
+새 출력 폴더에서 미리보기 생성 → 이미지 검토 → 3,000개 생성 → 검증 순서로 실행합니다.
 
 ```bash
 python -m pip install -r requirements-five-methods.txt
 python -m core.prepare_five_method_assets
-bash attack_scripts/run_five_method_dataset.sh preview
-bash attack_scripts/run_five_method_dataset.sh review-preview --review-note '실제 이미지 검토 내용'
-bash attack_scripts/run_five_method_dataset.sh full
-bash attack_scripts/run_five_method_dataset.sh validate
+export PYTHON=python
+OUTPUT=runs/five_methods_3000_new
+bash attack_scripts/run_five_method_dataset.sh preview --output "$OUTPUT"
+bash attack_scripts/run_five_method_dataset.sh review-preview --output "$OUTPUT" --review-note '실제 이미지 검토 내용'
+bash attack_scripts/run_five_method_dataset.sh full --output "$OUTPUT"
+bash attack_scripts/run_five_method_dataset.sh validate --output "$OUTPUT"
 ```
 
-위 명령은 [run_generate_five_method_dataset.py](run_generate_five_method_dataset.py)와 위 YAML을 사용합니다.
-기본 출력은 `runs/five_methods_3000_full_pool_one_recipe_20261104/`이며, 최종 샘플은 `full/test_cases.jsonl`에 저장됩니다.
-다른 출력 경로는 모든 단계에 같은 `--output`을 지정합니다.
-
-공유 ZIP 다운로드는 [3절](#3-dataset-loading)을 참고하세요. ZIP의 생성 구성은 내부 실행 기록에서 확인합니다.
-상세 구성은 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md), 응답 생성·ASR 평가는 [6절](#6-single-attack-pipeline)을 참고하세요.
+모든 단계에 같은 `--output`을 사용합니다. 상세 구성·백그라운드 실행은 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md)를 참고하세요.
 
 ## 9. Evaluation and metrics
 
