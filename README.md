@@ -187,7 +187,9 @@ VS Code·노트북에서도 위 환경의 Python 인터프리터·커널을 선�
 
 데이터는 [3절](#3-dataset-loading), 방어용 이미지·확산 모델 자산은
 [7절](#7-jailbreak-defenses)에 따라 준비합니다.
-MML의 NLTK 자산은 `data.zip`의 `nltk_data/`를 사용하거나 아래 명령으로 준비합니다.
+MML 단어 치환과 조합 데이터 생성에 필요한 영어 품사 태깅 모델은
+`data.zip`의 `data/nltk_data/`에 포함됩니다. 여러 실행이 공유하는 자산이며,
+누락된 경우 아래 명령으로 준비합니다.
 
 ```bash
 export NLTK_DATA="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/nltk_data"
@@ -223,9 +225,14 @@ API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
 
 ### Download and extract
 
-데이터 묶음은 [Google Drive의 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)에서
-다운로드합니다. 압축 파일은 약 1.19 GB이며, 다운로드 파일과 압축 해제본을
-함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
+`data.zip`은 벤치마크 원본과 여러 실행에서 재사용하는 공용 자산을 묶은 파일입니다.
+**새 ZIP에서는 공식 MML 재현용 `data/MML/`을 제외하고 `data/nltk_data/`는 유지합니다.**
+실행 중 생성한 공격 이미지·모델 응답·평가 결과는 `runs/<실험명>/`에 저장합니다.
+
+[Google Drive의 기존 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)도
+사용할 수 있습니다. 기존 배포본에는 `data/MML/`이 포함되어 있을 수 있으므로,
+아래 명령은 해당 폴더를 제외하고 압축을 풉니다. 새 ZIP에도 같은 명령을 사용할 수 있습니다.
+다운로드 파일과 압축 해제본을 함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
 
 ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에서 압축을 해제**하여
 `vlm-jailbreak-simulator/data/`에 배치합니다. `data/` 안에서 다시 압축을 풀어
@@ -243,8 +250,8 @@ curl --fail --location --retry 3 \
 # 다운로드한 ZIP의 무결성 검사
 unzip -tq ../data.zip
 
-# 기존 파일은 덮어쓰지 않고, ZIP의 data/ 폴더를 저장소 루트에 배치
-unzip -n ../data.zip -d .
+# 기존 파일은 덮어쓰지 않고, 공식 MML 데이터를 제외한 data/ 폴더를 배치
+unzip -n ../data.zip -d . -x 'data/MML' 'data/MML/*'
 
 export VLM_JAILBREAK_DATA_ROOT="$PWD/data"
 ```
@@ -257,16 +264,23 @@ Drive의 다운로드 확인 화면이나 용량 제한 안내가 나오면 위 
 vlm-jailbreak-simulator/
 ├── README.md
 ├── run_generate_test_cases.py
-└── data/
-    ├── SafeBench/safebench.csv
-    ├── advbench/harmful_behaviors.csv
-    ├── HADES/hades.csv
-    └── ...
+├── data/                            # 원본 입력과 재사용하는 공용 자산
+│   ├── SafeBench/safebench.csv
+│   ├── advbench/harmful_behaviors.csv
+│   ├── HADES/hades.csv
+│   ├── nltk_data/taggers/            # MML 단어 치환용 영어 품사 태깅 모델
+│   └── ...
+└── runs/<실험명>/                   # 생성 이미지·모델 응답·평가 결과
 ```
 
 기본 데이터 경로는 `<repo>/data`입니다. 위의 `export`는 이미 설정된 다른 데이터 루트가
 있더라도 방금 압축을 해제한 폴더를 사용하도록 지정합니다.
 다른 위치에 압축을 풀었다면 `VLM_JAILBREAK_DATA_ROOT`를 그 안의 `data/` 폴더로 지정하세요.
+
+공식 MML 이미지·메타데이터로 재현하려면 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
+별도 다운로드하여 `data/MML/`에 배치하세요. MML 단어 치환을 직접 생성하는 조합 모드는
+이 공식 이미지 폴더 대신 `nltk_data/`의 품사 태깅 모델을 사용합니다.
+위 압축 해제 명령은 이미 존재하는 로컬 `data/MML/` 폴더를 삭제하지 않습니다.
 
 ### Validate the data
 
@@ -363,8 +377,9 @@ CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사
 
 - JPS 기본 설정이 요구하는 upstream `advbench_subset.csv`와 `clean.jpeg`는
   upstream 배포에 없어 외부에서 준비해야 합니다. 조합용 대체 설정과 동일하지 않습니다.
-- CS-DJ는 CC3M 이미지 풀·공식 폰트, MML replay는 별도 이미지 트리와
-  hash-pinned upstream `const.py`가 필요합니다.
+- CS-DJ는 CC3M 이미지 풀·공식 폰트가 필요합니다.
+- MML replay는 기본 ZIP에서 제외된 공식 이미지·메타데이터와 hash-pinned upstream
+  `const.py`를 별도로 준비해야 합니다. [준비 안내](multi_attacks/mml/README.md)를 참고하세요.
 - JailBound는 저자 코드가 없는 논문 기반 구현으로 LLaVA-1.5, pooling,
   suffix 목적함수 등에 명시적 대체가 있습니다. 항상 adapted이며 공식 코드 재현으로 보지 않습니다.
 - `algorithm_fidelity`는 코드의 충실도, `experiment_profile`은 실행 설정입니다.
