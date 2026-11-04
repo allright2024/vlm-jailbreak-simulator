@@ -50,15 +50,20 @@ def _layout_candidates(relative: Pathish) -> list[str]:
             return [os.path.join("benchmarks", "AdvBenchM", *tail[1:]), normalized]
         if tail and tail[0] == "jood_subset":
             rest = tail[1:]
-        else:
+        elif tail and tail[0] in {"prompts", "images"}:
+            # Historical JOOD file references retain their asset destination.
             rest = tail
-        # A legacy bare AdvBenchM path means the historical JOOD subset.
+        else:
+            return [os.path.join("benchmarks", "AdvBenchM", *tail),
+                    os.path.join("AdvBenchM", "original_release", *tail)]
         return [os.path.join("method_assets", "JOOD", *rest),
                 os.path.join("AdvBenchM", "jood_subset", *rest),
                 os.path.join("AdvBenchM", *rest)]
     if first in BENCHMARK_DIRS:
         return [os.path.join("benchmarks", first, *tail), normalized]
     if first in METHOD_ASSET_DIRS:
+        if first == "JOOD":
+            return _layout_candidates(os.path.join("method_assets", normalized))
         return [os.path.join("method_assets", first, *tail), normalized]
     return [normalized]
 
@@ -70,8 +75,8 @@ def resolve_data_path(relative: Pathish, data_root: Pathish | None = None) -> st
     return next((path for path in candidates if os.path.exists(path)), candidates[0])
 
 
-def advbenchm_jood_root(data_dir: Pathish | None = None) -> str:
-    """Find JOOD assets while preserving the existing AdvBenchM CLI contract."""
+def jood_root(data_dir: Pathish | None = None) -> str:
+    """Find the JOOD subset in current or historical asset layouts."""
     if data_dir is None:
         return resolve_data_path("method_assets/JOOD")
     root = resolve_path(data_dir)
@@ -84,11 +89,16 @@ def advbenchm_jood_root(data_dir: Pathish | None = None) -> str:
     if os.path.basename(root) == "AdvBenchM":
         if os.path.basename(os.path.dirname(root)) == "benchmarks":
             raise ValueError(
-                "The existing AdvBenchM loader reads JOOD's 170-question subset, "
-                "not the original release. Use data/method_assets/JOOD as data_dir."
+                "The JOOD loader requires data/method_assets/JOOD; "
+                "data/benchmarks/AdvBenchM is the original benchmark."
             )
         return resolve_data_path("method_assets/JOOD", os.path.dirname(root))
     return resolve_data_path("method_assets/JOOD", root)
+
+
+def advbenchm_jood_root(data_dir: Pathish | None = None) -> str:
+    """Historical helper name; the JOOD dataset now has its own CLI name."""
+    return jood_root(data_dir)
 
 
 def resolve_path(path: Pathish) -> str:

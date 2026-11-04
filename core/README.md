@@ -46,15 +46,16 @@ to the directory containing `benchmarks/` and `method_assets/` (default: `<repo>
 `benchmarks/` contains the original AdvBench, AdvBench-M, HADES, MM-SafetyBench
 and SafeBench inputs. `method_assets/` contains method-specific inputs and shared resources.
 
-The `AdvBenchM` CLI reads `method_assets/JOOD/`; the `CS-DJ` CLI reads
-`method_assets/CS-DJ/instructions/`. Original AdvBench-M files remain under
-`benchmarks/AdvBenchM/`. See [DATA_LAYOUT.md](../DATA_LAYOUT.md).
+The `AdvBenchM` CLI reads the original release in `benchmarks/AdvBenchM/`.
+The `JOOD` CLI reads `method_assets/JOOD/`; the `CS-DJ` CLI reads
+`method_assets/CS-DJ/instructions/`. See [DATA_LAYOUT.md](../DATA_LAYOUT.md).
 Check a selected dataset with `python -m core.validation.data --dataset SafeBench --layout-only`.
 
 | Name | Behaviors | Images / behavior | Native fields | eval_type split |
 |---|---|---|---|---|
 | `AdvBench` | 520 | 0 | `target` | harmful 520 |
-| `AdvBenchM` (JOOD subset) | 170 | 1 (scenario image) | `keyword` | harmful 170 |
+| `AdvBenchM` | 246 | 20 (category pool; 160 unique overall) | `target` | harmful 246 |
+| `JOOD` (method subset) | 170 | 1 (scenario image) | `keyword` | harmful 170 |
 | `HADES` | 750 | 6 (opt. steps 0–5) | `keyword`, `keyword_type` | harmful 750 |
 | `MM-SafetyBench` | 1,680 | 3 (SD, SD_TYPO, TYPO) | `keyword`, `keyword_type` | harmful 972 / opinion 302 / advice 406 |
 | `SafeBench` | 500 | 0 | `statement` | harmful 350 / advice 150 |
@@ -81,7 +82,7 @@ Import `core.attacks` to register them. Ported so far:
 | Name | Needs | Notes |
 |---|---|---|
 | `FigStep` | — | Renders the declarative `statement` (falls back to `instruction`) above an empty numbered list; fixed incitement prompt. Config: `configs/attacks/FigStep.yaml`. |
-| `JOOD` | AdvBenchM | OOD-mixes the harmful item with a benign one. `aug` picks image mixing (`mixup`/`cutmix_original`/`cutmix_resizemix`) or text mixing (`textmix_*`). Builds one test case per (harmless item × λ); Pass@k scores "succeed on any mix". Config: `configs/attacks/JOOD.yaml`. |
+| `JOOD` | JOOD subset | OOD-mixes the harmful item with a benign one. `aug` picks image mixing (`mixup`/`cutmix_original`/`cutmix_resizemix`) or text mixing (`textmix_*`). Builds one test case per (harmless item × λ); Pass@k scores "succeed on any mix". Config: `configs/attacks/JOOD.yaml`. |
 | `HADES` | HADES | The default runs 3,000 white-box epochs to learn a universal top-quarter patch toward a `Sure...` target, then applies it with the keyword-masked prompt. `HADES_official.yaml` instead replays released image steps 0–5 (`step: all`, Pass@6). |
 | `VisualAdv` | any (+ benign base image) | **White-box (foundational).** PGD-optimizes a perturbation on a benign image (`requires_surrogate`; LLaVA) so the model emits toxic strings from a derogatory corpus (CE loss); one universal image reused per behavior. `constrained` = L_inf-bounded. Config: `configs/attacks/VisualAdv.yaml`. |
 | `DeltaJP` | datasets with per-behavior images (AdvBenchM/HADES/MM-SafetyBench) | **White-box.** A universal L_inf perturbation (delta) added to each behavior's own image (`requires_surrogate`+`requires_images`), fit over a training subset toward affirmative targets, then applied per behavior. Paper: Niu et al. 2402.02309 (deltaJP). Config: `configs/attacks/DeltaJP.yaml`. |

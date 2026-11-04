@@ -13,6 +13,11 @@ from .paths import DATA_ROOT, DATA_ROOT_ENV, resolve_data_path, resolve_path
 DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
     "AdvBench": ("benchmarks/advbench/harmful_behaviors.csv",),
     "AdvBenchM": (
+        "benchmarks/AdvBenchM/instructions.jsonl",
+        "benchmarks/AdvBenchM/images.jsonl",
+        "benchmarks/AdvBenchM/dataset/advimage",
+    ),
+    "JOOD": (
         "method_assets/JOOD/prompts/eval_all_instructions",
         "method_assets/JOOD/prompts/all_instructions",
         "method_assets/JOOD/prompts/all_instructions_harmful_annotated",
@@ -28,7 +33,8 @@ DATASET_LAYOUT: dict[str, tuple[str, ...]] = {
 
 EXPECTED_COUNTS = {
     "AdvBench": 520,
-    "AdvBenchM": 170,
+    "AdvBenchM": 246,
+    "JOOD": 170,
     "CS-DJ": 750,
     "HADES": 750,
     "HarmBench": 200,

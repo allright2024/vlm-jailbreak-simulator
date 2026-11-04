@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run JOOD (OOD image/text mixing) on its compatible benchmark.
-# JOOD OOD-mixes each harmful item with benign ones; it needs AdvBenchM (which
+# JOOD OOD-mixes each harmful item with benign ones; it needs JOOD (which
 # carries the per-behavior scenario image + benign item pool). Builds one test
 # case per (harmless item x lambda); Pass@k scores "succeed on any mix", so the
 # test-case count is large (behaviors x #benign x #lambda).
@@ -8,7 +8,7 @@
 # Usage:
 #   bash attack_scripts/run_jood.sh                      # full official 4-augmentation grid
 #   LIMIT=20 bash attack_scripts/run_jood.sh             # behavior subset (smoke)
-#   DATASETS="AdvBenchM" bash attack_scripts/run_jood.sh # (only AdvBenchM is compatible)
+#   DATASETS="JOOD" bash attack_scripts/run_jood.sh # (only JOOD is compatible)
 #   MODEL=llava_v1_5 bash ...
 set -uo pipefail
 export PYTHONNOUSERSITE=1
@@ -18,7 +18,7 @@ cd "$(dirname "$0")/.."
 ATTACK="JOOD"
 MODEL=${MODEL:-gpt-4-turbo-2024-04-09}
 LIMIT=${LIMIT:-0}
-DATASETS=${DATASETS:-"AdvBenchM"}
+DATASETS=${DATASETS:-"JOOD"}
 CONFIG=${CONFIG:-configs/attacks/JOOD.yaml}
 AUGS=${AUGS:-"cutmix_original mixup cutmix_resizemix randaug1"}
 limit_flag() { [ "$LIMIT" -gt 0 ] && echo "--limit $LIMIT" || echo ""; }

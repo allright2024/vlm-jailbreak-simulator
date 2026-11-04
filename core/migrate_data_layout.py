@@ -71,7 +71,7 @@ def migrate_data_root(root: Path, *, dry_run: bool = False) -> dict:
                   for a, b in moves],
         "removed_legacy_aliases": {str(p.relative_to(root)): os.readlink(p) for p in aliases},
         "benchmark_contents_modified": False,
-        "existing_AdvBenchM_loader": "JOOD subset, 170 questions; unchanged",
+        "dataset_cli_names": {"AdvBenchM": "original benchmark", "JOOD": "170-question subset"},
     }
     if dry_run or not moves and not aliases:
         return report

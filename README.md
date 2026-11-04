@@ -240,8 +240,8 @@ data/
     └── provenance/              # 자산 출처·이동 기록
 ```
 
-AdvBench-M 원본은 `data/benchmarks/AdvBenchM/`, 이전 `jood_subset`은 `data/method_assets/JOOD/`에 있습니다.
-`--dataset AdvBenchM`은 JOOD의 170문항을 읽습니다.
+이전 `original_release`는 `data/benchmarks/AdvBenchM/`에 있으며, `--dataset AdvBenchM`으로 읽습니다.
+이전 `jood_subset`은 `data/method_assets/JOOD/`에 있으며, `--dataset JOOD`로 읽습니다.
 
 ### Download and extract
 
@@ -277,7 +277,7 @@ python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
 
 ```bash
 python -m core.validation.data --dataset SafeBench --dataset AdvBench --layout-only
-python -m core.validation.data --dataset SafeBench --dataset AdvBench
+python -m core.validation.data --dataset AdvBenchM --dataset JOOD
 ```
 
 ### Dataset CLI paths
@@ -287,13 +287,15 @@ python -m core.validation.data --dataset SafeBench --dataset AdvBench
 | CLI 이름 | 입력 구분 | 경로 | 원본 행 수 |
 | --- | --- | --- | ---: |
 | [AdvBench](core/datasets/advbench.py) | 벤치마크 | `benchmarks/advbench/harmful_behaviors.csv` | 520 |
+| [AdvBenchM](core/datasets/advbenchm.py) | 벤치마크 | `benchmarks/AdvBenchM/` | 246 |
 | [HADES](core/datasets/hades.py) | 벤치마크 | `benchmarks/HADES/hades.csv`, `benchmarks/HADES/images/` | 750 |
 | [MM-SafetyBench](core/datasets/mm_safetybench.py) | 벤치마크 | `benchmarks/MM-SafetyBench/` | 1,680 |
 | [SafeBench](core/datasets/safebench.py) | 벤치마크 | `benchmarks/SafeBench/safebench.csv` | 500 |
-| [AdvBenchM](core/datasets/advbenchm.py) | JOOD 자산 | `method_assets/JOOD/` | 170 |
+| [JOOD](core/datasets/jood.py) | JOOD 자산 | `method_assets/JOOD/` | 170 |
 | [CS-DJ](core/datasets/cs_dj.py) | CS-DJ 자산 | `method_assets/CS-DJ/instructions/*.json` | 750 |
 
-원본 AdvBench-M 공개본과 방법론별 파일 구성은 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
+AdvBenchM은 8개 범주의 246문항과 160개 이미지를 포함합니다. 이미지는 범주별 풀로 연결됩니다.
+자세한 파일 구성은 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
 ### Schema and harmful-only policy
 
@@ -317,7 +319,7 @@ python -m core.validation.data --dataset SafeBench --dataset AdvBench
 | `CS-DJ` | [multi_attacks/cs_dj/](multi_attacks/cs_dj/) | Qwen 분해 → CLIP 대조 이미지 검색 → 3×4 콜라주. 외부 이미지 풀·폰트 필요 | [run_cs_dj.sh](attack_scripts/run_cs_dj.sh) |
 | `MML` | [multi_attacks/mml/](multi_attacks/mml/) | 공개 이미지·프롬프트 replay. 공통 Stage 2의 MML 프로토콜로 CLAS 조기 종료 | [run_mml.sh](attack_scripts/run_mml.sh) |
 | `HADES` | [multi_attacks/hades/](multi_attacks/hades/) | 기본 white-box 상단 패치 3,000 epochs. 별도 official 설정은 공개 이미지 6단계 replay | [run_hades.sh](attack_scripts/run_hades.sh) |
-| `JOOD` | [multi_attacks/jood/](multi_attacks/jood/) | benign 항목과 Mixup/CutMix/ResizeMix/RandAug. 개별 runner는 AdvBenchM 대상 | [run_jood.sh](attack_scripts/run_jood.sh) |
+| `JOOD` | [multi_attacks/jood/](multi_attacks/jood/) | benign 항목과 Mixup/CutMix/ResizeMix/RandAug. 개별 runner는 JOOD 부분집합 대상 | [run_jood.sh](attack_scripts/run_jood.sh) |
 | `JPS` | [multi_attacks/jps/](multi_attacks/jps/) | Qwen2 시각 최적화와 Qwen2.5-14B 에이전트의 피드백·수정. 공식 CSV·기저 이미지 별도 필요 | [run_jps.sh](attack_scripts/run_jps.sh) |
 | `VisualAdv` | [image_attacks/visual_adv/](image_attacks/visual_adv/) | CE/PGD universal 이미지. 기저 이미지·목표 문장 코퍼스·미분 가능 surrogate | [run_visualadv.sh](attack_scripts/run_visualadv.sh) |
 | `DeltaJP` | [image_attacks/delta_jp/](image_attacks/delta_jp/) | 원본 이미지에 universal delta 적용. 이미지 있는 데이터셋과 학습 분리 필요 | [run_deltajp.sh](attack_scripts/run_deltajp.sh) |
@@ -335,7 +337,7 @@ python -m core.validation.data --dataset SafeBench --dataset AdvBench
 | --- | --- |
 | FigStep·HADES·VisualAdv·DeltaJP | 기본 대상은 `llava_v1_5`. HADES는 기본 HADES 데이터셋, DeltaJP는 원본 이미지 필요 |
 | `run_cs_dj.sh` | 기본 `MODEL=gpt-4o-mini`, `DATASETS=CS-DJ` |
-| `run_jood.sh` | AdvBenchM의 네 `AUGS`를 각각 실행 |
+| `run_jood.sh` | JOOD 부분집합의 네 `AUGS`를 각각 실행 |
 | `run_jps.sh` | 기본 `MODEL=qwen2_vl_7b`, `CONFIG` 지정 가능 |
 | `run_mml.sh` | 기본 GPT-4o snapshot 대상. `VARIANTS`, `JUDGE_MODEL`, `EVALUATE_LLAMA_GUARD` 지원 |
 | [run_transfer.sh](attack_scripts/run_transfer.sh) | VisualAdv/DeltaJP의 Qwen2 surrogate → 별도 target 전이 실행 |

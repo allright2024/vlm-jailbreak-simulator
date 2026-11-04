@@ -18,7 +18,7 @@ pipeline scores Pass@k, matching JOOD's "succeed on any mix" evaluation. The
 prompt construction follows the official ``main.py``; only the target differs
 (this pipeline queries a local VLM instead of an API).
 
-Designed for the AdvBenchM dataset, which provides the harmful image, the
+Designed for the JOOD subset dataset, which provides the harmful image, the
 object-agnostic multimodal prompt, and the <HARMFUL>-annotated prompt per
 behavior, plus a shared harmless image pool.
 """
@@ -57,7 +57,7 @@ _HARMFUL_RE = re.compile(r"<HARMFUL>(.*?)</HARMFUL>", re.DOTALL)
 class JOODAttack(Attack):
     official_repo = "https://github.com/naver-ai/JOOD"
     official_commit = "4ca1368"
-    # Prompt/mixing logic is ported, but the bundled AdvBenchM contains one
+    # Prompt/mixing logic is ported, but the JOOD subset contains one
     # representative harmful image per scenario rather than the full upstream
     # image sweep.
     algorithm_fidelity = "adapted"
@@ -85,7 +85,7 @@ class JOODAttack(Attack):
                 f"Unknown JOOD aug {self.aug!r}. "
                 f"Image: {sorted(ju.MIX_FUNCS)}; text: {sorted(ju.TEXTMIX_FUNCS)}"
             )
-        # harmless pool (shared resource); default to AdvBenchM's.
+        # harmless pool (shared resource); default to JOOD's.
         hd = self.config.get("harmless_dir", "data/method_assets/JOOD/images/harmless")
         self.harmless_dir = resolve_path(hd)
         subset = self.config.get("harmless_subset")  # None = all

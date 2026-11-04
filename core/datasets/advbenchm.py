@@ -1,91 +1,65 @@
-"""JOOD subset loader: data/method_assets/JOOD/ -> list[Behavior].
+"""Original public AdvBench-M benchmark: 246 records and 160 category images.
 
-JOOD's subset of AdvBench-M groups harmful instructions into 7 scenarios,
-each with a single representative harmful image. This is distinct from the
-8-scenario ImgJP public release stored in ``data/benchmarks/AdvBenchM/``. For every
-instruction index it ships three aligned prompt variants:
-
-  eval_all_instructions/<scenario>.json          -> the ORIGINAL harmful request
-  all_instructions/<scenario>.json               -> JOOD's object-agnostic prompt
-                                                    ("... make each of these objects")
-  all_instructions_harmful_annotated/<scenario>.json
-                                                 -> the request with the harmful
-                                                    phrase wrapped in <HARMFUL>..</HARMFUL>
-
-We score against the eval (original) text, so that goes in ``instruction``. The
-harmful phrase (from the annotated variant) goes in ``keyword``; the two attack
-prompt variants are kept in ``meta`` for the JOOD attack to consume. The
-scenario's harmful image is the single entry in ``images``.
-
-170 behaviors across 7 scenarios. The harmless image pool
-(data/method_assets/JOOD/images/harmless) is a shared resource the JOOD attack reads via
-its config, not a per-behavior field.
+The former original_release directory now lives in data/benchmarks/AdvBenchM.
+Its questions and images are associated by category, rather than published
+one-to-one pairs. Behavior.images retains the entire category pool in catalog
+order; meta.image_association records this meaning. JOOD's separate subset is
+loaded by core.datasets.jood under the CLI name JOOD.
 """
 
 from __future__ import annotations
 
 import json
-import os
-import re
+from collections import defaultdict
 
 from ..dataset import Dataset
-from ..paths import advbenchm_jood_root
-from ..schema import Behavior, EvalType
 from ..registry import register_dataset
-
-_HARMFUL_RE = re.compile(r"<HARMFUL>(.*?)</HARMFUL>", re.DOTALL)
+from ..schema import Behavior, EvalType
 
 
 @register_dataset("AdvBenchM")
 class AdvBenchMDataset(Dataset):
     dir_name = "AdvBenchM"
 
-    def __init__(self, data_dir=None):
-        super().__init__(data_dir=advbenchm_jood_root(data_dir))
-
-    def _instructions(self, kind: str, scenario: str) -> list[str]:
-        path = self.path("prompts", kind, f"{scenario}.json")
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)["instructions"]
-
-    def _harmful_image(self, scenario: str) -> str:
-        d = self.path("images", "harmful", scenario)
-        imgs = sorted(f for f in os.listdir(d) if f.lower().endswith((".jpg", ".jpeg", ".png")))
-        if not imgs:
-            raise FileNotFoundError(f"No harmful image for scenario {scenario}")
-        return self.rel(os.path.join(d, imgs[0]))
-
     def load(self) -> list[Behavior]:
-        eval_dir = self.path("prompts", "eval_all_instructions")
-        scenarios = sorted(os.path.splitext(f)[0] for f in os.listdir(eval_dir) if f.endswith(".json"))
+        image_pools: dict[tuple[str, int], list[str]] = defaultdict(list)
+        with open(self.path("images.jsonl"), encoding="utf-8") as stream:
+            for line in stream:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                key = (row["category"], int(row["class_id"]))
+                image_pools[key].append(self.rel(self.path(row["path"])))
 
         behaviors = []
-        for scenario in scenarios:
-            eval_ins = self._instructions("eval_all_instructions", scenario)
-            mm_ins = self._instructions("all_instructions", scenario)
-            ann_ins = self._instructions("all_instructions_harmful_annotated", scenario)
-            assert len(eval_ins) == len(mm_ins) == len(ann_ins), f"misaligned prompts in {scenario}"
-            harmful_image = self._harmful_image(scenario)
-
-            for i, (orig, mm, ann) in enumerate(zip(eval_ins, mm_ins, ann_ins)):
-                m = _HARMFUL_RE.search(ann)
-                keyword = m.group(1) if m else None
-                behaviors.append(
-                    Behavior(
-                        behavior_id=f"advbenchm_{scenario}_{i:03d}",
-                        dataset=self.name,
-                        instruction=orig,
-                        eval_type=EvalType.HARMFUL,
-                        category=scenario,
-                        category_orig=scenario,
-                        keyword=keyword,
-                        images=[harmful_image],
-                        meta={
-                            "scenario": scenario,
-                            "index": i,
-                            "multimodal_prompt": mm,       # JOOD image-mix prompt body
-                            "annotated_prompt": ann,       # JOOD text-mix prompt body (with <HARMFUL>)
-                        },
-                    )
-                )
+        with open(self.path("instructions.jsonl"), encoding="utf-8") as stream:
+            for line in stream:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                key = (row["category"], int(row["class_id"]))
+                images = image_pools.get(key)
+                if not images:
+                    raise ValueError(f"AdvBenchM: no category image pool for {key}")
+                association = row["image_association"]
+                if association != "category_pool_not_one_to_one":
+                    raise ValueError(f"AdvBenchM: unsupported image association {association!r}")
+                behaviors.append(Behavior(
+                    behavior_id=row["id"].replace("/", "_"),
+                    dataset=self.name,
+                    instruction=row["instruction"],
+                    target=row.get("target"),
+                    eval_type=EvalType.HARMFUL,
+                    category=row["category"],
+                    category_orig=row["category"],
+                    images=list(images),
+                    meta={
+                        "upstream_id": row["id"],
+                        "class_id": int(row["class_id"]),
+                        "source_csv": row["source_csv"],
+                        "source_record_index": row["source_record_index"],
+                        "image_pool": self.rel(self.path(row["image_pool"])),
+                        "image_association": association,
+                    },
+                ))
         return behaviors

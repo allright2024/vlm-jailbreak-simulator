@@ -43,8 +43,8 @@ class DeltaJPAttack(Attack):
     official_repo = "https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model"
     official_commit = "fd98910"
     # The upstream attack fits one class-specific delta with 25/5 prompt and
-    # 10/10 image splits.  The bundled AdvBenchM has one image per class, so
-    # this universal cross-class port is necessarily an adaptation.
+    # 10/10 image splits. This port fits a cross-class universal delta and
+    # uses the first catalog image from each behavior's category pool.
     algorithm_fidelity = "adapted"
     requires_surrogate = True
     requires_images = True  # delta is added to the behavior's own image

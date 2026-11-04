@@ -42,7 +42,7 @@ Paths are relative to `data/`.
 | Dataset | Path | Contents |
 | --- | --- | --- |
 | AdvBench | `benchmarks/advbench/harmful_behaviors.csv` | 520 instructions |
-| AdvBench-M original release | `benchmarks/AdvBenchM/` | `instructions.jsonl`, `images.jsonl` and `dataset/` |
+| AdvBenchM | `benchmarks/AdvBenchM/` | 246 question records, 160 category-pool images; `instructions.jsonl`, `images.jsonl`, `dataset/` |
 | HADES | `benchmarks/HADES/` | `hades.csv` and `images/` |
 | MM-SafetyBench | `benchmarks/MM-SafetyBench/` | Scenario JSONs and SD/SD_TYPO/TYPO images |
 | SafeBench | `benchmarks/SafeBench/safebench.csv` | 500 questions |
@@ -73,10 +73,12 @@ retain that limitation; no missing images or pairings are invented.
 
 `method_assets/JOOD/` holds the complete former `jood_subset/`: 170 evaluation
 questions in seven categories, seven representative harmful images and ten
-mixing assets. To preserve historical experiments, the existing CLI dataset
-name `AdvBenchM` still reads this JOOD subset. Reorganizing files does not replace
-that evaluation set with the original release. The `CS-DJ` dataset loader also
-continues reading its method-specific instruction set under method assets.
+mixing assets. Use `--dataset AdvBenchM` for the original 246-record benchmark
+and `--dataset JOOD` for this separate 170-question subset. The original loader
+keeps all 20 catalog images per category as a pool in `Behavior.images`, with
+`meta.image_association=category_pool_not_one_to_one`; it preserves duplicate
+question records and released targets. The `CS-DJ` loader reads its method-specific
+instruction set under method assets.
 
 ## Download layout and migration
 
