@@ -38,14 +38,12 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 **실험 설정:** 기존 재현 실험의 설정은
 [설정 안내](configs/experiments/reproduction_settings/README.md)에 정리했습니다.
-전용 재현 실행기와 결과 모음은 저장소에서 제외했습니다.
 최신 [5개 방법·3,000개 조합 데이터 구성](FIVE_METHOD_DATASET.md)은 JOOD 이미지 MixUp을
 사용하며, 생성 완료와 타깃 응답·ASR 평가 완료를 구분합니다.
 
 이 문서는 코드 구조, 데이터 로딩, 단일 공격, 방어,
-공격 조합 생성 및 평가 실행 방법을 정리합니다. 데이터·모델 가중치는 별도 준비하며,
-아래 목록은 **코드의 지원 범위**이지 모든 조합의 실행 성공이나 논문 성능 재현을 뜻하지 않습니다.
-실험별 재현 수준은 설정과 생성된 manifest를 함께 확인해야 합니다.
+공격 조합 생성 및 평가 실행 방법을 정리합니다. 데이터·모델 가중치는 별도로 준비합니다.
+실험 설정과 실행 정보는 생성된 manifest에서 확인할 수 있습니다.
 
 - [1. Repository layout](#1-repository-layout)
 - [2. Installation and environment](#2-installation-and-environment)
@@ -251,24 +249,21 @@ data/
 
 AdvBench-M 원본 공개본은 246개 질문 레코드와 160장 이미지의 범주별 풀입니다.
 JOOD의 170문항·대표 이미지·혼합용 이미지는 `method_assets/JOOD/`에 따로 보관합니다.
-이번 변경은 저장 위치만 분리합니다. 기존 CLI 이름 `--dataset AdvBenchM`은
-JOOD의 170문항을 계속 읽으며, 원본 공개본의 246문항으로 자동 전환하지 않습니다.
-두 구성을 같은 평가 데이터로 집계하지 마세요.
+CLI 이름 `--dataset AdvBenchM`은 `method_assets/JOOD/`의 170문항을 읽습니다.
+원본 공개본과 JOOD 부분집합은 각각의 데이터 구성으로 관리합니다.
 
 ### Download and extract
 
 새 `data.zip`에는 위의 `benchmarks/`와 `method_assets/` 구조가 들어 있습니다.
-**공식 MML replay용 `method_assets/MML/`은 기본 ZIP에서 제외하고,
-단어 치환 생성에 필요한 `method_assets/nltk_data/`는 유지합니다.**
-MML을 직접 생성하는 조합 모드는 공식 MML 이미지 대신 이 NLTK 태거를 사용합니다.
+MML 단어 치환 생성과 조합 모드에서 사용하는 NLTK 태거는
+`method_assets/nltk_data/`에 포함됩니다.
 공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
 `data/method_assets/MML/`에 별도로 배치하세요.
 
 [Google Drive의 기존 data.zip](https://drive.google.com/file/d/1z4Tw-D7GaQSGwhG86T0p2cJhsQxqCB-i/view?usp=drive_link)은
 이전 평면 구조의 배포본입니다. 기존 ZIP을 사용하면 압축 해제 후 아래 이전 명령을 실행하세요.
 이미 새 구조인 데이터에는 이전 명령을 다시 실행해도 파일을 옮기지 않습니다.
-기존 ZIP에 AdvBench-M 원본 공개본이 없다면 이전 명령이 이를 새로 다운로드하지는 않습니다.
-원본까지 포함한 새 ZIP을 사용하거나 [공식 데이터 출처](https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model/tree/fd98910ae4075fe587a1944095c00660aa24cc54/dataset)를
+AdvBench-M 원본은 새 ZIP을 사용하거나 [공식 데이터 출처](https://github.com/abc03570128/Jailbreaking-Attack-against-Multimodal-Large-Language-Model/tree/fd98910ae4075fe587a1944095c00660aa24cc54/dataset)를
 참고해 `benchmarks/AdvBenchM/`에 별도로 준비하세요.
 다운로드 파일과 압축 해제본을 함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
 
@@ -363,7 +358,7 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 
 ## 4. Jailbreak attacks
 
-[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 11개입니다.
+[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 9개입니다.
 기본 설정 경로는 `configs/attacks/<CLI 이름>.yaml`이며,
 실행 시 `--config`로 다른 프로필을 명시할 수 있습니다.
 
@@ -379,25 +374,21 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 | `VisualAdv` | [image_attacks/visual_adv/](image_attacks/visual_adv/) | CE/PGD universal 이미지. 기저 이미지·목표 문장 코퍼스·미분 가능 surrogate | [run_visualadv.sh](attack_scripts/run_visualadv.sh) |
 | `DeltaJP` | [image_attacks/delta_jp/](image_attacks/delta_jp/) | 원본 이미지에 universal delta 적용. 이미지 있는 데이터셋과 학습 분리 필요 | [run_deltajp.sh](attack_scripts/run_deltajp.sh) |
 
-`JailBound`는 이름과 달리 **공격 방법론**이며 방어 목록에 포함하지 않습니다.
-`multi_attacks/` 아래에 있다는 것만으로 통합 실행이 지원되는 것은 아닙니다.
-위 표는 실제 registry 기준입니다.
-
 ### Configs and reproduction scope
 
 CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사용합니다.
 다른 공격에는 `*_official.yaml`, transfer 등 별도 프로필을 제공합니다.
 특히 다음은 구분해야 합니다.
 
-- JPS 기본 설정이 요구하는 upstream `advbench_subset.csv`와 `clean.jpeg`는
-  upstream 배포에 없어 외부에서 준비해야 합니다. 조합용 대체 설정과 동일하지 않습니다.
+- JPS 기본 설정에 필요한 `advbench_subset.csv`와 `clean.jpeg`는 별도로 준비합니다.
+  조합 모드의 자산 설정은 effective config에서 확인할 수 있습니다.
 - CS-DJ는 CC3M 이미지 풀·공식 폰트가 필요합니다.
-- MML replay는 기본 ZIP에서 제외된 공식 이미지·메타데이터와 hash-pinned upstream
-  `const.py`를 별도로 준비해야 합니다. [준비 안내](multi_attacks/mml/README.md)를 참고하세요.
-- JailBound는 저자 코드가 없는 논문 기반 구현으로 LLaVA-1.5, pooling,
-  suffix 목적함수 등에 명시적 대체가 있습니다. 항상 adapted이며 공식 코드 재현으로 보지 않습니다.
-- `algorithm_fidelity`는 코드의 충실도, `experiment_profile`은 실행 설정입니다.
-  `paper_reproduction`도 공격 생성 측 조건이며 대상 모델·judge까지 포함한 논문 수치 재현 보장은 아닙니다.
+- MML replay에 필요한 공식 이미지·메타데이터와 hash-pinned upstream `const.py`는
+  [준비 안내](multi_attacks/mml/README.md)에 따라 별도로 준비합니다.
+- JailBound는 논문 기반 adapted 구현이며 LLaVA-1.5, pooling, suffix 목적함수의
+  구체적인 설정을 manifest에 기록합니다.
+- `algorithm_fidelity`는 코드의 충실도, `experiment_profile`은 실행 설정,
+  `paper_reproduction`은 공격 생성 측 재현 조건을 기록합니다.
 
 각 변경점·upstream revision은 [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 있습니다.
 실행 시 `run_manifest.json`의 실제 resolved config와 lineage까지 확인하세요.
@@ -440,7 +431,6 @@ Target은 생성된 공격을 **평가할 모델**, surrogate는 공격 생성 �
 | `internvl3_2b`, `internvl3_8b` | `OpenGVLab/InternVL3-{2B,8B}-hf` |
 | `gpt-4o-mini`, `gpt-4o`, `gpt-4o-2024-08-06`, `gpt-4-turbo-2024-04-09` | OpenAI API |
 
-위 API 이름은 코드 등록값이며 현재 서비스 가용성을 보장하지 않습니다.
 전체 alias는 [core/targets/__init__.py](core/targets/__init__.py)를 참고하세요.
 
 ```bash
@@ -585,29 +575,26 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 - **AdaShield:** S는 공식 프롬프트와 `query + shield + query` 배치를 유지합니다.
   A inference는 [예제 설정](configs/defense_configs/AdaShield-A.example.yaml)과
   upstream refinement의 `final_table.csv`가 필요합니다.
-  공개 저장소에 해당 prompt pool이 없어 fresh checkout만으로 A 전체 실험을 재현할 수 없습니다.
 - **AsD:** 공식 패치 SHA-256을 확인하고 seed 42, 이미지 면적 25%, alpha 0.7을 사용합니다.
   입력 변환이지 차단 detector가 아니므로 `blocked=false`가 정상일 수 있습니다.
 - **JailGuard:** PL 정책(RR/BL/RP)으로 변형 8개, 응답 앞 100자,
   spaCy 유사도/KL threshold 0.025를 사용합니다.
   통과한 입력은 원본에 대한 후속 질의 1회가 추가됩니다.
-  setup의 `en_core_web_md`가 필요하며 `en_core_web_sm`만으로 대체하지 않습니다.
+  setup으로 설치하는 `en_core_web_md`를 사용합니다.
 - **CIDER:** LLaVA-1.5 target과 약 2.21 GB의 공식 guided-diffusion 체크포인트를 사용합니다.
   denoising 0/50/…/350, threshold `-0.003936767578125`를 사용합니다.
-  VisualAdv/DeltaJP 같은 최적화 perturbation이 주 위협 모델이며 FigStep 성능과 동일시하지 않습니다.
+  주 위협 모델은 VisualAdv/DeltaJP 같은 최적화 perturbation입니다.
 
-공식 알고리즘을 이식했더라도 simulator의 HF LLaVA-1.5-7B는
-각 논문의 원래 runtime·모델 크기와 다를 수 있습니다.
-전체 논문 수치 재현을 주장하지 않으며 세부 차이는 [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 기록합니다.
+방어별 upstream revision, 모델·runtime 설정과 재현 범위는
+[OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 정리했습니다.
 
 ## 8. Composed jailbreak generation
 
 최신 3,000개 생성 워크플로는 [FIVE_METHOD_DATASET.md](FIVE_METHOD_DATASET.md)를 참고하세요.
-FigStep, CS-DJ, MML, JOOD, JPS의 18개 조합이며, 이 데이터 구성은 이번 삭제의 영향을 받지 않습니다.
+FigStep, CS-DJ, MML, JOOD, JPS의 18개 조합으로 구성합니다.
 
-별도 일반 조합 엔진의 [v3 설정](configs/compositions/jailbreak_dataset_v3.yaml)은
-삭제된 방법을 포함한 레시피를 제외해 **8개 조합, 최종 1,450개 / 후보 1,740개**로 정리했습니다.
-기존 레시피 ID와 남은 조합의 수량은 유지합니다.
+일반 조합 엔진의 [v3 설정](configs/compositions/jailbreak_dataset_v3.yaml)은
+**8개 조합, 최종 1,450개 / 후보 1,740개**로 구성합니다.
 
 | ID | 적용 순서 | 최종 수량 |
 | --- | --- | ---: |
@@ -636,7 +623,7 @@ python -m core.validation.composed_dataset runs/composed_jailbreak_pruned_pilot
 소수 입력에서도 설정된 HADES·JPS·JailBound 최적화 루프를 수행합니다.
 JPS는 `configs/attacks/JPS.yaml`의 학습 CSV와 초기 이미지를 준비해야 합니다.
 
-그룹 실행은 기존 이름의 `attack_scripts/run_composed_dataset_3000.sh`,
+그룹 실행은 `attack_scripts/run_composed_dataset_3000.sh`,
 백그라운드 실행은 `run_composed_dataset_3000_nohup.sh`를 사용합니다.
 스크립트 이름과 별개로 현재 YAML의 수량을 따르며, 기본 출력은
 `runs/composed_jailbreak_pruned_20261103`입니다. `CONFIG`, `OUTPUT_ROOT`,
@@ -644,7 +631,6 @@ JPS는 `configs/attacks/JPS.yaml`의 학습 CSV와 초기 이미지를 준비해
 최신 5개 방법·3,000개 생성기와 이 일반 조합 실행기는 별개의 워크플로입니다.
 
 후보 체크포인트는 10회마다 저장하며 설정·입력·코드 해시가 일치해야 재개합니다.
-학습 중 optimizer 상태의 매 step 복원은 지원하지 않습니다.
 `nohup` 실행은 SSH·VS Code 종료 후에도 유지되지만 서버 재시작을 견디지는 않습니다.
 
 모든 조합 결과는 `adapted_composition`, `paper_reproduction: false`로 기록합니다.
