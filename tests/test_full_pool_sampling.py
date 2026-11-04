@@ -10,6 +10,7 @@ from core.schema import Behavior, EvalType
 class FullPoolSamplingTests(unittest.TestCase):
     def setup_plan(self):
         config, recipes = load_config("configs/compositions/five_methods_3000.yaml")
+        config["sources"].update({"balance": "equal", "sampling": "full_pool_cycles"})
         names = config["sources"]["datasets"]
         pools = {
             name: [Behavior(f"{name}_{i}", name, f"{name} unique question {i}",

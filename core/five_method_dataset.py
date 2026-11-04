@@ -70,10 +70,12 @@ SUPPORTED_SOURCES = ("SafeBench", "HADES", "MM-SafetyBench")
 
 def source_names(config):
     names = list(config.get("sources", {}).get("datasets", ["SafeBench"]))
-    if config.get("sources", {}).get("balance", "equal") != "equal":
-        raise ValueError("sources.balance must be equal")
-    if config.get("sources", {}).get("sampling", "minimum_shared_pool") not in {
-            "minimum_shared_pool", "full_pool_cycles"}:
+    sampling = config.get("sources", {}).get("sampling", "minimum_shared_pool")
+    balance = config.get("sources", {}).get("balance", "equal")
+    if balance != ("proportional" if sampling == "all_records_once" else "equal"):
+        raise ValueError("sources.balance must match the sampling policy")
+    if sampling not in {
+            "minimum_shared_pool", "full_pool_cycles", "all_records_once"}:
         raise ValueError("unsupported sources.sampling")
     if (not names or len(set(names)) != len(names)
             or not set(names) <= set(SUPPORTED_SOURCES)):
@@ -193,6 +195,8 @@ def _full_pool_plans(config, recipes, owned, stats, quotas):
 def select_source_parents(config, recipes, pools, training_keys):
     from collections import Counter, defaultdict
     names = source_names(config)
+    if config.get("sources", {}).get("sampling") == "all_records_once":
+        return _all_record_plans(config, recipes, pools, training_keys)
     seed = config["seed"]
     quotas = recipe_source_quotas(recipes, names)
     needs = {name: max(counts[name] for counts in quotas.values()) for name in names}
@@ -279,6 +283,149 @@ def select_source_parents(config, recipes, pools, training_keys):
     return parents, plans, metadata
 
 
+def _all_record_plans(config, recipes, pools, training_keys):
+    """Cover every original record before drawing proportional extra inputs."""
+    from collections import Counter, defaultdict, deque
+    import random
+
+    names = source_names(config)
+    total = sum(recipe.count for recipe in recipes)
+    raw = [behavior for name in names for behavior in pools[name]]
+    if not raw or any(not pools[name] for name in names):
+        raise ValueError("all-record sampling requires nonempty source pools")
+    if len(raw) > total:
+        raise ValueError(f"{len(raw)} original records exceed the {total}-input budget")
+    if len({b.behavior_id for b in raw}) != len(raw):
+        raise ValueError("source record IDs must be distinct across benchmarks")
+    if any(not instruction_key(b.instruction) for b in raw):
+        raise ValueError("all-record sampling cannot drop an empty original instruction")
+    overlap = [b.behavior_id for b in raw if instruction_key(b.instruction) in training_keys]
+    if overlap:
+        raise ValueError("JPS training overlaps source records; provide disjoint training assets")
+
+    def ordered_pool(name, cycle):
+        groups = defaultdict(list)
+        for behavior in pools[name]:
+            groups[behavior.category or "__uncategorized__"].append(behavior)
+        rng = random.Random(json_hash([config["seed"], "all_records", name, cycle]))
+        categories = sorted(groups)
+        rng.shuffle(categories)
+        for group in groups.values():
+            group.sort(key=lambda b: b.behavior_id)
+            rng.shuffle(group)
+        ordered = []
+        while any(groups.values()):
+            for category in categories:
+                if groups[category]:
+                    ordered.append(groups[category].pop())
+        return deque(ordered)
+
+    # Weighted fair scheduling spreads every complete source pool over recipes.
+    queues = {name: ordered_pool(name, 0) for name in names}
+    served, sequence = Counter(), []
+    for index in range(len(raw)):
+        available = [name for name in names if queues[name]]
+        name = max(available, key=lambda n: (
+            (index + 1) * len(pools[n]) - served[n] * len(raw), -names.index(n)))
+        sequence.append(queues[name].popleft())
+        served[name] += 1
+    plans, offset = {}, 0
+    for recipe in recipes:
+        plans[recipe.id] = sequence[offset:offset + recipe.count]
+        offset += recipe.count
+
+    # Preserve duplicate source rows, assigning matching text different recipes.
+    normalized = {rid: Counter(instruction_key(b.instruction) for b in rows)
+                  for rid, rows in plans.items()}
+    for recipe in recipes:
+        rid = recipe.id
+        for index, behavior in enumerate(plans[rid]):
+            key = instruction_key(behavior.instruction)
+            if normalized[rid][key] <= 1:
+                continue
+            swapped = False
+            for other in recipes:
+                oid = other.id
+                if oid == rid or normalized[oid][key]:
+                    continue
+                for candidate_index, candidate in enumerate(plans[oid]):
+                    candidate_key = instruction_key(candidate.instruction)
+                    if candidate.dataset != behavior.dataset or normalized[rid][candidate_key]:
+                        continue
+                    plans[rid][index], plans[oid][candidate_index] = candidate, behavior
+                    normalized[rid][key] -= 1
+                    normalized[rid][candidate_key] += 1
+                    normalized[oid][candidate_key] -= 1
+                    normalized[oid][key] += 1
+                    swapped = True
+                    break
+                if swapped:
+                    break
+            if not swapped:
+                raise ValueError("cannot assign duplicate original text to distinct recipes")
+
+    extra = total - len(raw)
+    extra_counts = {name: extra * len(pools[name]) // len(raw) for name in names}
+    remainder = extra - sum(extra_counts.values())
+    ranking = sorted(names, key=lambda n: (-(extra * len(pools[n]) % len(raw)), names.index(n)))
+    for name in ranking[:remainder]:
+        extra_counts[name] += 1
+    remaining = dict(extra_counts)
+    extras = {name: ordered_pool(name, 1) for name in names}
+    usage = Counter(b.behavior_id for b in raw)
+    for recipe in recipes:
+        rid = recipe.id
+        while len(plans[rid]) < recipe.count:
+            candidates = [name for name in names if remaining[name]]
+            name = max(candidates, key=lambda n: (remaining[n], -names.index(n)))
+            for _ in range(len(extras[name])):
+                behavior = extras[name].popleft()
+                key = instruction_key(behavior.instruction)
+                if not normalized[rid][key] and usage[behavior.behavior_id] == 1:
+                    break
+                extras[name].append(behavior)
+            else:
+                raise ValueError("cannot resample without a repeated question/recipe pair")
+            plans[rid].append(behavior)
+            normalized[rid][key] += 1
+            usage[behavior.behavior_id] += 1
+            remaining[name] -= 1
+    if any(remaining.values()):
+        raise ValueError("unassigned proportional extra samples")
+    flattened = [b for recipe in recipes for b in plans[recipe.id]]
+    if len({b.behavior_id for b in flattened[:len(raw)]}) != len(raw):
+        raise ValueError("resampling started before every original record was covered")
+    if max(usage.values()) > 2:
+        raise ValueError("all-record profile permits at most two uses per record")
+    stats = {}
+    for name in names:
+        rows = pools[name]
+        stats[name] = {
+            "loaded": len(rows), "records_in_pool": len(rows),
+            "harmful": sum(b.eval_type == EvalType.HARMFUL for b in rows),
+            "eval_type_counts": dict(Counter(b.eval_type.value for b in rows)),
+            "training_excluded": 0, "filtered_records": 0,
+            "pool_sha256": json_hash([b.to_dict() for b in rows]),
+            "selected_parents": len(rows),
+            "selected_categories": dict(Counter(b.category for b in rows)),
+            "sampled_inputs": len(rows) + extra_counts[name],
+            "draws_per_parent": {str(k): v for k, v in sorted(Counter(usage[b.behavior_id] for b in rows).items())},
+        }
+    metadata = {
+        "datasets": names, "selection_policy": "all_records_once_then_resample",
+        "assignment_policy": "one_recipe_per_sampled_question",
+        "coverage_unit": "original_dataset_record_id", "eval_type_policy": "all",
+        "resampling": "only_after_all_source_records_covered",
+        "deduplication": "preserve_all_original_records", "jps_training_excluded": True,
+        "pools": stats, "unique_parents": len(raw),
+        "unique_instructions": len({instruction_key(b.instruction) for b in raw}),
+        "total_draws": total, "resampled_draws": extra,
+        "recipe_source_counts": {r.id: dict(Counter(b.dataset for b in plans[r.id])) for r in recipes},
+        "full_source_counts": {name: len(pools[name]) + extra_counts[name] for name in names},
+    }
+    return raw, plans, metadata
+
+
 def plan_jood_variants(config, recipes, parent_plans, harmless_count):
     import random
     weights = mixup_weights(config)
@@ -299,6 +446,44 @@ def plan_jood_variants(config, recipes, parent_plans, harmless_count):
                 "source_weight": weights[wi], "harmless_index": hi,
             }
             ordinal += 1
+    if config.get("sources", {}).get("sampling") == "all_records_once":
+        # Swapping complete variants within a recipe preserves all global and
+        # recipe-level distributions while covering every source/weight/image.
+        from collections import Counter
+        by_recipe = {r.id: [(r.id, b.behavior_id) for b in parent_plans[r.id]]
+                     for r in recipes if "JOOD" in r.methods}
+        source = {(r.id, b.behavior_id): b.dataset for r in recipes
+                  for b in parent_plans[r.id] if "JOOD" in r.methods}
+        def variant(key):
+            row = assignments[key]
+            return row["weight_index"], row["harmless_index"]
+        counts = Counter((source[key], *variant(key)) for key in assignments)
+        for name in source_names(config):
+            for wi in range(len(weights)):
+                for hi in range(harmless_count):
+                    if counts[(name, wi, hi)]:
+                        continue
+                    swapped = False
+                    for keys in by_recipe.values():
+                        donors = [key for key in keys if variant(key) == (wi, hi)
+                                  and source[key] != name and counts[(source[key], wi, hi)] > 1]
+                        if not donors:
+                            continue
+                        receiver = next((key for key in keys if source[key] == name
+                                         and counts[(name, *variant(key))] > 1), None)
+                        if receiver is None:
+                            continue
+                        donor = donors[0]
+                        old, donor_source = variant(receiver), source[donor]
+                        counts[(name, *old)] -= 1
+                        counts[(donor_source, wi, hi)] -= 1
+                        assignments[receiver], assignments[donor] = assignments[donor], assignments[receiver]
+                        counts[(name, wi, hi)] += 1
+                        counts[(donor_source, *old)] += 1
+                        swapped = True
+                        break
+                    if not swapped:
+                        raise ValueError("cannot cover every source/JOOD weight/image combination")
     return assignments
 
 
@@ -736,6 +921,7 @@ class DatasetBuilder:
                               "arity": len(recipe.methods), "identity": self.identity,
                               "source_behavior_id": behavior.behavior_id, "source_dataset": behavior.dataset,
                               "source_category": behavior.category,
+                              "source_eval_type": behavior.eval_type.value,
                               "source_record_sha256": json_hash(behavior.to_dict()), "split": split,
                               "source_instruction_hash": json_hash(split_key),
                               "algorithm_fidelity": "adapted_composition", "paper_reproduction": False,

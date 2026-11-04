@@ -52,6 +52,11 @@ def main():
         html.append('<p><strong>벤치마크별 전체 입력:</strong> ' +
                     ' · '.join(f'{escape(k)} {v:,}개' for k,v in sources.items()) + '</p>')
     selection = identity.get("source_selection", {})
+    if selection.get("selection_policy") == "all_records_once_then_resample":
+        html.append(f'<p><strong>전체 레코드 사용:</strong> {selection["unique_parents"]:,}개 원본 레코드를 모두 한 번씩 사용하고, '
+                    f'{selection["resampled_draws"]:,}개 입력만 추가합니다. 조언·의견 범주와 중복 원본 레코드도 보존합니다.</p>')
+        html.append(f'<p>서로 다른 원문: {selection["unique_instructions"]:,}개. 각 레코드는 최대 두 번 사용하고, '
+                    '동일한 질문·조합 쌍은 중복되지 않습니다.</p>')
     if selection.get("selection_policy") == "full_pool_cycles_one_recipe_per_draw":
         html.append('<p><strong>샘플링:</strong> 전체 가용 질문 풀을 사용하고, 질문을 한 번 뽑을 때 조합 하나만 적용합니다. '
                     '각 출처의 전체 풀을 모두 사용한 뒤 필요한 만큼 재샘플링합니다.</p>')

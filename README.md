@@ -307,7 +307,7 @@ AdvBenchM은 8개 범주의 246문항과 160개 이미지를 포함합니다. �
 | `TestCase` | 공격으로 만든 실제 입력 텍스트·이미지, `behavior_id`, 시도 번호 |
 | `Completion` | 대상 모델 응답, 차단 여부, judge 라벨 및 계측 메타데이터 |
 
-평가는 원본 지시문을 기준으로 합니다. 기본 생성 대상은 학습 행을 제외한 `harmful` 유형이며, 전체 유형은 `--eval-types all`로 선택합니다.
+평가는 원본 지시문을 기준으로 합니다. 단일 공격 CLI의 기본 대상은 학습 행을 제외한 `harmful` 유형이며, 전체 유형은 `--eval-types all`로 선택합니다. 8절의 조합 생성은 모든 유형을 포함합니다.
 
 ## 4. Jailbreak attacks
 
@@ -496,15 +496,16 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 ### Sample composition
 
 **질문을 한 번 샘플링할 때 18개 중 조합 하나만 적용합니다.**
-각 벤치마크의 전체 가용 질문 풀을 사용한 뒤 재샘플링합니다.
-원본 질문 2,071개와 재샘플링 929회로 구성하며, 동일한 질문·조합 쌍은 중복되지 않습니다.
+조언·의견 범주와 중복 원문도 원본 레코드별로 보존합니다.
+2,930개 레코드(서로 다른 원문 2,910개)를 모두 한 번씩 사용한 뒤 70개를 추가합니다.
+각 레코드는 최대 두 번 사용하며, 동일한 질문·조합 쌍은 중복되지 않습니다.
 
-| 원본 데이터셋 | 서로 다른 원본 질문 | 생성 샘플 |
-| --- | ---: | ---: |
-| SafeBench | 349 | 1,000 |
-| HADES | 750 | 1,000 |
-| MM-SafetyBench | 972 | 1,000 |
-| 합계 | 2,071 | 3,000 |
+| 원본 데이터셋 | 전체 원본 레코드 | 추가 샘플 | 생성 샘플 |
+| --- | ---: | ---: | ---: |
+| SafeBench | 500 | 12 | 512 |
+| HADES | 750 | 18 | 768 |
+| MM-SafetyBench | 1,680 | 40 | 1,720 |
+| 합계 | 2,930 | 70 | 3,000 |
 
 | ID | 방법 조합 | 샘플 수 |
 | --- | --- | ---: |
@@ -528,8 +529,11 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 | Q02 | MML + CS-DJ + JOOD + JPS | 150 |
 | **합계** | **18개 조합** | **3,000** |
 
-JOOD가 포함된 1,840개 입력은 원본 이미지 가중치 5~95%를 5% 간격으로 배정합니다.
-19개 비율은 각각 96~97회, 무해 이미지 5종은 각각 368회 사용합니다.
+JOOD가 포함된 1,840개 입력의 구성입니다.
+
+- 원본 이미지 가중치: **5%에서 95%까지, 5%p 간격**으로 총 19단계
+- 가중치별 사용 횟수: 각각 **96회 또는 97회**
+- 무해 이미지: **5종**, 각각 **368회** 사용
 
 ### Use the generated samples
 
@@ -540,19 +544,19 @@ unzip -n ../data.zip -d .
 unzip -n ../3000_samples.zip -d .
 ```
 
-샘플은 `runs/five_methods_3000_full_pool_one_recipe_20261104/`에 복원됩니다.
+샘플은 `runs/five_methods_3000_all_records_20261104/`에 복원됩니다.
 
 | 파일 | 내용 |
 | --- | --- |
 | `full/test_cases.jsonl` | 평가할 3,000개 텍스트·이미지 입력 |
-| `full/behaviors.jsonl` | 원본 질문 2,071개와 평가 정보 |
+| `full/behaviors.jsonl` | 원본 레코드 2,930개와 평가 정보 |
 | `preview/`, `index.html` | 별도 미리보기 54개와 갤러리 |
 | `sample_plan.json`, `generation_report.json`, `full/qc.json` | 샘플 배정과 생성 검증 결과 |
 
 `full/`을 `--run_dir`로 지정해 응답과 ASR을 평가합니다. 아래 예시는 다중 이미지 입력을 지원하는 Qwen3-VL을 사용합니다.
 
 ```bash
-RUN_DIR=runs/five_methods_3000_full_pool_one_recipe_20261104/full
+RUN_DIR=runs/five_methods_3000_all_records_20261104/full
 python run_generate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --batch_size 1
 python run_evaluate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --judge_batch_size 1
 ```
@@ -605,8 +609,8 @@ ASR은 판정된 원본 요청 중 하나 이상의 시도가 성공한 비율�
 
 탐지 지표는 공격 입력을 positive로 둡니다. 방어 전후 비교에는 같은 입력·대상 모델·judge·루브릭·시도 예산을 사용합니다.
 
-Convincingness·Specificity는 StrongREJECT 공식 프롬프트로 각각 1~5점을 채점합니다.
-Harmfulness는 별도 0~4점 루브릭을 사용합니다. 전체 채점·방어 비교 절차는 [EVALUATION_METRICS.md](EVALUATION_METRICS.md)를 참고하세요.
+Convincingness·Specificity는 StrongREJECT 공식 프롬프트로 각각 1점부터 5점까지 채점합니다.
+Harmfulness는 별도 루브릭으로 0점부터 4점까지 채점합니다. 전체 채점·방어 비교 절차는 [EVALUATION_METRICS.md](EVALUATION_METRICS.md)를 참고하세요.
 
 ```bash
 python run_grade_responses.py \

@@ -72,6 +72,9 @@ def validate_phase(root, recipes, phase, identity):
                 raise ValueError("sample differs from its planned original benchmark record")
             if row.get("draw_index") is not None and meta.get("source_draw_index") != row["draw_index"]:
                 raise ValueError("sample differs from its question draw assignment")
+            if (manifest["source_selection"].get("eval_type_policy") == "all"
+                    and meta.get("source_eval_type") != parents[case["behavior_id"]]["eval_type"]):
+                raise ValueError("original benchmark evaluation type changed")
             if phase == "preview" and case["behavior_id"] not in plan["preview_behavior_ids"][rid]:
                 raise ValueError("preview parent differs from the declared representative subset")
             source = meta["source_dataset"]
@@ -115,6 +118,25 @@ def validate_phase(root, recipes, phase, identity):
             actual_pairs = {(c["meta"]["recipe_id"], c["behavior_id"]) for c in cases}
             if actual_pairs != set(planned) or len(actual_pairs) != len(cases):
                 raise ValueError("full output does not contain exactly one case per planned question/recipe pair")
+            if declared.get("selection_policy") == "all_records_once_then_resample":
+                expected_ids = set(parents)
+                covered_ids = {case["behavior_id"] for case in cases}
+                ordered = sorted(cases, key=lambda c: c["meta"]["source_draw_index"])
+                if (covered_ids != expected_ids
+                        or len(expected_ids) != sum(p["loaded"] for p in declared["pools"].values())
+                        or {c["behavior_id"] for c in ordered[:len(expected_ids)]} != expected_ids
+                        or {c["meta"]["source_draw_index"] for c in cases} != set(range(len(cases)))):
+                    raise ValueError("not every original record was used before resampling")
+                normalized_pairs = {(c["meta"]["recipe_id"], c["meta"]["source_instruction_hash"]) for c in cases}
+                if len(normalized_pairs) != len(cases):
+                    raise ValueError("duplicate normalized question/recipe pair")
+                for name, stats in declared["pools"].items():
+                    uses = Counter(c["behavior_id"] for c in cases if c["meta"]["source_dataset"] == name)
+                    types = Counter(b["eval_type"] for b in behavior_rows if b["dataset"] == name)
+                    if (len(uses) != stats["loaded"] or max(uses.values()) > 2
+                            or dict(types) != stats["eval_type_counts"]
+                            or {str(k): v for k, v in Counter(uses.values()).items()} != stats["draws_per_parent"]):
+                        raise ValueError(f"incomplete all-record coverage: {name}")
             if declared.get("selection_policy") == "full_pool_cycles_one_recipe_per_draw":
                 for name, stats in declared["pools"].items():
                     draws = Counter(c["behavior_id"] for c in cases if c["meta"]["source_dataset"] == name)
@@ -156,6 +178,7 @@ def validate_phase(root, recipes, phase, identity):
                 raise ValueError("preview contact sheet changed")
     report = {"status": "passed", "n_cases": len(cases), "counts": dict(counts),
               "unique_inputs": len(contents), "n_source_instructions": len(source_splits),
+              "n_source_records": len({case["behavior_id"] for case in cases}),
               "clipped_layouts": 0, "identity": identity,
               "test_cases_sha256": digest(directory / "test_cases.jsonl"),
               "manifest_sha256": digest(manifest_path)}
@@ -167,6 +190,11 @@ def validate_phase(root, recipes, phase, identity):
                            for name in source_counts},
                        "recipe_source_counts": {k: dict(v) for k, v in recipe_sources.items()},
                        "source_categories": {k: dict(v) for k, v in source_categories.items()}})
+        if manifest["source_selection"].get("eval_type_policy") == "all":
+            report.update({"eval_type_policy": "all",
+                           "source_eval_type_counts": dict(Counter(b["eval_type"] for b in behavior_rows)),
+                           "resampled_draws": len(cases) - len(behavior_rows),
+                           "all_original_records_covered": phase == "full" and len(behavior_rows) == len(parents)})
     if manifest.get("jood"):
         report.update({"jood_image_mixed_cases": sum(jood_counts.values()),
                        "jood_counts": dict(jood_counts), "jood_harmless_images": dict(harmless_counts),
@@ -236,7 +264,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["preview", "review-preview", "full", "validate"])
     parser.add_argument("--config", default="configs/compositions/five_methods_3000.yaml")
-    parser.add_argument("--output", default="runs/five_methods_3000_full_pool_one_recipe_20261104")
+    parser.add_argument("--output", default="runs/five_methods_3000_all_records_20261104")
     parser.add_argument("--reuse-from", help="Completed source run whose verified pre-JOOD renders are reused")
     parser.add_argument("--validate-phase", choices=["preview", "full"], default="full")
     parser.add_argument("--review-note", help="Visual observations after inspecting all 18 contact sheets")

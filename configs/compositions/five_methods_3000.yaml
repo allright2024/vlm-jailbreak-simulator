@@ -1,4 +1,4 @@
-# Sample from full benchmark pools, assigning one recipe to each question draw.
+# Cover every source record once, then add 70 draws; one recipe per input.
 name: five_methods_3000
 seed: 20261104
 preview_per_recipe: 3
@@ -152,5 +152,5 @@ sources:
   - SafeBench
   - HADES
   - MM-SafetyBench
-  balance: equal
-  sampling: full_pool_cycles
+  balance: proportional
+  sampling: all_records_once
