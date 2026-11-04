@@ -22,7 +22,9 @@ unzip -tq ../3000_samples.zip
 unzip -n ../3000_samples.zip -d .
 ```
 
-입력 자산은 `data/`, 생성 샘플은 `runs/`에 복원됩니다.
+`data.zip`은 `data/benchmarks/`와 `data/method_assets/`로 복원됩니다.
+벤치마크 원본은 전자에, 방법론별 생성 자산은 후자에 둡니다. 생성 샘플은 `runs/`에 복원됩니다.
+폴더별 내용은 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
 ## 5개 방법 · 3,000개 입력
 
@@ -46,7 +48,7 @@ JOOD 원본 이미지 가중치는 0.05~0.95의 19단계입니다. JOOD 입력 1
 
 준비 경로는 데이터 루트의 `benchmarks/{SafeBench,HADES,MM-SafetyBench}/`,
 `method_assets/CS-DJ/`, `method_assets/JOOD/images/harmless/`,
-`method_assets/nltk_data/`입니다. JPS 이미지·steer prompt·학습 CSV는 YAML의
+`method_assets/nltk_data/`, `method_assets/fonts/`입니다. JPS 이미지·steer prompt·학습 CSV는 YAML의
 `jps.source_run`에서 검증된 자산을 읽습니다.
 실행 전에 [환경 설치](README.md#2-installation-and-environment)를 완료하세요.
 
