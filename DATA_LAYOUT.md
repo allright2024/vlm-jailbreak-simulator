@@ -1,5 +1,11 @@
 # Benchmark inputs and method assets
 
+Download `data.zip` (benchmark inputs and method assets) from the
+[shared Google Drive folder](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link). The same folder also contains
+`3000_samples.zip`: 3,000 samples generated through method composition and decomposition.
+Extract the input bundle as `data/` and the generated samples as `runs/` at the repository root.
+See the [composition guide](COMPOSED_GENERATION.md) for sample usage.
+
 Benchmark inputs and reusable method resources are stored separately. Neither
 data nor run outputs are tracked by Git. Set `VLM_JAILBREAK_DATA_ROOT` to the
 directory containing both sections, not to either section itself.
@@ -65,10 +71,8 @@ continues reading its method-specific instruction set under method assets.
 
 ## Existing bundles and historical paths
 
-The current Drive link may still supply a flat bundle containing only the JOOD
-subset of AdvBench-M. Migration does not download missing benchmark releases.
-Use the new bundle for the collected original release, or supply those files
-separately under `benchmarks/AdvBenchM/`. After extraction run:
+The shared folder's `data.zip` uses the separated `benchmarks/` and `method_assets/`
+layout described above. To migrate an existing flat data directory, run:
 
 ```bash
 export VLM_JAILBREAK_DATA_ROOT=/path/to/data
