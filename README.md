@@ -545,47 +545,33 @@ bash attack_scripts/run_five_method_dataset.sh validate
 
 ## 9. Evaluation and metrics
 
-`--judge`로 `harmbench`(기본값), `beaver_dam`, `llama_guard`, `mml_clas`를 선택합니다.
-`--judge_model`로 모델을 지정하며, Llama Guard는 모델명 지정이 필수입니다.
+공격은 성공 여부와 응답 품질을, 방어는 탐지 성능과 정상 요청의 성능을 평가합니다.
 
-| 지표군 | 지원 내용 / 필요한 입력 |
-| --- | --- |
-| 공격 성공 | behavior-level ASR, attempt ASR, Pass@k, 예산별 ASR, Wilson 95% CI |
-| 평가 커버리지 | 요청·생성·판정 건수, 미판정·누락, category/eval_type별 ASR, macro·safety-worst ASR |
-| 방어 비교 | 같은 입력의 baseline/defended 결과로 ASR 감소, 조건부 mitigation·regression, exact McNemar |
-| 이진 탐지 | TP/TN/FP/FN, accuracy, precision/recall/F1, FPR/FNR, balanced accuracy, MCC |
-| 연속 score | score가 있을 때 AUROC/AUPRC, FPR@95%TPR, TPR@1%FPR, EER, Brier, ECE |
-| 효율·비용 | 시도·질의·시간·첫 성공까지의 비용, 방어 overhead. 토큰·API 비용·GPU 값은 기록된 경우만 |
-| 추가 비교 | 전이 ASR, judge 일치율·kappa, seed 안정성, text/image/joint ablation, 변형·JPEG/resize 강건성 |
-| 이미지·응답 품질 | L-inf/L2/PSNR/SSIM, 선택적 LPIPS/CLIP. 거절·부분 이행·severity·benign utility는 명시적 주석 필요 |
+### Jailbreak
 
-### Definitions and prerequisites
+| 지표 | 필요한 이유 | 확인하는 질문 |
+| --- | --- | --- |
+| ASR | 공격 효과를 성공 빈도로 비교 | 원래 공격 목표를 얼마나 자주 달성했는가? |
+| Harmfulness | 성공 판정 안에서도 유해성의 정도를 구분 | 생성된 내용이 얼마나 유해한가? |
+| Convincingness | 답변의 논리성과 일관성을 확인 | 내용이 일관되고 설득력 있게 구성되었는가? |
+| Specificity | 일반적인 언급과 구체적인 도움을 구분 | 원래 요청에 얼마나 구체적으로 답했는가? |
+| Contradiction Rate | 거절 문구와 유해한 도움의 동시 제공을 확인 | 거절하면서도 유해한 정보를 제공하는가? |
+| Intent-conditioned ASR | 의도 이해 실패와 이해 후 거절을 구분 | 의도를 이해한 사례 중 얼마나 성공했는가? |
 
-ASR은 판정된 원본 질문 중 하나 이상의 시도가 성공한 비율입니다. 비교할 때 대상·judge·입력·시도 예산을 맞추세요.
+ASR은 판정된 원본 요청 중 하나 이상의 시도가 성공한 비율입니다. Intent-conditioned ASR은 의도를 이해했다고 판정된 사례를 분모로 사용합니다.
 
-탐지 지표는 악성 입력을 positive로 둡니다. `FPR = FP / (FP + TN)`, `FNR = FN / (TP + FN)`이며 FPR 측정에는 검토된 benign 입력이 필요합니다.
+### Jailbreak defense
 
-### Extended report
+| 지표 | 필요한 이유 | 측정 방법 |
+| --- | --- | --- |
+| Detection Success Rate | 공격 탐지의 누락 정도를 확인 | 공격 중 탐지된 비율: `TP / (TP + FN)` |
+| F1 Score | 공격 탐지와 정상 입력 오탐을 함께 고려 | 공격·정상 입력에서 Precision과 Recall의 조화평균 |
+| Over-defense Rate | 정상 요청까지 차단하는 과잉 방어를 확인 | 정상 입력 중 잘못 차단하거나 거절한 비율 |
+| Benign Performance | 정상 요청에 대한 답변 정확도·품질을 확인 | 동일 정상 과제의 방어 전후 정답률·평가 점수 비교 |
+| ASR Reduction | 방어가 실제 공격 성공률을 줄이는지 확인 | 동일 공격 입력의 방어 전 ASR − 방어 후 ASR |
+| Harmfulness Reduction | 방어 후 남은 유해 정보의 정도를 확인 | 동일 judge·루브릭으로 방어 전후 유해성 점수 비교 |
 
-앞의 baseline과 AdaShield 결과를 비교하는 예입니다.
-
-```bash
-python run_extended_metrics.py \
-  --results runs/figstep_safebench/results_llava_v1_5__defense-AdaShield.jsonl \
-  --baseline-results runs/figstep_safebench/results_llava_v1_5.jsonl \
-  --behaviors runs/figstep_safebench/behaviors.jsonl \
-  --output runs/figstep_safebench/extended_metrics.json
-```
-
-추가 분석 옵션입니다.
-
-- `--benign-results`, `--benign-baseline-results`: FPR·benign utility 비교.
-- `--source-results`, `--second-judge-results`: 전이·judge 비교.
-- `--seed-results`, `--variant NAME=PATH`, `--transformed NAME=PATH`: 여러 번 지정 가능.
-- `--text-only-results`, `--image-only-results`: 동일 사례의 modality ablation.
-- `--image-pairs`: reference/candidate 이미지 쌍. LPIPS/CLIP은 별도 패키지·가중치와 opt-in 필요.
-
-전체 옵션은 `python run_extended_metrics.py --help`로 확인합니다.
+탐지 지표는 공격 입력을 positive로 둡니다. 방어 전후 비교에는 같은 입력·대상 모델·judge·루브릭·시도 예산을 사용합니다.
 
 ## 10. Validation
 
