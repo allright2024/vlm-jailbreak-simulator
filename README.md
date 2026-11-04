@@ -65,6 +65,10 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 
 ```text
 vlm-jailbreak-simulator/
+├── data/
+│   ├── benchmarks/             # 벤치마크 원본
+│   └── method_assets/          # 방법론별 생성·최적화 자산
+├── runs/                       # 생성 샘플·응답·평가 결과
 ├── core/
 │   ├── schema.py                    # Behavior / TestCase / Completion
 │   ├── dataset.py, datasets/        # 데이터셋 공통 인터페이스와 로더
@@ -207,32 +211,36 @@ LPIPS·CLIP 유사도에는 모델 가중치도 필요합니다.
 
 ### Benchmark inputs and method assets
 
-`data/`는 다음 두 디렉터리로 관리합니다. 실행 결과는 `runs/<실험명>/`에 저장합니다.
+`data/`는 벤치마크 원본과 방법론 자산을 분리해 관리합니다.
 
-| 디렉터리 | 역할 | 예시 |
-| --- | --- | --- |
-| `data/benchmarks/` | 공격·방어 평가에 사용하는 벤치마크 원본 | AdvBench, AdvBench-M 원본 공개본, HADES, MM-SafetyBench, SafeBench |
-| `data/method_assets/` | 각 방법론의 샘플 생성·최적화·재현에 필요한 입력과 공용 자산 | CS-DJ 이미지 풀, JOOD 부분집합·혼합 이미지, MML 공식 이미지, NLTK 태거 |
+| 경로 | 용도 |
+| --- | --- |
+| `data/benchmarks/` | 평가·샘플 생성의 기준이 되는 벤치마크 원본 |
+| `data/method_assets/` | 공격 샘플 생성·최적화·재현에 필요한 이미지·문장·폰트·공용 도구 |
+| `runs/<실험명>/` | 생성한 샘플·패치, 모델 응답, 평가 결과 |
+
+현재 폴더 구성입니다.
 
 ```text
 data/
 ├── benchmarks/
-│   ├── advbench/
-│   ├── AdvBenchM/                    # 이전 original_release/의 전체 내용
-│   ├── HADES/
-│   ├── MM-SafetyBench/
-│   └── SafeBench/
+│   ├── advbench/                # AdvBench 원본
+│   ├── AdvBenchM/               # AdvBench-M 원본 공개본
+│   ├── HADES/                   # HADES 원본
+│   ├── MM-SafetyBench/          # MM-SafetyBench 원본
+│   └── SafeBench/               # SafeBench 원본
 └── method_assets/
-    ├── CS-DJ/
-    ├── JOOD/                         # 이전 AdvBenchM/jood_subset/의 전체 내용
-    ├── JailbreakInPieces/
-    ├── VisualAdv/
-    ├── nltk_data/
-    └── MML/                          # 공식 replay용 선택 자산, 별도 다운로드
+    ├── CS-DJ/                   # 이미지 풀·지시문·폰트
+    ├── JOOD/                    # JOOD 부분집합·혼합 이미지
+    ├── JailbreakInPieces/       # 고정 입력 이미지
+    ├── MML/                     # 공식 재현 이미지·메타데이터
+    ├── VisualAdv/               # 최적화 목표 문장
+    ├── fonts/                   # 조합 생성용 폰트
+    ├── nltk_data/               # MML 단어 치환용 품사 태거
+    └── provenance/              # 자산 출처·이동 기록
 ```
 
-AdvBench-M 원본 공개본은 246개 질문 레코드와 160장 이미지의 범주별 풀입니다.
-JOOD의 170문항·대표 이미지·혼합용 이미지는 `method_assets/JOOD/`에 따로 보관합니다.
+AdvBench-M 원본은 `data/benchmarks/AdvBenchM/`, 이전 `jood_subset`은 `data/method_assets/JOOD/`에 있습니다.
 `--dataset AdvBenchM`은 JOOD의 170문항을 읽습니다.
 
 ### Download and extract
@@ -241,7 +249,7 @@ JOOD의 170문항·대표 이미지·혼합용 이미지는 `method_assets/JOOD/
 
 | 파일 | 내용 | 압축 해제 위치 |
 | --- | --- | --- |
-| `data.zip` | 벤치마크 원본과 방법론별 생성 자산 | 저장소 루트의 `data/` |
+| `data.zip` | `benchmarks/`와 `method_assets/` | 저장소 루트의 `data/` |
 | `3000_samples.zip` | 조합·분해 방식으로 생성한 3,000개 샘플 | 저장소 루트의 `runs/` |
 
 `data.zip`을 저장소 상위 폴더에 두고 압축을 풉니다.
@@ -261,6 +269,7 @@ python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
 ```
 
 공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라 별도로 준비합니다.
+조합 생성용 폰트는 `python -m core.prepare_five_method_assets`로 준비합니다.
 
 ### Validate the data
 
@@ -271,21 +280,20 @@ python -m core.validation.data --dataset SafeBench --dataset AdvBench --layout-o
 python -m core.validation.data --dataset SafeBench --dataset AdvBench
 ```
 
-### Registered loaders
+### Dataset CLI paths
 
-등록된 데이터셋의 입력 경로와 원본 행 수입니다.
+현재 준비된 데이터의 CLI 이름과 실제 입력 경로입니다. 경로는 `data/` 기준입니다.
 
-| CLI 데이터셋 이름 | 로더 | 주요 입력 경로: 데이터 루트 기준 | 기대 행 수 |
+| CLI 이름 | 입력 구분 | 경로 | 원본 행 수 |
 | --- | --- | --- | ---: |
-| `AdvBench` | [advbench.py](core/datasets/advbench.py) | `advbench/harmful_behaviors.csv` | 520 |
-| `AdvBenchM` | [advbenchm.py](core/datasets/advbenchm.py) | `method_assets/JOOD/` (historical JOOD subset; original release is `benchmarks/AdvBenchM/`) | 170 |
-| `CS-DJ` | [cs_dj.py](core/datasets/cs_dj.py) | `CS-DJ/instructions/*.json` | 750 |
-| `HADES` | [hades.py](core/datasets/hades.py) | `HADES/hades.csv` 및 참조 이미지 | 750 |
-| `HarmBench` | [harmbench.py](core/datasets/harmbench.py) | `HarmBench/harmbench_standard.json` | 200 |
-| `MM-SafetyBench` | [mm_safetybench.py](core/datasets/mm_safetybench.py) | `MM-SafetyBench/` | 1,680 |
-| `SafeBench` | [safebench.py](core/datasets/safebench.py) | `SafeBench/safebench.csv` | 500 |
+| [AdvBench](core/datasets/advbench.py) | 벤치마크 | `benchmarks/advbench/harmful_behaviors.csv` | 520 |
+| [HADES](core/datasets/hades.py) | 벤치마크 | `benchmarks/HADES/hades.csv`, `benchmarks/HADES/images/` | 750 |
+| [MM-SafetyBench](core/datasets/mm_safetybench.py) | 벤치마크 | `benchmarks/MM-SafetyBench/` | 1,680 |
+| [SafeBench](core/datasets/safebench.py) | 벤치마크 | `benchmarks/SafeBench/safebench.csv` | 500 |
+| [AdvBenchM](core/datasets/advbenchm.py) | JOOD 자산 | `method_assets/JOOD/` | 170 |
+| [CS-DJ](core/datasets/cs_dj.py) | CS-DJ 자산 | `method_assets/CS-DJ/instructions/*.json` | 750 |
 
-추가 자산과 경로는 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
+원본 AdvBench-M 공개본과 방법론별 파일 구성은 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
 ### Schema and harmful-only policy
 
