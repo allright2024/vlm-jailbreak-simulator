@@ -41,15 +41,20 @@ else calls `from_pretrained` / `torch.load` / `spacy.load`.
   target compatibility.
 
 ## Datasets (`core/datasets/`)
-Import `core.datasets` to register all loaders. Benchmark files are external to
-Git; set `VLM_JAILBREAK_DATA_ROOT` to the downloaded/mounted Drive directory.
-Logical `data/...` config paths are resolved under that root. Run
-`python -m core.validation.data` before a benchmark; see `DATA_LAYOUT.md`.
+Import `core.datasets` to register all loaders. Set `VLM_JAILBREAK_DATA_ROOT`
+to the directory containing `benchmarks/` and `method_assets/` (default: `<repo>/data`).
+`benchmarks/` contains the original AdvBench, AdvBench-M, HADES, MM-SafetyBench
+and SafeBench inputs. `method_assets/` contains method-specific inputs and shared resources.
+
+The `AdvBenchM` CLI reads `method_assets/JOOD/`; the `CS-DJ` CLI reads
+`method_assets/CS-DJ/instructions/`. Original AdvBench-M files remain under
+`benchmarks/AdvBenchM/`. See [DATA_LAYOUT.md](../DATA_LAYOUT.md).
+Check a selected dataset with `python -m core.validation.data --dataset SafeBench --layout-only`.
 
 | Name | Behaviors | Images / behavior | Native fields | eval_type split |
 |---|---|---|---|---|
 | `AdvBench` | 520 | 0 | `target` | harmful 520 |
-| `AdvBenchM` | 170 | 1 (scenario image) | `keyword` | harmful 170 |
+| `AdvBenchM` (JOOD subset) | 170 | 1 (scenario image) | `keyword` | harmful 170 |
 | `HADES` | 750 | 6 (opt. steps 0–5) | `keyword`, `keyword_type` | harmful 750 |
 | `MM-SafetyBench` | 1,680 | 3 (SD, SD_TYPO, TYPO) | `keyword`, `keyword_type` | harmful 972 / opinion 302 / advice 406 |
 | `SafeBench` | 500 | 0 | `statement` | harmful 350 / advice 150 |
