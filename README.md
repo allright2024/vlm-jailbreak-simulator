@@ -57,8 +57,7 @@ Each category includes recent state-of-the-art jailbreak implementations, enabli
 - [10. Validation](#10-validation)
 - [11. Related documentation](#11-related-documentation)
 
-모든 예제는 저장소 루트에서 실행합니다. GPU 최적화, 가중치 다운로드, 외부 API 호출이
-필요한 명령은 시간·메모리·API 비용을 발생시킬 수 있습니다.
+모든 명령어는 저장소 루트에서 실행합니다.
 
 ## 1. Repository layout
 
@@ -119,11 +118,7 @@ GPU를 확인하고, 사용할 모델에 맞는 GPU 여유 메모리를 확보�
 
 ### Create and install
 
-아래 명령은 저장소 루트에서 **새 환경을 구성할 때** 실행합니다.
-`jb_env`가 이미 사용 중이면 다른 이름의 환경을 만들고, 실행 중인 실험의 패키지는 변경하지 마세요.
-
-`PYTHONNOUSERSITE=1`은 [Python의 사용자 패키지 경로를 비활성화](https://docs.python.org/3.11/using/cmdline.html#envvar-PYTHONNOUSERSITE)하여
-`~/.local`의 다른 버전이 섞이지 않게 합니다. Conda 환경 변수로 저장한 뒤 재활성화합니다.
+Conda 환경을 만들고 필요한 패키지를 설치합니다. 기존 환경을 사용 중이면 이름을 바꾸세요.
 
 ```bash
 conda create -n jb_env python=3.11.11 -y
@@ -143,11 +138,11 @@ python -m pip install \
 python -m pip install --no-build-isolation -r requirements.txt
 ```
 
-PyTorch 설치 순서는 [공식 2.9.1 설치 안내](https://pytorch.org/get-started/previous-versions/#v291)를 따릅니다.
-CLIP은 지정된 Git 커밋에서 빌드하므로 `git`이 필요하고,
-JailGuard의 spaCy 벡터 모델 `en_core_web_md==3.7.1`도 고정된 공개 wheel로 설치합니다.
+CLIP 소스 설치에 `git`이 필요합니다.
 
 ### Verify the environment
+
+설치 버전과 GPU 사용 가능 여부를 확인합니다.
 
 ```bash
 python -m pip check
@@ -176,34 +171,25 @@ print("Environment OK")
 PY
 ```
 
-VS Code·노트북에서도 위 환경의 Python 인터프리터·커널을 선택하고,
-환경 변수를 설정한 뒤에는 기존 커널을 재시작하세요.
-모델 로딩은 [multimodalmodels/loaders.py](multimodalmodels/loaders.py),
-체크포인트 revision은 [multimodalmodels/registry.py](multimodalmodels/registry.py)에서 관리합니다.
+VS Code·노트북에서도 `jb_env`의 Python 인터프리터·커널을 선택하세요.
 
 ### Data, defense assets and optional metrics
 
-데이터는 [3절](#3-dataset-loading), 방어용 이미지·확산 모델 자산은
-[7절](#7-jailbreak-defenses)에 따라 준비합니다.
-MML 단어 치환과 조합 데이터 생성에 필요한 영어 품사 태깅 모델은
-`data.zip`의 `data/method_assets/nltk_data/`에 포함됩니다. 여러 실행이 공유하는 자산이며,
-누락된 경우 아래 명령으로 준비합니다.
+NLTK 태거는 `data.zip`에 포함됩니다. 누락된 경우 아래 명령으로 설치합니다.
 
 ```bash
 export NLTK_DATA="${VLM_JAILBREAK_DATA_ROOT:-$PWD/data}/method_assets/nltk_data"
 python -m nltk.downloader -d "$NLTK_DATA" averaged_perceptron_tagger
 ```
 
-SSIM·LPIPS 이미지 품질 지표를 사용할 때는 다음 패키지를 추가 설치합니다.
-기준 패키지 버전은 `-c requirements.txt`로 유지합니다.
+SSIM·LPIPS 지표를 사용하려면 추가 패키지를 설치합니다.
 
 ```bash
 python -m pip install -c requirements.txt "scikit-image==0.25.2" "lpips==0.1.4"
 python -m pip check
 ```
 
-LPIPS·CLIP 유사도에는 해당 모델 가중치도 필요합니다.
-실제 계산 여부와 옵션은 [9절](#9-evaluation-and-metrics)을 참고하세요.
+LPIPS·CLIP 유사도에는 모델 가중치도 필요합니다.
 
 | 환경 변수 | 용도 |
 | --- | --- |
@@ -215,9 +201,7 @@ LPIPS·CLIP 유사도에는 해당 모델 가중치도 필요합니다.
 | `PYTHONNOUSERSITE` | `1`로 설정하여 사용자 site-packages 혼입 방지 |
 | `NLTK_DATA` | MML 등에서 사용하는 NLTK 자산 경로 |
 
-API 키 설정 형식은 [.env.example](.env.example)을 참고하세요.
-일부 API 컴포넌트는 프로젝트 `.env`를 읽지만, 데이터 루트는 그 자동 로딩에 의존하지 말고
-**Python 프로세스 시작 전에 export**하세요. 방어별 추가 자산 준비는 [7절](#7-jailbreak-defenses)에 있습니다.
+환경 변수는 실행 전에 설정하세요. API 키 형식은 [.env.example](.env.example)을 참고하세요.
 
 ## 3. Dataset loading
 
@@ -249,73 +233,47 @@ data/
 
 AdvBench-M 원본 공개본은 246개 질문 레코드와 160장 이미지의 범주별 풀입니다.
 JOOD의 170문항·대표 이미지·혼합용 이미지는 `method_assets/JOOD/`에 따로 보관합니다.
-CLI 이름 `--dataset AdvBenchM`은 `method_assets/JOOD/`의 170문항을 읽습니다.
-원본 공개본과 JOOD 부분집합은 각각의 데이터 구성으로 관리합니다.
+`--dataset AdvBenchM`은 JOOD의 170문항을 읽습니다.
 
 ### Download and extract
 
-[Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)에서 다음 두 ZIP을 다운로드할 수 있습니다.
+[Google Drive 공유 폴더](https://drive.google.com/drive/folders/1zxLWKwmC8yzDeXKC3Th7CwqjBchQbh4r?usp=drive_link)에서 다운로드합니다.
 
 | 파일 | 내용 | 압축 해제 위치 |
 | --- | --- | --- |
 | `data.zip` | 벤치마크 원본과 방법론별 생성 자산 | 저장소 루트의 `data/` |
 | `3000_samples.zip` | 조합·분해 방식으로 생성한 3,000개 샘플 | 저장소 루트의 `runs/` |
 
-새 `data.zip`에는 위의 `benchmarks/`와 `method_assets/` 구조가 들어 있습니다.
-MML 단어 치환 생성과 조합 모드에서 사용하는 NLTK 태거는
-`method_assets/nltk_data/`에 포함됩니다.
-공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라
-`data/method_assets/MML/`에 별도로 배치하세요.
-
-공유 폴더에서 `data.zip`을 내려받아 저장소 상위 디렉터리의 `../data.zip`에 놓습니다.
-다운로드 파일과 압축 해제본을 함께 보관하려면 최소 3 GB의 여유 공간을 준비하세요.
-
-ZIP에는 최상위 `data/` 폴더가 들어 있습니다. **저장소 루트에서 압축을 해제**하여
-`vlm-jailbreak-simulator/data/`에 배치합니다. `data/` 안에서 다시 압축을 풀어
-`data/data/`가 되지 않도록 주의하세요.
+`data.zip`을 저장소 상위 폴더에 두고 압축을 풉니다.
 
 ```bash
-# vlm-jailbreak-simulator/에서 실행: 공유 폴더에서 내려받은 data.zip 사용
 unzip -tq ../data.zip
 unzip -n ../data.zip -d .
 export VLM_JAILBREAK_DATA_ROOT="$PWD/data"
-
-# 기존 평면 구조를 두 디렉터리로 정리: 새 구조는 그대로 유지
-python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT" --dry-run
-python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
 export NLTK_DATA="$VLM_JAILBREAK_DATA_ROOT/method_assets/nltk_data"
 ```
 
-다른 위치에 압축을 풀었다면 `VLM_JAILBREAK_DATA_ROOT`를 그 안의 `data/` 폴더로 지정하세요.
-이전된 파일의 내용과 기존 실행 기록은 수정하지 않습니다. 이동 기록은
-`method_assets/provenance/data_layout_migration.json`에 남깁니다.
-새 설정은 두 디렉터리 경로를 사용하고, 공통 resolver는 이전 `data/HADES/...`,
-`data/AdvBenchM/jood_subset/...` 같은 설정 경로도 계속 읽습니다.
+기존 평면 구조의 데이터를 사용한다면 아래 명령으로 이전합니다.
+
+```bash
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT" --dry-run
+python -m core.migrate_data_layout --data-root "$VLM_JAILBREAK_DATA_ROOT"
+```
+
+공식 MML 재현 자산은 [MML 준비 안내](multi_attacks/mml/README.md)에 따라 별도로 준비합니다.
 
 ### Validate the data
+
+`--dataset`으로 검사할 데이터셋을 지정합니다. `--layout-only`는 파일 구조만 검사합니다.
 
 ```bash
 python -m core.validation.data --dataset SafeBench --dataset AdvBench --layout-only
 python -m core.validation.data --dataset SafeBench --dataset AdvBench
 ```
 
-`--dataset NAME`을 반복하여 검사할 데이터셋을 선택합니다. 전체 등록 데이터셋의
-자산을 준비한 경우에는 `--dataset`을 생략하여 모두 검사할 수 있습니다.
-공식 AdvBench-M 원본의 파일별 해시와 공개 범위는
-`data/benchmarks/AdvBenchM/{manifest.json,availability.json}`에 기록되어 있습니다.
-방법론별 필수 파일은 [4절](#4-jailbreak-attacks)과 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
-
-[core/paths.py](core/paths.py)는 `data/benchmarks/...`, `data/method_assets/...`를
-`$VLM_JAILBREAK_DATA_ROOT` 아래로 해석합니다. 기본 루트는 `<repo>/data`입니다.
-데이터 루트 밖의 절대 경로는 그대로 사용하고, 그 밖의 상대 경로는 저장소 기준입니다.
-생성 CLI는 필요한 입력과 방법론 자산을 검사하고, 누락 시 생성 전에 실패합니다.
-
 ### Registered loaders
 
-등록 허브는 [core/datasets/__init__.py](core/datasets/__init__.py),
-공통 인터페이스는 [core/dataset.py](core/dataset.py)입니다.
-행 수는 [core/data.py](core/data.py)의 **원본 전체 로드 기대값**이며,
-harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니다.
+등록된 데이터셋의 입력 경로와 원본 행 수입니다.
 
 | CLI 데이터셋 이름 | 로더 | 주요 입력 경로: 데이터 루트 기준 | 기대 행 수 |
 | --- | --- | --- | ---: |
@@ -327,14 +285,11 @@ harmful-only 필터·학습 분리 후 생성할 수 있는 수와는 다릅니�
 | `MM-SafetyBench` | [mm_safetybench.py](core/datasets/mm_safetybench.py) | `MM-SafetyBench/` | 1,680 |
 | `SafeBench` | [safebench.py](core/datasets/safebench.py) | `SafeBench/safebench.csv` | 500 |
 
-`CS-DJ`는 공격 이름인 동시에 데이터셋 등록 이름입니다.
-데이터셋 로딩에 필요한 자산과 공격 최적화에 필요한 추가 자산은 서로 다를 수 있습니다.
-VisualAdv의 최적화 목표 코퍼스는 `data/method_assets/VisualAdv/derogatory_corpus.csv`에 두고,
-기저 이미지는 `data/method_assets/FORCE/clean.jpeg`를 사용합니다.
+추가 자산과 경로는 [DATA_LAYOUT.md](DATA_LAYOUT.md)를 참고하세요.
 
 ### Schema and harmful-only policy
 
-[core/schema.py](core/schema.py)의 세 레코드로 데이터와 실험을 연결합니다.
+데이터와 실험은 다음 레코드로 연결됩니다.
 
 | 레코드 | 역할 |
 | --- | --- |
@@ -342,24 +297,11 @@ VisualAdv의 최적화 목표 코퍼스는 `data/method_assets/VisualAdv/derogat
 | `TestCase` | 공격으로 만든 실제 입력 텍스트·이미지, `behavior_id`, 시도 번호 |
 | `Completion` | 대상 모델 응답, 차단 여부, judge 라벨 및 계측 메타데이터 |
 
-원본 `Behavior.instruction`을 평가 기준으로 유지하며, 공격 과정에서 바뀐 텍스트로
-정답 기준을 바꾸지 않습니다. 원본 하나에서 여러 시도가 생성될 수 있으므로
-Behavior 수와 TestCase 수는 같지 않을 수 있습니다.
-
-Stage 1은 기본적으로 `eval_type=harmful`만 선택합니다.
-SafeBench의 advice, MM-SafetyBench의 advice/opinion 등은 제외하고,
-그다음 공격 학습용 행을 제외한 뒤 `--limit`, `--per_category`를 적용합니다.
-허용 유형·제외 사유·실제 평가 행 수는 `run_manifest.json`에 남깁니다.
-
-`--eval-types all`은 별도의 전체 벤치마크 평가용입니다.
-그 결과를 harmful-instruction 탈옥 셋에 합치지 않습니다.
-advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하지도 않습니다.
+평가는 원본 지시문을 기준으로 합니다. 기본 생성 대상은 학습 행을 제외한 `harmful` 유형이며, 전체 유형은 `--eval-types all`로 선택합니다.
 
 ## 4. Jailbreak attacks
 
-[core/attacks/__init__.py](core/attacks/__init__.py)에 등록된 개별 공격은 8개입니다.
-기본 설정 경로는 `configs/attacks/<CLI 이름>.yaml`이며,
-실행 시 `--config`로 다른 프로필을 명시할 수 있습니다.
+`--attack`으로 실행할 공격을 선택합니다.
 
 | CLI 공격 이름 | 구현 위치 | 생성 방식 및 주요 의존성 | 실행 스크립트 |
 | --- | --- | --- | --- |
@@ -374,25 +316,12 @@ advice/opinion을 benign으로 재라벨링해서 FPR 대조군으로 사용하�
 
 ### Configs and reproduction scope
 
-CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사용합니다.
-다른 공격에는 `*_official.yaml`, transfer 등 별도 프로필을 제공합니다.
-특히 다음은 구분해야 합니다.
-
-- JPS 기본 설정에 필요한 `advbench_subset.csv`와 `clean.jpeg`는 별도로 준비합니다.
-  조합 모드의 자산 설정은 effective config에서 확인할 수 있습니다.
-- CS-DJ는 CC3M 이미지 풀·공식 폰트가 필요합니다.
-- MML replay에 필요한 공식 이미지·메타데이터와 hash-pinned upstream `const.py`는
-  [준비 안내](multi_attacks/mml/README.md)에 따라 별도로 준비합니다.
-- `algorithm_fidelity`는 코드의 충실도, `experiment_profile`은 실행 설정,
-  `paper_reproduction`은 공격 생성 측 재현 조건을 기록합니다.
-
-각 변경점·upstream revision은 [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 있습니다.
-실행 시 `run_manifest.json`의 실제 resolved config와 lineage까지 확인하세요.
+공격 설정은 `configs/attacks/`에서 확인하고 `--config`로 지정합니다.
+필수 자산은 [DATA_LAYOUT.md](DATA_LAYOUT.md), 공식 설정과 재현 범위는 [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)를 참고하세요.
 
 ### Attack wrappers
 
-일반 래퍼는 `PYTHON`, `MODEL`, `DATASETS`, `LIMIT`를 사용하지만
-데이터셋 호환성, 기본 모델, judge와 추가 옵션은 스크립트별로 다릅니다.
+쉘 래퍼는 `PYTHON`, `MODEL`, `DATASETS`, `LIMIT`로 실행 조건을 지정합니다.
 
 | 스크립트 계열 | 추가 옵션 / 주의점 |
 | --- | --- |
@@ -404,10 +333,7 @@ CS-DJ, JOOD, MML, JPS는 공식 설정을 지향하는 단일 기본 YAML을 사
 | [run_transfer.sh](attack_scripts/run_transfer.sh) | VisualAdv/DeltaJP의 Qwen2 surrogate → 별도 target 전이 실행 |
 | [run_jps_full.sh](attack_scripts/run_jps_full.sh), [run_visualadv_full.sh](attack_scripts/run_visualadv_full.sh) | 장시간 프로필과 lineage 검증 캐시 실행 |
 
-환경 변수의 `LIMIT=0`은 보통 래퍼에서 전체 실행을 뜻합니다.
-직접 Python CLI에는 필요한 양의 `--limit`을 지정하거나 옵션을 생략하세요.
-`LIMIT=3` / `--limit 3`은 원본 행 수 제한이지 최적화 iteration 축소가 아닙니다.
-생성만 필요한 경우 아래 Stage 1을 직접 실행하면 대상 모델 질의·평가를 분리할 수 있습니다.
+`LIMIT`는 원본 행 수 제한입니다. 전체 입력은 `LIMIT=0`으로 실행하고, 최적화 반복 수는 YAML에서 조절합니다.
 
 ## 5. Target and surrogate models
 
@@ -436,10 +362,7 @@ python run_generate_completions.py \
 
 ### Surrogate models
 
-VisualAdv, DeltaJP, HADES white-box의 공통 CE 최적화에는
-`llava_v1_5`, `llava_v1_6`, `qwen2_vl_7b`,
-`qwen3_vl_2b`, `qwen3_vl_8b`, `internvl3_2b`, `internvl3_8b`를 선택할 수 있습니다.
-프로필 정의는 [multimodalmodels/surrogates.py](multimodalmodels/surrogates.py)에 있습니다.
+VisualAdv·DeltaJP·HADES white-box의 최적화 모델은 `--surrogate-profile`로 선택합니다.
 
 ```bash
 # 최적화 surrogate 변경: VisualAdv / DeltaJP / HADES white_box 공통 CE 경로
@@ -448,9 +371,7 @@ python run_generate_test_cases.py \
   --surrogate-profile qwen3_vl_2b --save_dir runs/visualadv_qwen3
 ```
 
-공통 CE 프로필은 원본 RGB 텐서를 각 모델의 미분 가능한 전처리에 통과시킵니다.
-JPS는 공통 Qwen2 adapter를 사용합니다.
-CIDER는 LLaVA-1.5 target의 encoder를 사용합니다.
+지원 프로필은 [surrogates.py](multimodalmodels/surrogates.py)를 참고하세요.
 
 ## 6. Single-attack pipeline
 
@@ -462,8 +383,7 @@ Dataset loader → Behavior → Attack → TestCase
 
 ### Stage 1–3 quickstart
 
-소규모 예제로 FigStep 3개 원본을 생성하고 방어 없이 응답·평가합니다.
-대상 모델과 기본 HarmBench judge는 각각 가중치와 실행 자원이 필요합니다.
+FigStep로 SafeBench 원본 3개의 공격 입력을 생성하고, 대상 모델 응답과 ASR을 평가합니다.
 
 ```bash
 # 1. 공격 입력 생성
@@ -482,7 +402,7 @@ python run_evaluate_completions.py \
   --judge_batch_size 1
 ```
 
-주요 출력은 다음과 같습니다. Stage 1만 끝났다면 ASR은 아직 측정되지 않은 상태입니다.
+단계별 출력 파일입니다.
 
 | 파일 | 의미 |
 | --- | --- |
@@ -493,13 +413,9 @@ python run_evaluate_completions.py \
 | `results_<model>.jsonl` | Stage 3 라벨이 붙은 응답 |
 | `asr_results.jsonl` | 기본적으로 **실행 작업 디렉터리**에 append되는 ASR 요약 |
 
-ASR 로그 위치는 Stage 3의 `--asr_results_file`로 바꿀 수 있습니다.
-공격·대상·방어·judge·seed가 다른 실험은 별도 출력 경로로 보존하세요.
-기존 결과 경로를 재사용하면 일반 Stage 2/3 출력이 덮어써질 수 있습니다.
+ASR 요약 경로는 `--asr_results_file`로 지정합니다. 실험마다 출력 폴더를 구분하세요.
 
-MML의 CLAS 판정이 다음 시도를 제어하는 공식 평가 루프는 일반 3단계 평가와 다릅니다.
-공통 Stage 2의 `--protocol mml_official` 옵션이나
-[run_mml.sh](attack_scripts/run_mml.sh)를 사용합니다.
+MML 공식 평가에는 `--protocol mml_official`을 사용합니다.
 
 ```bash
 python run_generate_completions.py --protocol mml_official \
@@ -507,12 +423,8 @@ python run_generate_completions.py --protocol mml_official \
   --model gpt-4o-2024-08-06 --judge_model gpt-4o-mini-2024-07-18
 ```
 
-이 모드는 최대 5회 예산·score-5 조기 종료를 유지하고, completions와 판정된 results,
-ASR/RSR/query 요약을 한 번에 기록합니다. 작은 실험은 Stage 1에서 behavior 수를
-줄인 뒤 `--allow_subset`을 지정합니다. Stage 2의 `--limit`으로 시도 행을 잘라내지 않습니다.
-프로토콜 구현은 [core/protocols/mml.py](core/protocols/mml.py)에 있습니다.
-공식 모드는 baseline 전용이며, 방어 비교는 양쪽 모두 기본 `--protocol standard`와
-동일한 judge·시도 예산을 사용합니다.
+최대 5회 시도하며 score 5에서 종료합니다. 소규모 실행은 Stage 1의 샘플 수를 줄이고 `--allow_subset`을 지정합니다.
+방어 비교에는 `--protocol standard`를 사용합니다.
 
 ## 7. Jailbreak defenses
 
@@ -529,7 +441,7 @@ ASR/RSR/query 요약을 한 번에 기록합니다. 작은 실험은 Stage 1에�
 
 ### Setup and paired evaluation
 
-필요한 방어의 setup만 실행하세요. setup은 자산을 다운로드하거나 패키지를 설치합니다.
+사용할 방어의 자산을 준비합니다.
 
 ```bash
 bash defense_scripts/setup_asd.sh
@@ -537,7 +449,7 @@ bash defense_scripts/setup_cider.sh
 bash defense_scripts/setup_jailguard.sh
 ```
 
-앞 절의 baseline과 **동일 입력**에 AdaShield를 적용하는 예제입니다.
+같은 공격 입력에 AdaShield를 적용하고 결과를 평가합니다.
 
 ```bash
 python run_generate_completions.py \
@@ -553,35 +465,18 @@ python run_evaluate_completions.py \
   --save_path runs/figstep_safebench/results_llava_v1_5__defense-AdaShield.jsonl
 ```
 
-동일한 작업을 래퍼로 실행할 수도 있습니다.
+쉘 래퍼로도 실행할 수 있습니다.
 
 ```bash
 RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
   bash defense_scripts/run_adashield.sh
 ```
 
-방어 래퍼의 공통 변수는 `RUN_DIR`, `MODEL`, `DEFENSE_CONFIG`, `LIMIT`,
-`EVALUATE`, `PYTHON`입니다. 기본 `LIMIT=0`은 전체 입력, `EVALUATE=0`은 응답 생성까지만입니다.
-방어별 결과는 `__defense-<이름>` 파일로 분리됩니다.
-일부 입력·모델 제한이 있으므로 단일 이미지에서 먼저 확인하세요.
+`RUN_DIR`·`MODEL`로 입력과 대상을 지정합니다. `LIMIT=0`은 전체 입력, `EVALUATE=1`은 평가까지 실행합니다.
 
 ### Algorithm and compatibility notes
 
-- **AdaShield:** S는 공식 프롬프트와 `query + shield + query` 배치를 유지합니다.
-  A inference는 [예제 설정](configs/defense_configs/AdaShield-A.example.yaml)과
-  upstream refinement의 `final_table.csv`가 필요합니다.
-- **AsD:** 공식 패치 SHA-256을 확인하고 seed 42, 이미지 면적 25%, alpha 0.7을 사용합니다.
-  입력 변환이지 차단 detector가 아니므로 `blocked=false`가 정상일 수 있습니다.
-- **JailGuard:** PL 정책(RR/BL/RP)으로 변형 8개, 응답 앞 100자,
-  spaCy 유사도/KL threshold 0.025를 사용합니다.
-  통과한 입력은 원본에 대한 후속 질의 1회가 추가됩니다.
-  setup으로 설치하는 `en_core_web_md`를 사용합니다.
-- **CIDER:** LLaVA-1.5 target과 약 2.21 GB의 공식 guided-diffusion 체크포인트를 사용합니다.
-  denoising 0/50/…/350, threshold `-0.003936767578125`를 사용합니다.
-  주 위협 모델은 VisualAdv/DeltaJP 같은 최적화 perturbation입니다.
-
-방어별 upstream revision, 모델·runtime 설정과 재현 범위는
-[OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 정리했습니다.
+방어별 자산·모델 조건은 위 YAML에서 확인하세요. 공식 설정과 재현 범위는 [OFFICIAL_ALIGNMENT.md](OFFICIAL_ALIGNMENT.md)에 정리했습니다.
 
 ## 8. Composed jailbreak generation
 
@@ -598,8 +493,7 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 SafeBench·HADES·MM-SafetyBench에서 원본 질문을 각각 60개씩 선택해
 벤치마크별 조합 결과를 1,000개씩 생성합니다.
 JOOD MixUp은 원본 이미지 가중치 5~95%의 19단계를 균등하게 배정합니다.
-원본 출처·혼합 비율·이미지 해시와 JPS 자산 정보를 각 샘플에 기록합니다.
-`preview` → `review-preview` → `full` → `validate` 순서로 실행합니다.
+미리보기 생성 → 이미지 검토 → 전체 생성 → 검증 순서로 실행합니다.
 
 ```bash
 python -m pip install -r requirements-five-methods.txt
@@ -626,26 +520,13 @@ python run_generate_composed_dataset.py --per-recipe 3 \
 python -m core.validation.composed_dataset runs/composed_pilot
 ```
 
-전체 그룹 실행은 `attack_scripts/run_composed_dataset_3000.sh`,
-백그라운드 실행은 `attack_scripts/run_composed_dataset_3000_nohup.sh`를 사용합니다.
-실행 수량과 그룹은 선택한 YAML에서 읽습니다. `CONFIG`, `OUTPUT_ROOT`, `PYTHON`,
-`PREFLIGHT_ONLY`로 실행 조건을 지정할 수 있습니다.
-재개 시 설정·입력·코드·아티팩트 해시를 검증합니다.
-
-조합 결과는 `adapted_composition`, `paper_reproduction: false`로 기록합니다.
-원본 질문별 split과 단계별 lineage를 유지하고 구조·중복·결정적 순서로 선별합니다.
-타깃 응답 생성과 ASR 평가는 [6절](#6-single-attack-pipeline)에 따라 실행합니다.
+전체 실행은 `attack_scripts/run_composed_dataset_3000.sh`, 백그라운드 실행은 `attack_scripts/run_composed_dataset_3000_nohup.sh`를 사용합니다.
+`CONFIG`와 `OUTPUT_ROOT`로 설정과 출력 경로를 지정합니다. 응답 생성과 ASR 평가는 [6절](#6-single-attack-pipeline)을 따릅니다.
 
 ## 9. Evaluation and metrics
 
-기본 judge는 HarmBench입니다. Stage 3의 `--judge`로
-`harmbench`, `beaver_dam`, `llama_guard`, `mml_clas`를 선택할 수 있고,
-`--judge_model`로 모델을 지정합니다. Llama Guard는 모델 이름 지정이 필수입니다.
-논문 프로토콜별 평가와 공통 judge 비교 결과를 분리하세요.
-
-지표 구현은 [core/metrics.py](core/metrics.py),
-멀티모달 분석은 [core/multimodal_metrics.py](core/multimodal_metrics.py),
-집계 CLI는 [run_extended_metrics.py](run_extended_metrics.py)입니다.
+`--judge`로 `harmbench`(기본값), `beaver_dam`, `llama_guard`, `mml_clas`를 선택합니다.
+`--judge_model`로 모델을 지정하며, Llama Guard는 모델명 지정이 필수입니다.
 
 | 지표군 | 지원 내용 / 필요한 입력 |
 | --- | --- |
@@ -660,18 +541,9 @@ python -m core.validation.composed_dataset runs/composed_pilot
 
 ### Definitions and prerequisites
 
-ASR은 기본적으로 **판정된 원본 Behavior 중 하나 이상의 시도가 성공한 비율**입니다.
-미판정은 성공/실패로 임의 처리하지 않고 coverage로 함께 보고합니다.
-행 단위 attempt ASR과 behavior-level ASR을 섞지 않으며,
-비교 시 같은 대상·judge·입력·시도 예산을 맞춰야 합니다.
-safety-worst category ASR은 가장 높은 공격 성공률입니다.
+ASR은 판정된 원본 질문 중 하나 이상의 시도가 성공한 비율입니다. 비교할 때 대상·judge·입력·시도 예산을 맞추세요.
 
-탐지에서는 **악성 입력을 positive**로 정의합니다.
-`FPR = FP / (FP + TN)`, `FNR = FN / (TP + FN)`이며 분모가 없으면 `null`입니다.
-FPR 및 양쪽 클래스를 포괄하는 탐지 성능 해석에는 독립적으로 검토한 benign 입력이 필요합니다.
-AsD/AdaShield 같은 입력 변환 방어의 차단 여부를 탐지 정답처럼 사용하지 않습니다.
-탐지 decision metadata가 없는 경우 해당 지표는 unavailable로 남습니다.
-공격 응답의 judge 라벨과 입력의 악성/정상 ground truth는 서로 다른 개념입니다.
+탐지 지표는 악성 입력을 positive로 둡니다. `FPR = FP / (FP + TN)`, `FNR = FN / (TP + FN)`이며 FPR 측정에는 검토된 benign 입력이 필요합니다.
 
 ### Extended report
 
@@ -685,7 +557,7 @@ python run_extended_metrics.py \
   --output runs/figstep_safebench/extended_metrics.json
 ```
 
-추가 입력은 실제 생성·평가된 JSONL을 준비한 경우에만 지정합니다.
+추가 분석 옵션입니다.
 
 - `--benign-results`, `--benign-baseline-results`: FPR·benign utility 비교.
 - `--source-results`, `--second-judge-results`: 전이·judge 비교.
@@ -693,29 +565,21 @@ python run_extended_metrics.py \
 - `--text-only-results`, `--image-only-results`: 동일 사례의 modality ablation.
 - `--image-pairs`: reference/candidate 이미지 쌍. LPIPS/CLIP은 별도 패키지·가중치와 opt-in 필요.
 
-공통 방향은 “score가 높을수록 악성”이며 CIDER/JailGuard score를 변환해 집계합니다.
-누락된 계측·주석은 추정하지 않고 `null`/unavailable로 유지합니다.
-배치 target latency는 행별 실측값이 아니라 배치 시간의 균등 분배 추정치입니다.
-입력 형식 전체는 `python run_extended_metrics.py --help`를 참고하세요.
+전체 옵션은 `python run_extended_metrics.py --help`로 확인합니다.
 
 ## 10. Validation
 
-[core/validation/](core/validation/)에서 데이터 경로, 공식 프로필의 준비 조건,
-생성된 조합 결과와 캐시 계보를 검증합니다.
+데이터 경로와 생성 결과를 검사합니다.
 
 ```bash
 # 데이터셋 필수 경로 검사
 python -m core.validation.data --layout-only
 
-# 조합 결과의 harmful-only, 수량, 중복, 아티팩트·단계 연결·split 검사
-python -m core.validation.composed_dataset runs/composed_jailbreak_v3_pilot
+# 조합 결과 검사
+python -m core.validation.composed_dataset runs/composed_pilot
 ```
 
-캐시 계보는 `python -m core.validation.artifact_lineage`로 별도 검사할 수 있습니다
-(`--attack`, `--config`, `--artifact` 필요).
-이 검사는 자산·설정·산출물의 무결성을 확인합니다.
-실제 공격 성능은 [6절](#6-single-attack-pipeline)의 응답 생성·평가와
-[9절](#9-evaluation-and-metrics)의 지표 집계로 측정합니다.
+캐시 검증 등 상세 안내는 [core/README.md](core/README.md)를 참고하세요.
 
 ## 11. Related documentation
 
