@@ -65,6 +65,159 @@ class Recipe:
     count: int
 
 
+SUPPORTED_SOURCES = ("SafeBench", "HADES", "MM-SafetyBench")
+
+
+def source_names(config):
+    names = list(config.get("sources", {}).get("datasets", ["SafeBench"]))
+    if config.get("sources", {}).get("balance", "equal") != "equal":
+        raise ValueError("sources.balance must be equal")
+    if (not names or len(set(names)) != len(names)
+            or not set(names) <= set(SUPPORTED_SOURCES)):
+        raise ValueError("sources.datasets must contain distinct supported benchmarks")
+    return names
+
+
+def mixup_weights(config):
+    settings = config.get("jood", {})
+    values = settings.get("source_weights", [settings.get("source_weight", 0.7)])
+    if not isinstance(values, list) or not values:
+        raise ValueError("JOOD source_weights must be a nonempty list")
+    weights = [float(value) for value in values]
+    if (len(set(weights)) != len(weights)
+            or any(not math.isfinite(w) or not 0 < w < 1 for w in weights)):
+        raise ValueError("JOOD source weights must be distinct finite values in (0, 1)")
+    return weights
+
+
+def recipe_source_quotas(recipes, names):
+    totals = {name: 0 for name in names}
+    by_group = {False: dict(totals), True: dict(totals)}
+    quotas = {}
+    for recipe in recipes:
+        group = "JOOD" in recipe.methods
+        counts = {name: recipe.count // len(names) for name in names}
+        for _ in range(recipe.count % len(names)):
+            chosen = min(names, key=lambda name: (
+                totals[name] + counts[name], by_group[group][name] + counts[name],
+                names.index(name)))
+            counts[chosen] += 1
+        quotas[recipe.id] = counts
+        for name in names:
+            totals[name] += counts[name]
+            by_group[group][name] += counts[name]
+    return quotas
+
+
+def select_source_parents(config, recipes, pools, training_keys):
+    from collections import Counter, defaultdict
+    names = source_names(config)
+    seed = config["seed"]
+    quotas = recipe_source_quotas(recipes, names)
+    needs = {name: max(counts[name] for counts in quotas.values()) for name in names}
+    grouped = defaultdict(list)
+    stats = {}
+    for name in names:
+        raw = pools[name]
+        harmful = [b for b in raw if b.eval_type == EvalType.HARMFUL]
+        eligible = [b for b in harmful if instruction_key(b.instruction) not in training_keys]
+        stats[name] = {
+            "loaded": len(raw), "harmful": len(harmful),
+            "training_excluded": len(harmful) - len(eligible),
+            "pool_sha256": json_hash([b.to_dict() for b in raw]),
+        }
+        for behavior in eligible:
+            key = instruction_key(behavior.instruction)
+            if key:
+                grouped[key].append(behavior)
+    owned = {name: [] for name in names}
+    for key, choices in grouped.items():
+        owner = min(choices, key=lambda b: json_hash(
+            [seed, "source_owner", key, b.dataset, b.behavior_id]))
+        owned[owner.dataset].append(owner)
+    selected = {}
+    for name in names:
+        pool = owned[name]
+        stats[name]["unique_after_cross_dataset_deduplication"] = len(pool)
+        if len(pool) < needs[name]:
+            raise ValueError(f"insufficient held-out unique parents for {name}: {len(pool)}/{needs[name]}")
+        ordered = sorted(pool, key=lambda b: (len(b.statement or b.instruction), b.behavior_id))
+        edges = [ordered[-1], ordered[len(ordered) // 2], ordered[0]]
+        chosen, seen = [], set()
+        for behavior in edges:
+            if behavior.behavior_id not in seen and len(chosen) < needs[name]:
+                chosen.append(behavior)
+                seen.add(behavior.behavior_id)
+        categories = defaultdict(list)
+        for behavior in pool:
+            if behavior.behavior_id not in seen:
+                categories[behavior.category or "__uncategorized__"].append(behavior)
+        for category in categories:
+            categories[category].sort(key=lambda b: json_hash(
+                [seed, name, category, b.behavior_id]))
+        counts = Counter(b.category or "__uncategorized__" for b in chosen)
+        while len(chosen) < needs[name]:
+            available = [category for category, values in categories.items() if values]
+            category = min(available, key=lambda c: (counts[c], json_hash([seed, name, c])))
+            chosen.append(categories[category].pop(0))
+            counts[category] += 1
+        selected[name] = chosen
+        stats[name]["selected_parents"] = len(chosen)
+        stats[name]["selected_categories"] = dict(counts)
+    parents = []
+    for index in range(max(needs.values())):
+        for name in names:
+            if index < len(selected[name]):
+                parents.append(selected[name][index])
+    if len({b.behavior_id for b in parents}) != len(parents):
+        raise ValueError("source behavior IDs must be distinct across benchmarks")
+    if len({instruction_key(b.instruction) for b in parents}) != len(parents):
+        raise ValueError("duplicate normalized source instruction")
+    plans = {}
+    for recipe in recipes:
+        counts = quotas[recipe.id]
+        plan = []
+        for index in range(max(counts.values())):
+            for name in names:
+                if index < counts[name]:
+                    plan.append(selected[name][index])
+        plans[recipe.id] = plan
+    metadata = {
+        "datasets": names, "selection_policy": "equal_dataset_quota_category_balanced",
+        "deduplication": "normalized_instruction_across_all_sources",
+        "jps_training_excluded": True, "pools": stats,
+        "recipe_source_counts": quotas,
+        "full_source_counts": {
+            name: sum(quotas[r.id][name] for r in recipes) for name in names},
+        "unique_parents": len(parents),
+    }
+    return parents, plans, metadata
+
+
+def plan_jood_variants(config, recipes, parent_plans, harmless_count):
+    import random
+    weights = mixup_weights(config)
+    randomizer = random.Random(config["seed"])
+    weight_order = list(range(len(weights)))
+    image_order = list(range(harmless_count))
+    randomizer.shuffle(weight_order)
+    randomizer.shuffle(image_order)
+    assignments, ordinal = {}, 0
+    for recipe in recipes:
+        if "JOOD" not in recipe.methods:
+            continue
+        for behavior in parent_plans[recipe.id]:
+            wi = weight_order[ordinal % len(weight_order)]
+            hi = image_order[ordinal % len(image_order)]
+            assignments[(recipe.id, behavior.behavior_id)] = {
+                "assignment_index": ordinal, "weight_index": wi,
+                "source_weight": weights[wi], "harmless_index": hi,
+            }
+            ordinal += 1
+    return assignments
+
+
+
 def load_config(path):
     with open(path, encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
@@ -85,11 +238,15 @@ def load_config(path):
         raise ValueError("this production plan requires 18 recipes totaling exactly 3000")
     if config["preview_per_recipe"] != 3:
         raise ValueError("preview must contain three cases for each recipe")
+    source_names(config)
+    mixup_weights(config)
     return config, recipes
 
 
 class DatasetBuilder:
     def __init__(self, config, recipes, root, reuse_from=None):
+        from core.registry import get_dataset
+        import core.datasets  # registration only; no model loading
         self.config, self.recipes = config, recipes
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
@@ -98,11 +255,23 @@ class DatasetBuilder:
         if recorded_identity and recorded_identity["config"] != config:
             raise ValueError("configuration changed; select a new output directory")
         self.font = resolve_path(config["render"]["font_path"])
-        self.cs = None
-        self._mml = None
-        self._bases = {}
+        self.cs, self._mml, self._bases = None, None, {}
         self.jps = self._jps_artifact()
         self.jood = self._jood_artifacts()
+        with open(self.jps["paths"]["training_csv"], newline="", encoding="utf-8") as stream:
+            train = {instruction_key(row["goal"]) for row in csv.DictReader(stream)}
+        pools = {name: get_dataset(name)().load() for name in source_names(config)}
+        self._parents, self._parent_plans, self.source_selection = select_source_parents(
+            config, recipes, pools, train)
+        from core.safe_typography import _coverage
+        if not Path(self.font).is_file():
+            raise FileNotFoundError("Prepare the composition font with: python -m core.prepare_five_method_assets")
+        chars = {ord(c) for b in self._parents for c in (b.statement or b.instruction) if not c.isspace()}
+        missing = chars - _coverage(self.font)
+        if missing:
+            raise ValueError(f"selected source font lacks glyphs: {[hex(c) for c in sorted(missing)]}")
+        self._jood_plan = plan_jood_variants(
+            config, recipes, self._parent_plans, len(self.jood["paths"]))
         if reuse_from is None and recorded_identity:
             recorded_reuse = recorded_identity.get("reuse")
             if recorded_reuse:
@@ -118,7 +287,7 @@ class DatasetBuilder:
         self.identity = json_hash({"config": config, "jps": self.jps["hashes"],
                                    "jood": self.jood["hashes"], "reuse": self.reuse,
                                    "font_sha256": digest(self.font),
-                                   "dataset_sha256": digest(resolve_path("data/benchmarks/SafeBench/safebench.csv")),
+                                   "sources": self.source_selection,
                                    "code": {str(p): digest(p) for p in code}})
         if identity_path.exists():
             if json.loads(identity_path.read_text())["identity"] != self.identity:
@@ -127,15 +296,27 @@ class DatasetBuilder:
             atomic_json(identity_path, {"identity": self.identity, "config": config,
                                        "algorithm_fidelity": "adapted_composition",
                                        "paper_reproduction": False, "jps": self.jps,
-                                       "jood": self.jood, "reuse": self.reuse})
+                                       "jood": self.jood, "reuse": self.reuse,
+                                       "source_selection": self.source_selection})
+        self.parents()
+        plan = {
+            "identity": self.identity, "source_selection": self.source_selection,
+            "preview_behavior_ids": {r.id: [b.behavior_id for b in self.parents_for_recipe(r, "preview")] for r in recipes},
+            "recipes": {r.id: [{"behavior_id": b.behavior_id, "dataset": b.dataset,
+                               "instruction_hash": json_hash(instruction_key(b.instruction)),
+                               "jood": self._jood_plan.get((r.id, b.behavior_id))}
+                              for b in self._parent_plans[r.id]] for r in recipes},
+        }
+        path = self.root / "sample_plan.json"
+        if path.exists() and json.loads(path.read_text()) != plan:
+            raise ValueError("sample plan changed")
+        atomic_json(path, plan)
 
     def _jood_artifacts(self):
         cfg = self.config.get("jood", {})
         if cfg.get("operation", "mixup") != "mixup":
             raise ValueError("this composition profile requires JOOD image MixUp")
-        weight = float(cfg.get("source_weight", 0.7))
-        if not math.isfinite(weight) or not 0 < weight < 1:
-            raise ValueError("JOOD source_weight must be strictly between 0 and 1")
+        weights = mixup_weights(self.config)
         pool = Path(resolve_path(cfg.get("harmless_dir", "data/method_assets/JOOD/images/harmless")))
         files = sorted(p for p in pool.iterdir()
                        if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg"})
@@ -155,7 +336,7 @@ class DatasetBuilder:
                 shutil.copyfile(source, destination)
             paths.append(portable_path(destination))
             hashes[source.name] = expected
-        return {"operation": "mixup", "source_weight": weight,
+        return {"operation": "mixup", "source_weights": weights,
                 "harmless_dir": portable_path(pool), "paths": paths, "hashes": hashes,
                 "preprocessing": "letterbox_harmless_to_native_source_canvas",
                 "algorithm_fidelity": "adapted_native_resolution_mixup"}
@@ -206,44 +387,36 @@ class DatasetBuilder:
                 "application": "auxiliary_image_and_steering_transfer"}
 
     def parents(self):
-        from core.datasets.safebench import SafeBenchDataset
-        with open(self.jps["paths"]["training_csv"], newline="", encoding="utf-8") as stream:
-            train = {instruction_key(row["goal"]) for row in csv.DictReader(stream)}
-        pool, seen = [], set()
-        for behavior in SafeBenchDataset().load():
-            key = instruction_key(behavior.instruction)
-            if behavior.eval_type != EvalType.HARMFUL or key in train or key in seen:
-                continue
-            seen.add(key)
-            pool.append(behavior)
-        # A shared three-case preview covers short, median and long source text.
-        by_length = sorted(pool, key=lambda b: (len(b.statement or b.instruction), b.behavior_id))
-        preview = [by_length[-1], by_length[len(by_length) // 2], by_length[0]]
-        selected = list(preview)
-        groups = {}
-        for b in pool:
-            if b.behavior_id not in {v.behavior_id for v in preview}:
-                groups.setdefault(b.category, []).append(b)
-        for values in groups.values():
-            values.sort(key=lambda b: json_hash([self.config["seed"], b.behavior_id]))
-        while len(selected) < max(r.count for r in self.recipes):
-            progressed = False
-            for category in sorted(groups):
-                if groups[category]:
-                    selected.append(groups[category].pop(0))
-                    progressed = True
-                    if len(selected) == max(r.count for r in self.recipes):
-                        break
-            if not progressed:
-                raise ValueError("insufficient unique held-out parents for the recipe quotas")
-        record = [b.to_dict() for b in selected]
+        record = [b.to_dict() for b in self._parents]
         if self.reuse_from and json.loads((self.reuse_from / "parents.json").read_text()) != record:
             raise ValueError("reuse source parents differ from the current dataset selection")
         path = self.root / "parents.json"
         if path.exists() and json.loads(path.read_text()) != record:
             raise ValueError("parent selection changed; select a new output directory")
         atomic_json(path, record)
-        return selected
+        return list(self._parents)
+
+    def parents_for_recipe(self, recipe, phase):
+        plan = self._parent_plans[recipe.id]
+        if phase != "preview":
+            return list(plan)
+        names = source_names(self.config)
+        choices = []
+        weights = sorted(self.jood["source_weights"])
+        targets = [weights[0], weights[len(weights) // 2], weights[-1]]
+        for index in range(3):
+            name = names[index % len(names)]
+            candidates = [b for b in plan if b.dataset == name and b not in choices]
+            if "JOOD" in recipe.methods:
+                target = targets[index]
+                distance = min(abs(self._jood_plan[(recipe.id, b.behavior_id)]["source_weight"] - target)
+                               for b in candidates)
+                candidates = [b for b in candidates if abs(
+                    self._jood_plan[(recipe.id, b.behavior_id)]["source_weight"] - target) <= distance + 1e-12]
+            candidates.sort(key=lambda b: (len(b.statement or b.instruction), b.behavior_id))
+            chosen = candidates[-1] if index == 0 else candidates[len(candidates) // 2] if index == 1 else candidates[0]
+            choices.append(chosen)
+        return choices
 
     def _cs_data(self, behavior):
         cache_dir = self.root / "_cache" / "cs_dj"
@@ -403,9 +576,9 @@ class DatasetBuilder:
         self._bases[key] = result
         return result
 
-    def _augment(self, source, behavior, destination):
-        value = int(json_hash([self.config["seed"], behavior.behavior_id, "jood"]), 16)
-        harmless_path = self.jood["paths"][value % len(self.jood["paths"])]
+    def _augment(self, source, behavior, destination, recipe):
+        assignment = self._jood_plan[(recipe.id, behavior.behavior_id)]
+        harmless_path = self.jood["paths"][assignment["harmless_index"]]
         expected = self.jood["hashes"][Path(harmless_path).name]
         if digest(resolve_path(harmless_path)) != expected:
             raise ValueError("JOOD provided image changed after run initialization")
@@ -414,15 +587,14 @@ class DatasetBuilder:
         with Image.open(resolve_path(harmless_path)) as opened:
             harmless = ImageOps.pad(opened.convert("RGB"), original.size,
                                     method=Image.Resampling.LANCZOS, color="white")
-        # Same alpha-blend as JOOD mixup_images; keep task text at its native
-        # resolution instead of applying the released 320px source downscale.
-        weight = self.jood["source_weight"]
+        weight = assignment["source_weight"]
         image = Image.blend(harmless, original, weight)
         if image.size != original.size or ImageChops.difference(original, image).getbbox() is None:
             raise ValueError("JOOD image MixUp must change pixels while retaining all coordinates")
         image.save(destination, compress_level=3)
         return {"profile": "provided_image_mixup_native_resolution", "operation": "mixup",
-                "source_weight": weight, "lam": weight, "geometry_unchanged": True,
+                **assignment, "lam": weight, "harmless_weight": round(1 - weight, 12),
+                "geometry_unchanged": True,
                 "harmless": Path(harmless_path).stem, "harmless_image": harmless_path,
                 "harmless_sha256": expected, "input_image": portable_path(source),
                 "canvas_size": list(original.size), "preprocessing": self.jood["preprocessing"],
@@ -454,7 +626,7 @@ class DatasetBuilder:
         image_path = directory / f"{stem}.png"
         aug = None
         if "JOOD" in methods:
-            aug = self._augment(source, behavior, image_path)
+            aug = self._augment(source, behavior, image_path, recipe)
         else:
             # Copy rather than resizing/re-encoding, so typography and JPS pixels survive exactly.
             shutil.copyfile(source, image_path)
@@ -470,7 +642,9 @@ class DatasetBuilder:
                         attack="+".join(recipe.methods), text=text, images=images,
                         meta={"recipe_id": recipe.id, "methods": list(recipe.methods),
                               "arity": len(recipe.methods), "identity": self.identity,
-                              "source_behavior_id": behavior.behavior_id, "split": split,
+                              "source_behavior_id": behavior.behavior_id, "source_dataset": behavior.dataset,
+                              "source_category": behavior.category,
+                              "source_record_sha256": json_hash(behavior.to_dict()), "split": split,
                               "source_instruction_hash": json_hash(split_key),
                               "algorithm_fidelity": "adapted_composition", "paper_reproduction": False,
                               "layouts": layouts, "details": details, "jood": aug,
@@ -522,7 +696,7 @@ def validate_case(case):
 
 def make_contact_sheet(cases, destination):
     font = ImageFont.truetype(resolve_path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"), 26)
-    columns, width, header = 3, 800, 80
+    columns, width, header = 3, 800, 120
     prepared = []
     for case in cases:
         with Image.open(resolve_path(case["images"][0])) as source:
@@ -536,6 +710,10 @@ def make_contact_sheet(cases, destination):
         x = i * width
         draw.text((x + 10, 10), case["meta"]["recipe_id"], font=font, fill="black")
         draw.text((x + 10, 42), case["behavior_id"], font=font, fill="black")
+        label = case["meta"].get("source_dataset", "")
+        if case["meta"].get("jood"):
+            label += f' | source weight {case["meta"]["jood"]["source_weight"]:.0%}'
+        draw.text((x + 10, 78), label, font=font, fill="black")
         sheet.paste(image, (x + 10, header))
         if len(case["images"]) > 1:
             with Image.open(resolve_path(case["images"][1])) as source:

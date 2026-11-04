@@ -244,3 +244,7 @@ their own upstream licenses when used, independently of which runner is selected
 - The MIT License in [LICENSE](LICENSE) covers only the original code
   and documentation directly developed by ai.resilience as part of the
   VLM-Jailbreak-Simulator project.
+
+### Composition typography
+
+The five-method renderer downloads Noto Sans CJK Bold from [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk/tree/f8d157532fbfaeda587e826d4cd5b21a49186f7c). Its font and SIL Open Font License are stored in `data/method_assets/fonts/` with verified SHA-256 hashes. Preparation: `python -m core.prepare_five_method_assets`.

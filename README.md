@@ -593,11 +593,16 @@ RUN_DIR=runs/figstep_safebench MODEL=llava_v1_5 LIMIT=3 EVALUATE=1 \
 | 5개 방법 조합 | [five_methods_3000.yaml](configs/compositions/five_methods_3000.yaml) / [상세 안내](FIVE_METHOD_DATASET.md) | 18 | 3,000 |
 | 일반 단계 조합 | [jailbreak_dataset_v3.yaml](configs/compositions/jailbreak_dataset_v3.yaml) | 3 | 최종 600 / 후보 720 |
 
-5개 방법 구성은 FigStep, CS-DJ, MML, JOOD, JPS를 사용하며
-JOOD 이미지 MixUp과 JPS 자산의 출처를 각 샘플에 기록합니다.
+5개 방법 구성은 FigStep, CS-DJ, MML, JOOD, JPS를 사용합니다.
+SafeBench·HADES·MM-SafetyBench에서 원본 질문을 각각 60개씩 선택해
+벤치마크별 조합 결과를 1,000개씩 생성합니다.
+JOOD MixUp은 원본 이미지 가중치 5~95%의 19단계를 균등하게 배정합니다.
+원본 출처·혼합 비율·이미지 해시와 JPS 자산 정보를 각 샘플에 기록합니다.
 `preview` → `review-preview` → `full` → `validate` 순서로 실행합니다.
 
 ```bash
+python -m pip install -r requirements-five-methods.txt
+python -m core.prepare_five_method_assets
 bash attack_scripts/run_five_method_dataset.sh preview
 bash attack_scripts/run_five_method_dataset.sh review-preview --review-note '실제 이미지 검토 내용'
 bash attack_scripts/run_five_method_dataset.sh full

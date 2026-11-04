@@ -15,10 +15,16 @@
 | 네 방법 | 2 | 150 | 300 |
 | 전체 | 18 | | 3,000 |
 
-원본 질문은 harmful-only SafeBench에서 선택합니다. JPS 학습 질문과 중복 질문을
-분리하고 원본 질문의 모든 파생 샘플에 같은 train/validation/test split을 적용합니다.
+원본 질문은 SafeBench·HADES·MM-SafetyBench에서 각각 60개씩 선택합니다.
+벤치마크별 조합 결과는 정확히 1,000개씩이며 레시피 안에서도 세 출처를 균등하게
+배정합니다. JPS 학습 질문과 출처 간 중복 질문을 제외하고, 원본 질문의 모든 파생
+샘플에 같은 train/validation/test split을 적용합니다.
 
-준비 경로는 데이터 루트의 `benchmarks/SafeBench/`,
+JOOD 원본 이미지 가중치는 0.05~0.95의 19단계입니다. JOOD 입력 1,840개에서
+각 비율은 96~97회, 무해 이미지 5종은 각각 368회 사용합니다.
+비율×이미지 95개 조합도 모두 사용하며 실제 배정은 `sample_plan.json`에 기록합니다.
+
+준비 경로는 데이터 루트의 `benchmarks/{SafeBench,HADES,MM-SafetyBench}/`,
 `method_assets/CS-DJ/`, `method_assets/JOOD/images/harmless/`,
 `method_assets/nltk_data/`입니다. JPS 이미지·steer prompt·학습 CSV는 YAML의
 `jps.source_run`에서 검증된 자산을 읽습니다.
@@ -26,15 +32,18 @@
 
 ```bash
 python -m pip install -r requirements-five-methods.txt
+python -m core.prepare_five_method_assets
 bash attack_scripts/run_five_method_dataset.sh preview
 bash attack_scripts/run_five_method_dataset.sh review-preview --review-note '실제 이미지 검토 내용'
 bash attack_scripts/run_five_method_dataset.sh full
 bash attack_scripts/run_five_method_dataset.sh validate
 ```
 
-미리보기는 레시피당 3개, 총 54개입니다. contact sheet와 원본 이미지를 검토한 뒤
+미리보기는 레시피당 각 벤치마크 1개씩, 총 54개입니다.
+JOOD 미리보기는 원본 이미지 가중치 5%·50%·95%를 포함합니다.
+contact sheet와 원본 이미지를 검토한 뒤
 해당 이미지 해시에 연결된 review record를 저장합니다. `full`은 이 기록을 확인합니다.
-기본 출력은 `runs/five_methods_3000_jood_image_mix_20261103/`입니다.
+기본 출력은 `runs/five_methods_3000_mixed_sources_jood_ratios_20261104/`입니다.
 새 실행은 `--output`으로 별도 경로를 지정할 수 있습니다.
 
 ```bash
@@ -84,12 +93,12 @@ OUTPUT_ROOT=runs/composed_generation \
 
 | 구성 | 주요 파일 |
 | --- | --- |
-| 5개 방법 조합 | `preview/test_cases.jsonl`, `full/test_cases.jsonl`, `parents.json`, 각 phase의 `manifest.json`, `qc.json`, `status.json` |
+| 5개 방법 조합 | `preview/test_cases.jsonl`, `full/test_cases.jsonl`, `parents.json`, `sample_plan.json`, 각 phase의 `behaviors.jsonl`·`manifest.json`·`qc.json`·`status.json` |
 | 일반 단계 조합 | `test_cases.jsonl`, `behaviors.jsonl`, `images/`, `composition_manifest.json`, `composition_qc.json` |
 
 조합 입력에는 `adapted_composition`과 단계별 provenance를 기록합니다.
 구조 검사, 이미지 존재·해시, 단계 연결, 중복과 원본 질문별 split을 검증합니다.
 일반 조합은 생성 폴더를, 5개 방법 조합은 `full/`을 Stage 2의 `--run_dir`로
-지정합니다. 5개 방법의 원본 Behavior는 `parents.json`을 JSONL로 변환해
-Stage 3의 `--behaviors_path`로 전달합니다. [README의 Stage 2–3 안내](README.md#6-single-attack-pipeline)에 따라
+지정합니다. 각 phase의 `behaviors.jsonl`에 원본 평가 지시문을 함께 저장하므로
+Stage 3에서 같은 폴더를 `--run_dir`로 사용합니다. [README의 Stage 2–3 안내](README.md#6-single-attack-pipeline)에 따라
 같은 원본 지시문을 기준으로 응답을 판정합니다.
