@@ -3,7 +3,7 @@
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKER="$REPO_ROOT/attack_scripts/five_method_dataset_worker.sh"
-RUN_ROOT="${OUTPUT_ROOT:-$REPO_ROOT/runs/five_methods_3000_jood_image_mix_20261103}"
+RUN_ROOT="${OUTPUT_ROOT:-$REPO_ROOT/runs/five_methods_3000_mixed_sources_jood_ratios_20261104}"
 RUN_ROOT="$(realpath -m -- "$RUN_ROOT")"
 PYTHON_BIN="${PYTHON:-/home/jovyan/.conda/envs/jb_env/bin/python}"
 ACTION="${1:-start}"

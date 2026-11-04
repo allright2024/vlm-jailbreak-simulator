@@ -42,11 +42,15 @@ def main():
     identity = json.loads((root / "run_identity.json").read_text())
     mixing = identity.get("jood")
     if mixing:
-        source = mixing["source_weight"]
+        weights = mixing.get("source_weights", [mixing.get("source_weight", 0.7)])
         html.append(f'<p><strong>JOOD 이미지 혼합:</strong> 제공 이미지 {len(mixing["paths"])}종과 MixUp. '
-                    f'원래 이미지 {source:.0%} + JOOD 이미지 {1-source:.0%}. 원래 해상도를 유지합니다.</p>')
+                    f'원본 이미지 비율 {min(weights):.0%}–{max(weights):.0%}, {len(weights)}단계. 원래 해상도를 유지합니다.</p>')
         if full_qc and "jood_image_mixed_cases" in full_qc:
             html.append(f'<p>JOOD 제공 이미지와 혼합된 입력: {full_qc["jood_image_mixed_cases"]:,}개.</p>')
+    sources = (full_qc or {}).get("source_counts") or identity.get("source_selection", {}).get("full_source_counts")
+    if sources:
+        html.append('<p><strong>벤치마크별 전체 입력:</strong> ' +
+                    ' · '.join(f'{escape(k)} {v:,}개' for k,v in sources.items()) + '</p>')
     html.append('<nav>' + ''.join(f'<a href="#{escape(k)}">{escape(k)}</a>' for k in grouped) + '</nav>')
     for recipe, items in grouped.items():
         methods = ' + '.join(items[0]["meta"]["methods"])
@@ -64,7 +68,8 @@ def main():
                 harmless = os.path.relpath(resolve_path(aug["harmless_image"]), root)
                 description = (f' · JOOD: <a href="{quote(harmless)}">{escape(aug["harmless"])}</a>'
                                f' · 원래 이미지 비율 {aug["source_weight"]:.0%}')
-            html.append(f'<li>{escape(case["behavior_id"])}: ' + ' · '.join(links) + description + '</li>')
+            source = escape(case["meta"].get("source_dataset", ""))
+            html.append(f'<li>{source} · {escape(case["behavior_id"])}: ' + ' · '.join(links) + description + '</li>')
         html.append('</ul></section>')
     html.append('</html>')
     destination = root / "index.html"

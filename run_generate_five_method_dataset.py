@@ -21,6 +21,7 @@ from core.five_method_dataset import (
     load_config,
     make_contact_sheet,
     validate_case,
+    json_hash,
 )
 
 
@@ -32,38 +33,102 @@ def validate_phase(root, recipes, phase, identity):
         raise ValueError("incomplete or mismatched phase manifest")
     expected = {r.id: 3 if phase == "preview" else r.count for r in recipes}
     cases = [json.loads(line) for line in (directory / "test_cases.jsonl").read_text().splitlines() if line]
+    plan = None
+    if manifest.get("source_selection"):
+        if (digest(root / "sample_plan.json") != manifest["sample_plan_sha256"]
+                or digest(root / "parents.json") != manifest["parents_sha256"]):
+            raise ValueError("source selection/assignment plan changed")
+        plan = json.loads((root / "sample_plan.json").read_text())
+        if plan["identity"] != identity or plan["source_selection"] != manifest["source_selection"]:
+            raise ValueError("source plan identity mismatch")
+        planned = {(rid, row["behavior_id"]): row for rid, rows in plan["recipes"].items() for row in rows}
+        parents = {b["behavior_id"]: b for b in json.loads((root / "parents.json").read_text())}
+        if digest(directory / "behaviors.jsonl") != manifest["behaviors_sha256"]:
+            raise ValueError("original scoring behaviors changed")
+        behavior_rows = [json.loads(l) for l in (directory / "behaviors.jsonl").read_text().splitlines() if l]
+        if (len({b["behavior_id"] for b in behavior_rows}) != len(behavior_rows)
+                or any(parents.get(b["behavior_id"]) != b for b in behavior_rows)
+                or {b["behavior_id"] for b in behavior_rows} != {c["behavior_id"] for c in cases}):
+            raise ValueError("scoring behaviors differ from the selected original parents")
     counts, contents, ids, source_splits = Counter(), set(), set(), {}
-    jood_counts, harmless_counts = Counter(), Counter()
+    source_counts, source_categories, recipe_sources = Counter(), {}, {}
+    jood_counts, harmless_counts, weight_counts = Counter(), Counter(), Counter()
+    recipe_weights, source_weights, joint_counts = {}, {}, Counter()
     for case in cases:
-        if case["meta"]["identity"] != identity:
+        meta = case["meta"]
+        if meta["identity"] != identity:
             raise ValueError("sample identity mismatch")
         if case["test_case_id"] in ids:
             raise ValueError("duplicate test case id")
         ids.add(case["test_case_id"])
+        rid = meta["recipe_id"]
         content = validate_case(case)
-        if "JOOD" in case["meta"]["methods"] and manifest.get("jood"):
-            aug = case["meta"]["jood"]
+        row = None
+        if plan:
+            row = planned.get((rid, case["behavior_id"]))
+            if (not row or meta["source_dataset"] != row["dataset"]
+                    or meta["source_instruction_hash"] != row["instruction_hash"]
+                    or meta["source_record_sha256"] != json_hash(parents[case["behavior_id"]])):
+                raise ValueError("sample differs from its planned original benchmark record")
+            if phase == "preview" and case["behavior_id"] not in plan["preview_behavior_ids"][rid]:
+                raise ValueError("preview parent differs from the declared representative subset")
+            source = meta["source_dataset"]
+            source_counts[source] += 1
+            source_categories.setdefault(source, Counter())[meta["source_category"]] += 1
+            recipe_sources.setdefault(rid, Counter())[source] += 1
+        if "JOOD" in meta["methods"] and manifest.get("jood"):
+            aug = meta["jood"]
             profile = manifest["jood"]
-            if (aug.get("operation") != "mixup"
-                    or aug["source_weight"] != profile["source_weight"]
+            weights = profile.get("source_weights", [profile.get("source_weight", 0.7)])
+            if (aug.get("operation") != "mixup" or aug["source_weight"] not in weights
                     or profile["hashes"].get(Path(aug["harmless_image"]).name) != aug["harmless_sha256"]):
-                raise ValueError("JOOD sample differs from the declared provided-image MixUp profile")
-            jood_counts[case["meta"]["recipe_id"]] += 1
+                raise ValueError("JOOD sample differs from the declared image/weight profile")
+            if row:
+                if any(aug[k] != row["jood"][k] for k in row["jood"]):
+                    raise ValueError("JOOD variant differs from its deterministic assignment")
+                if aug["harmless_image"] != profile["paths"][aug["harmless_index"]]:
+                    raise ValueError("JOOD harmless-image assignment mismatch")
+            weight = f'{aug["source_weight"]:.2f}'
+            jood_counts[rid] += 1
             harmless_counts[aug["harmless"]] += 1
+            weight_counts[weight] += 1
+            recipe_weights.setdefault(rid, Counter())[weight] += 1
+            if plan:
+                source_weights.setdefault(meta["source_dataset"], Counter())[weight] += 1
+            joint_counts[weight + "|" + aug["harmless"]] += 1
         if content in contents:
             raise ValueError("duplicate final text/image input")
         contents.add(content)
-        counts[case["meta"]["recipe_id"]] += 1
-        source = case["meta"]["source_instruction_hash"]
-        split = case["meta"]["split"]
+        counts[rid] += 1
+        source = meta["source_instruction_hash"]
+        split = meta["split"]
         if source in source_splits and source_splits[source] != split:
             raise ValueError("same source instruction crosses dataset splits")
         source_splits[source] = split
     if dict(counts) != expected:
         raise ValueError(f"recipe quota mismatch: {dict(counts)} != {expected}")
+    if plan:
+        declared = manifest["source_selection"]
+        for recipe in recipes:
+            target = (dict(Counter(planned[(recipe.id, bid)]["dataset"] for bid in plan["preview_behavior_ids"][recipe.id])) if phase == "preview"
+                      else declared["recipe_source_counts"][recipe.id])
+            if dict(recipe_sources[recipe.id]) != target:
+                raise ValueError(f"benchmark balance mismatch: {recipe.id}")
+        target = (dict(Counter(planned[(rid, bid)]["dataset"] for rid, bids in plan["preview_behavior_ids"].items() for bid in bids)) if phase == "preview"
+                  else declared["full_source_counts"])
+        if dict(source_counts) != target:
+            raise ValueError("global benchmark balance mismatch")
     expected_jood = {r.id: expected[r.id] for r in recipes if "JOOD" in r.methods}
     if manifest.get("jood") and dict(jood_counts) != expected_jood:
         raise ValueError("JOOD provided-image mixing quota mismatch")
+    if phase == "full" and manifest.get("jood", {}).get("source_weights"):
+        keys = [f"{w:.2f}" for w in manifest["jood"]["source_weights"]]
+        for distribution in [weight_counts, *recipe_weights.values()]:
+            values = [distribution[k] for k in keys]
+            if max(values) - min(values) > 1:
+                raise ValueError("JOOD ratio distribution is not balanced")
+        if min(weight_counts[k] for k in keys) < 1:
+            raise ValueError("not all declared JOOD ratios were generated")
     if digest(directory / "test_cases.jsonl") != manifest["test_cases_sha256"]:
         raise ValueError("test_cases.jsonl changed after generation")
     if phase == "preview":
@@ -76,10 +141,17 @@ def validate_phase(root, recipes, phase, identity):
               "clipped_layouts": 0, "identity": identity,
               "test_cases_sha256": digest(directory / "test_cases.jsonl"),
               "manifest_sha256": digest(manifest_path)}
+    if plan:
+        report.update({"source_counts": dict(source_counts),
+                       "recipe_source_counts": {k: dict(v) for k, v in recipe_sources.items()},
+                       "source_categories": {k: dict(v) for k, v in source_categories.items()}})
     if manifest.get("jood"):
         report.update({"jood_image_mixed_cases": sum(jood_counts.values()),
-                       "jood_counts": dict(jood_counts),
-                       "jood_harmless_images": dict(harmless_counts)})
+                       "jood_counts": dict(jood_counts), "jood_harmless_images": dict(harmless_counts),
+                       "jood_source_weights": dict(sorted(weight_counts.items())),
+                       "jood_recipe_weights": {k: dict(sorted(v.items())) for k, v in recipe_weights.items()},
+                       "jood_dataset_weights": {k: dict(sorted(v.items())) for k, v in source_weights.items()},
+                       "jood_weight_image_pairs": dict(sorted(joint_counts.items()))})
     atomic_json(directory / "qc.json", report)
     return report
 
@@ -95,7 +167,7 @@ def generate(builder, recipes, phase):
         count = 3 if phase == "preview" else recipe.count
         print(f"[{phase}] {recipe.id} {' + '.join(recipe.methods)}: {count}", flush=True)
         selected = []
-        for i, parent in enumerate(parents[:count]):
+        for i, parent in enumerate(builder.parents_for_recipe(recipe, phase)):
             case = builder.build(recipe, parent, directory / "cases" / recipe.id)
             cases.append(case)
             selected.append(case)
@@ -113,11 +185,21 @@ def generate(builder, recipes, phase):
         for case in cases:
             stream.write(json.dumps(case, ensure_ascii=False) + "\n")
     temporary.replace(directory / "test_cases.jsonl")
+    selected_ids = {case["behavior_id"] for case in cases}
+    behavior_path = directory / "behaviors.jsonl"
+    with behavior_path.open("w", encoding="utf-8") as stream:
+        for behavior in parents:
+            if behavior.behavior_id in selected_ids:
+                stream.write(json.dumps(behavior.to_dict(), ensure_ascii=False) + "\n")
     manifest = {"status": "complete", "phase": phase, "identity": builder.identity,
                 "n_cases": len(cases), "counts": dict(counts),
                 "algorithm_fidelity": "adapted_composition", "paper_reproduction": False,
                 "target_model_queried": False,
                 "jood": builder.jood, "reused_rendered_bases": builder.reuse,
+                "source_selection": builder.source_selection,
+                "sample_plan_sha256": digest(root / "sample_plan.json"),
+                "parents_sha256": digest(root / "parents.json"),
+                "behaviors_sha256": digest(behavior_path),
                 "test_cases_sha256": digest(directory / "test_cases.jsonl")}
     if phase == "preview":
         manifest["contact_sheet_sha256s"] = {
@@ -132,7 +214,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["preview", "review-preview", "full", "validate"])
     parser.add_argument("--config", default="configs/compositions/five_methods_3000.yaml")
-    parser.add_argument("--output", default="runs/five_methods_3000_jood_image_mix_20261103")
+    parser.add_argument("--output", default="runs/five_methods_3000_mixed_sources_jood_ratios_20261104")
     parser.add_argument("--reuse-from", help="Completed source run whose verified pre-JOOD renders are reused")
     parser.add_argument("--validate-phase", choices=["preview", "full"], default="full")
     parser.add_argument("--review-note", help="Visual observations after inspecting all 18 contact sheets")
