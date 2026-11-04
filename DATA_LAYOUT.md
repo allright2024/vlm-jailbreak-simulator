@@ -8,50 +8,59 @@ See the [composition guide](COMPOSED_GENERATION.md) for sample usage.
 
 Benchmark inputs and reusable method resources are stored separately. Neither
 data nor run outputs are tracked by Git. Set `VLM_JAILBREAK_DATA_ROOT` to the
-directory containing both sections, not to either section itself.
+directory containing both sections, not to either section itself. The default
+is `<repo>/data`. The tree below matches the currently prepared directories.
 
 ```text
 data/
 ├── benchmarks/
-│   ├── advbench/harmful_behaviors.csv
-│   ├── AdvBenchM/                     # the former original_release/ contents
-│   │   ├── dataset/{advbench,advimage}/
-│   │   ├── instructions.jsonl         # 246 records, 231 unique instruction texts
-│   │   ├── images.jsonl               # 160 primary images in eight categories
-│   │   ├── manifest.json
-│   │   └── availability.json
-│   ├── HADES/{hades.csv,images/}
-│   ├── MM-SafetyBench/
-│   ├── SafeBench/safebench.csv
-│   └── HarmBench/harmbench_standard.json  # optional JPS query/target split
+│   ├── advbench/                # Original AdvBench inputs
+│   ├── AdvBenchM/               # Original public AdvBench-M release
+│   ├── HADES/                   # Original HADES inputs
+│   ├── MM-SafetyBench/          # Original MM-SafetyBench inputs
+│   └── SafeBench/               # Original SafeBench inputs
 └── method_assets/
-    ├── CS-DJ/
-    │   ├── llava_images/              # LLaVA-CC3M image pool
-    │   ├── instructions/              # method-specific 750-instruction set
-    │   └── Super Moods.ttf
-    ├── JOOD/                          # former AdvBenchM/jood_subset/
-    │   ├── images/{harmful,harmless,harmless_text}/
-    │   ├── prompts/{eval_all_instructions,all_instructions,all_instructions_harmful_annotated}/
-    │   ├── scenario_def.json
-    │   └── scenario_repr.json
-    ├── JailbreakInPieces/{meth_pill.png,white.jpeg}
-    ├── VisualAdv/{derogatory_corpus.csv,rtp_prompts.jsonl}
-    ├── nltk_data/taggers/             # English POS models for MML generation
-    ├── MML/                           # optional; excluded from the default ZIP
-    │   ├── upstream/const.py
-    │   ├── safebench/<class>/{data.json,images_wr/,images_mirror/,images_rotate/,images_base64/}
-    │   ├── mm-safebench/<class>/...
-    │   └── hades/<class>/...
-    ├── FORCE/clean.jpeg               # optional method input
-    ├── JPS/{advbench_subset.csv,clean.jpeg}  # optional method inputs
-    ├── UltraBreak/{images/,train_configs/}  # optional method inputs
-    └── provenance/data_layout_migration.json
+    ├── CS-DJ/                   # Image pool, instructions and font
+    ├── JOOD/                    # JOOD subset and mixing images
+    ├── JailbreakInPieces/       # Fixed source images
+    ├── MML/                     # Official replay images and metadata
+    ├── VisualAdv/               # Optimization target corpus
+    ├── fonts/                   # Composition font
+    ├── nltk_data/               # POS tagger for MML word replacement
+    └── provenance/              # Source and migration records
 ```
 
 `runs/<experiment>/` contains generated attack images, model responses, fitted
 patches and evaluation results. Those outputs do not belong in either data
 section. A benchmark image distributed by its authors remains benchmark input;
 an image pool or training corpus required by an attack belongs in method assets.
+
+## Benchmark files
+
+Paths are relative to `data/`.
+
+| Dataset | Path | Contents |
+| --- | --- | --- |
+| AdvBench | `benchmarks/advbench/harmful_behaviors.csv` | 520 instructions |
+| AdvBench-M original release | `benchmarks/AdvBenchM/` | `instructions.jsonl`, `images.jsonl` and `dataset/` |
+| HADES | `benchmarks/HADES/` | `hades.csv` and `images/` |
+| MM-SafetyBench | `benchmarks/MM-SafetyBench/` | Scenario JSONs and SD/SD_TYPO/TYPO images |
+| SafeBench | `benchmarks/SafeBench/safebench.csv` | 500 questions |
+
+## Method resources
+
+Paths are relative to `data/method_assets/`.
+
+| Directory | Contents / use |
+| --- | --- |
+| `CS-DJ/` | `llava_images/`, `instructions/` and `Super Moods.ttf` |
+| `JOOD/` | `prompts/`, `images/` and scenario metadata |
+| `JailbreakInPieces/` | Fixed source images for image optimization |
+| `MML/` | Official replay images, metadata and upstream constants; downloaded separately |
+| `VisualAdv/` | Target sentence corpus and prompt records |
+| `fonts/` | Composition font and license, prepared by `python -m core.prepare_five_method_assets` |
+| `nltk_data/` | Reusable POS-tagging resources for MML word replacement |
+| `provenance/` | Data-layout migration and source records |
 
 ## AdvBench-M and JOOD
 
@@ -69,7 +78,7 @@ name `AdvBenchM` still reads this JOOD subset. Reorganizing files does not repla
 that evaluation set with the original release. The `CS-DJ` dataset loader also
 continues reading its method-specific instruction set under method assets.
 
-## Existing bundles and historical paths
+## Download layout and migration
 
 The shared folder's `data.zip` uses the separated `benchmarks/` and `method_assets/`
 layout described above. To migrate an existing flat data directory, run:
