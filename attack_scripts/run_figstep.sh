@@ -27,9 +27,9 @@ for d in $DATASETS; do
   echo "=================================================================="
   "$PYTHON" run_generate_test_cases.py --attack "$ATTACK" --dataset "$d" \
       --save_dir "$run_dir" $(limit_flag) $extra || { echo "!! stage1 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_generate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage2 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage3 failed: $ATTACK/$d"; continue; }
 done
 echo "Done. ASR summaries appended to asr_results.jsonl"

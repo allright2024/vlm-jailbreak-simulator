@@ -129,10 +129,10 @@ def run_official_loop(
 def execute(args: Any) -> None:
     """Run the protocol selected explicitly by run_generate_completions.py."""
     test_cases = read_jsonl(
-        args.test_cases_path or os.path.join(args.run_dir, "test_cases.jsonl"), TestCase,
+        args.test_cases_path or os.path.join(args.save_dir, "test_cases.jsonl"), TestCase,
     )
     behaviors = read_jsonl(
-        args.behaviors_path or os.path.join(args.run_dir, "behaviors.jsonl"), Behavior,
+        args.behaviors_path or os.path.join(args.save_dir, "behaviors.jsonl"), Behavior,
     )
     if not test_cases or not behaviors:
         raise ValueError("MML protocol requires nonempty behaviors and test cases")
@@ -176,13 +176,13 @@ def execute(args: Any) -> None:
         test_cases, behaviors, target, judge, attempts=args.attempts
     )
     completions_path = args.save_path or os.path.join(
-        args.run_dir, f"completions_{args.model_name}.jsonl"
+        args.save_dir, f"completions_{args.model_name}.jsonl"
     )
     results_path = args.results_path or os.path.join(
-        args.run_dir, f"results_{args.model_name}.jsonl"
+        args.save_dir, f"results_{args.model_name}.jsonl"
     )
     summary_path = args.summary_path or os.path.join(
-        args.run_dir, f"mml_summary_{args.model_name}.json"
+        args.save_dir, f"mml_summary_{args.model_name}.json"
     )
     write_jsonl(completions_path, completions)
     write_jsonl(results_path, completions)
@@ -191,7 +191,7 @@ def execute(args: Any) -> None:
         json.dump(summary, output, indent=2, ensure_ascii=False)
         output.write("\n")
 
-    manifest_path = os.path.join(args.run_dir, "run_manifest.json")
+    manifest_path = os.path.join(args.save_dir, "run_manifest.json")
     provenance = None
     attack = completions[0].attack if completions else "MML"
     if os.path.isfile(manifest_path):

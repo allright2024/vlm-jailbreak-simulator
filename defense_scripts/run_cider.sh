@@ -29,7 +29,7 @@ if [ "$LIMIT" -gt 0 ]; then
 fi
 
 "$PYTHON" run_generate_completions.py \
-  --run_dir "$RUN_DIR" \
+  --save_dir "$RUN_DIR" \
   --model_name "$MODEL" \
   --defense CIDER \
   --defense_config "$DEFENSE_CONFIG" \
@@ -40,7 +40,7 @@ fi
 
 if [ "$EVALUATE" = "1" ]; then
   "$PYTHON" run_evaluate_completions.py \
-    --run_dir "$RUN_DIR" \
+    --save_dir "$RUN_DIR" \
     --model_name "$MODEL" \
     --completions_path "$completion_path" \
     --save_path "$RUN_DIR/results_${MODEL}__defense-CIDER.jsonl"

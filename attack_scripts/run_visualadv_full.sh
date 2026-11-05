@@ -62,9 +62,9 @@ for d in $DATASETS; do
   "$PYTHON" run_generate_test_cases.py --attack "$ATTACK" --dataset "$d" \
       --config "$REUSE_CFG" --save_dir "$run_dir" \
       || { echo "!! stage1 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_generate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage2 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage3 failed: $ATTACK/$d"; continue; }
 done
 echo "Done. ASR summaries in asr_results.jsonl"

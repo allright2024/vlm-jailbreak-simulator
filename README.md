@@ -367,7 +367,7 @@ Target은 생성된 공격을 **평가할 모델**, surrogate는 공격 생성 �
 ```bash
 # 평가 대상 변경: 기존 test cases를 그대로 사용
 python run_generate_completions.py \
-  --run_dir runs/example --model_name internvl3_2b --batch_size 1
+  --save_dir runs/example --model_name internvl3_2b --batch_size 1
 ```
 
 ### Surrogate models
@@ -403,12 +403,12 @@ python run_generate_test_cases.py \
 
 # 2. 대상 VLM 응답
 python run_generate_completions.py \
-  --run_dir runs/figstep_safebench \
+  --save_dir runs/figstep_safebench \
   --model_name llava_v1_5 --batch_size 1
 
 # 3. 원본 instruction 기준 판정 및 behavior-level ASR
 python run_evaluate_completions.py \
-  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
+  --save_dir runs/figstep_safebench --model_name llava_v1_5 \
   --judge_batch_size 1
 ```
 
@@ -429,7 +429,7 @@ MML 공식 평가에는 `--protocol mml_official`을 사용합니다.
 
 ```bash
 python run_generate_completions.py --protocol mml_official \
-  --run_dir runs/MML_word_replacement_HADES \
+  --save_dir runs/MML_word_replacement_HADES \
   --model_name gpt-4o-2024-08-06 --judge_model gpt-4o-mini-2024-07-18
 ```
 
@@ -463,13 +463,13 @@ bash defense_scripts/setup_jailguard.sh
 
 ```bash
 python run_generate_completions.py \
-  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
+  --save_dir runs/figstep_safebench --model_name llava_v1_5 \
   --batch_size 1 --defense AdaShield \
   --defense_config configs/defense_configs/AdaShield.yaml \
   --save_path runs/figstep_safebench/completions_llava_v1_5__defense-AdaShield.jsonl
 
 python run_evaluate_completions.py \
-  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
+  --save_dir runs/figstep_safebench --model_name llava_v1_5 \
   --judge_batch_size 1 \
   --completions_path runs/figstep_safebench/completions_llava_v1_5__defense-AdaShield.jsonl \
   --save_path runs/figstep_safebench/results_llava_v1_5__defense-AdaShield.jsonl
@@ -553,12 +553,12 @@ unzip -n ../3000_samples.zip -d .
 | `preview/`, `index.html` | 별도 미리보기 54개와 갤러리 |
 | `sample_plan.json`, `generation_report.json`, `full/qc.json` | 샘플 배정과 생성 검증 결과 |
 
-`full/`을 `--run_dir`로 지정해 응답과 ASR을 평가합니다. 아래 예시는 다중 이미지 입력을 지원하는 Qwen3-VL을 사용합니다.
+`full/`을 `--save_dir`로 지정해 응답과 ASR을 평가합니다. 아래 예시는 다중 이미지 입력을 지원하는 Qwen3-VL을 사용합니다.
 
 ```bash
 RUN_DIR=runs/five_methods_3000_all_records_20261104/full
-python run_generate_completions.py --run_dir "$RUN_DIR" --model_name qwen3_vl_2b --batch_size 1
-python run_evaluate_completions.py --run_dir "$RUN_DIR" --model_name qwen3_vl_2b --judge_batch_size 1
+python run_generate_completions.py --save_dir "$RUN_DIR" --model_name qwen3_vl_2b --batch_size 1
+python run_evaluate_completions.py --save_dir "$RUN_DIR" --model_name qwen3_vl_2b --judge_batch_size 1
 ```
 
 ### Generate a new dataset

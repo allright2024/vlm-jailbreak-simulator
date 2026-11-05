@@ -122,7 +122,7 @@ OUTPUT_ROOT=runs/composed_generation \
 
 조합 입력에는 `adapted_composition`과 단계별 provenance를 기록합니다.
 구조 검사, 이미지 존재·해시, 단계 연결, 중복과 원본 질문별 split을 검증합니다.
-일반 조합은 생성 폴더를, 5개 방법 조합은 `full/`을 Stage 2의 `--run_dir`로
+일반 조합은 생성 폴더를, 5개 방법 조합은 `full/`을 Stage 2의 `--save_dir`로
 지정합니다. 각 phase의 `behaviors.jsonl`에 원본 평가 지시문을 함께 저장하므로
-Stage 3에서 같은 폴더를 `--run_dir`로 사용합니다. [README의 Stage 2–3 안내](README.md#6-single-attack-pipeline)에 따라
+Stage 3에서 같은 폴더를 `--save_dir`로 사용합니다. [README의 Stage 2–3 안내](README.md#6-single-attack-pipeline)에 따라
 같은 원본 지시문을 기준으로 응답을 판정합니다.

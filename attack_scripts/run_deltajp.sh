@@ -54,9 +54,9 @@ for d in $DATASETS; do
   "$PYTHON" run_generate_test_cases.py --attack "$ATTACK" --dataset "$d" \
       --config "$CONFIG" --save_dir "$run_dir" $(limit_flag) \
       || { echo "!! stage1 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_generate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage2 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --save_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage3 failed: $ATTACK/$d"; continue; }
 done
 echo "Done. ASR summaries appended to asr_results.jsonl"
