@@ -395,6 +395,8 @@ Dataset loader → Behavior → Attack → TestCase
 
 FigStep로 SafeBench 원본 3개의 공격 입력을 생성하고, 대상 모델 응답과 ASR을 평가합니다.
 
+모든 단계에서 `--save_dir`로 같은 실험 폴더를 지정합니다. 응답 생성·평가 모델은 `--model_name`으로 선택합니다.
+
 ```bash
 # 1. 공격 입력 생성
 python run_generate_test_cases.py \
