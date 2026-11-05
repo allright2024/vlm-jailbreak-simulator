@@ -160,7 +160,7 @@ def execute(args: Any) -> None:
         resolve_path(args.upstream_const_path),
         expected_sha256=args.upstream_const_sha256,
     )
-    target = load_target(args.model)
+    target = load_target(args.model_name)
     target.max_new_tokens = args.max_new_tokens
     target.temperature = args.temperature
     target.retry_limit = args.retry_limit
@@ -176,13 +176,13 @@ def execute(args: Any) -> None:
         test_cases, behaviors, target, judge, attempts=args.attempts
     )
     completions_path = args.save_path or os.path.join(
-        args.run_dir, f"completions_{args.model}.jsonl"
+        args.run_dir, f"completions_{args.model_name}.jsonl"
     )
     results_path = args.results_path or os.path.join(
-        args.run_dir, f"results_{args.model}.jsonl"
+        args.run_dir, f"results_{args.model_name}.jsonl"
     )
     summary_path = args.summary_path or os.path.join(
-        args.run_dir, f"mml_summary_{args.model}.json"
+        args.run_dir, f"mml_summary_{args.model_name}.json"
     )
     write_jsonl(completions_path, completions)
     write_jsonl(results_path, completions)
@@ -201,7 +201,7 @@ def execute(args: Any) -> None:
         "protocol": "mml_official",
         "attack": attack,
         "dataset": dataset,
-        "model": args.model,
+        "model": args.model_name,
         "judge": judge.name,
         **{key: value for key, value in summary.items() if key != "per_behavior"},
     }

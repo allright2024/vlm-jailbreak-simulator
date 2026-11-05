@@ -7,7 +7,7 @@ and writes judged results, replacing a separate MML entry point.
 
 Example:
     python run_generate_completions.py --run_dir runs/figstep_safebench \\
-        --model llava_v1_5
+        --model_name llava_v1_5
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from core.targets import load_target, TARGET_REGISTRY
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description="Generate completions from a target VLM (unified pipeline).")
     p.add_argument("--run_dir", required=True, help="Run dir from stage 1 (holds test_cases.jsonl).")
-    p.add_argument("--model", required=True, help=f"Target model. Available: {sorted(TARGET_REGISTRY)}")
+    p.add_argument("--model_name", "--model", dest="model_name", required=True, help=f"Target model. Available: {sorted(TARGET_REGISTRY)}")
     p.add_argument(
         "--protocol", choices=("standard", "mml_official"), default="standard",
         help="standard: generate only; mml_official: serial MML target/CLAS loop and metrics.",
@@ -100,9 +100,9 @@ def main():
         execute(args)
         return
     tc_path = args.test_cases_path or os.path.join(args.run_dir, "test_cases.jsonl")
-    default_name = f"completions_{args.model}.jsonl"
+    default_name = f"completions_{args.model_name}.jsonl"
     if args.defense:
-        default_name = f"completions_{args.model}__defense-{args.defense}.jsonl"
+        default_name = f"completions_{args.model_name}__defense-{args.defense}.jsonl"
     save_path = args.save_path or os.path.join(args.run_dir, default_name)
 
     test_cases = read_jsonl(tc_path, TestCase)
@@ -112,7 +112,7 @@ def main():
         test_cases = test_cases[:args.limit]
     print(f"Loaded {len(test_cases)} test cases from {tc_path}")
 
-    target = load_target(args.model)
+    target = load_target(args.model_name)
     if hasattr(target, "max_new_tokens"):
         target.max_new_tokens = args.max_new_tokens
     if args.temperature is not None and hasattr(target, "temperature"):

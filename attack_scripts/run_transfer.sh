@@ -40,9 +40,9 @@ run_stages() {  # attack dataset config run_dir
   "$PYTHON" run_generate_test_cases.py --attack "$attack" --dataset "$dataset" \
       --config "$config" --save_dir "$run_dir" $(limit_flag) \
       || { echo "!! stage1 failed: $attack/$dataset"; return 1; }
-  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage2 failed: $attack/$dataset"; return 1; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
       || { echo "!! stage3 failed: $attack/$dataset"; return 1; }
 }
 

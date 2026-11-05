@@ -7,7 +7,7 @@ advice/opinion behaviors are excluded from the headline ASR by default.
 
 Example:
     python run_evaluate_completions.py --run_dir runs/figstep_safebench \\
-        --model llava_v1_5
+        --model_name llava_v1_5
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from core.pipeline import evaluate
 def parse_args():
     p = argparse.ArgumentParser(description="Evaluate completions and compute ASR (unified pipeline).")
     p.add_argument("--run_dir", required=True, help="Run dir (holds behaviors.jsonl and completions).")
-    p.add_argument("--model", required=True, help="Target model name (to locate completions file).")
+    p.add_argument("--model_name", "--model", dest="model_name", required=True, help="Target model name (to locate completions file).")
     p.add_argument("--completions_path", default=None, help="Override completions JSONL path.")
     p.add_argument("--behaviors_path", default=None, help="Override behaviors JSONL path.")
     p.add_argument("--save_path", default=None, help="Override results JSONL path.")
@@ -43,9 +43,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    comp_path = args.completions_path or os.path.join(args.run_dir, f"completions_{args.model}.jsonl")
+    comp_path = args.completions_path or os.path.join(args.run_dir, f"completions_{args.model_name}.jsonl")
     beh_path = args.behaviors_path or os.path.join(args.run_dir, "behaviors.jsonl")
-    save_path = args.save_path or os.path.join(args.run_dir, f"results_{args.model}.jsonl")
+    save_path = args.save_path or os.path.join(args.run_dir, f"results_{args.model_name}.jsonl")
 
     completions = read_jsonl(comp_path, Completion)
     behaviors = read_jsonl(beh_path, Behavior)
@@ -81,7 +81,7 @@ def main():
 
     attack = completions[0].attack if completions else "?"
     dataset = behaviors[0].dataset if behaviors else "?"
-    record = {"attack": attack, "dataset": dataset, "model": args.model, "judge": judge.name, **summary}
+    record = {"attack": attack, "dataset": dataset, "model": args.model_name, "judge": judge.name, **summary}
     manifest_path = os.path.join(args.run_dir, "run_manifest.json")
     if os.path.isfile(manifest_path):
         with open(manifest_path, encoding="utf-8") as f:

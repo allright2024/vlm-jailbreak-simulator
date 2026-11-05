@@ -33,14 +33,14 @@ for variant in $VARIANTS; do
       --config "$VARIANT_CONFIG" --save_dir "$run_dir" $(limit_flag) \
       || { echo "!! stage1 failed: $ATTACK/$d"; continue; }
   "$PYTHON" run_generate_completions.py --protocol mml_official \
-      --run_dir "$run_dir" --model "$MODEL" \
+      --run_dir "$run_dir" --model_name "$MODEL" \
       --judge_model "$JUDGE_MODEL" --attempts 5 \
       --max_new_tokens 2000 --temperature 0.7 --retry_limit 3 \
       $(subset_flag) \
       || { echo "!! stage2 failed: $ATTACK/$d"; continue; }
   if [ "$EVALUATE_LLAMA_GUARD" = "1" ]; then
     echo ">>> paper cross-check with Llama Guard 3 (separate result file)"
-    "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+    "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
         --judge llama_guard --judge_model meta-llama/Llama-Guard-3-8B \
         --save_path "$run_dir/results_${MODEL}_llama_guard3.jsonl" \
         || { echo "!! stage3 failed: $ATTACK/$d"; continue; }

@@ -28,14 +28,14 @@ for d in $DATASETS; do
   "$PYTHON" run_generate_test_cases.py --attack "$ATTACK" --dataset "$d" \
       --config "$CONFIG" --save_dir "$run_dir" $(limit_flag) \
       || { echo "!! stage1 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+  "$PYTHON" run_generate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
       --max_new_tokens 256 \
       || { echo "!! stage2 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
       --judge harmbench --judge_model cais/HarmBench-Llama-2-13b-cls \
       --judge_batch_size 12 --save_path "$run_dir/results_${MODEL}_harmbench.jsonl" \
       || { echo "!! stage3 failed: $ATTACK/$d"; continue; }
-  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model "$MODEL" \
+  "$PYTHON" run_evaluate_completions.py --run_dir "$run_dir" --model_name "$MODEL" \
       --judge llama_guard --judge_model meta-llama/Llama-Guard-3-8B \
       --save_path "$run_dir/results_${MODEL}_llamaguard3.jsonl" \
       || { echo "!! Llama Guard 3 stage failed: $ATTACK/$d"; continue; }

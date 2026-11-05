@@ -367,7 +367,7 @@ Target은 생성된 공격을 **평가할 모델**, surrogate는 공격 생성 �
 ```bash
 # 평가 대상 변경: 기존 test cases를 그대로 사용
 python run_generate_completions.py \
-  --run_dir runs/example --model internvl3_2b --batch_size 1
+  --run_dir runs/example --model_name internvl3_2b --batch_size 1
 ```
 
 ### Surrogate models
@@ -404,11 +404,11 @@ python run_generate_test_cases.py \
 # 2. 대상 VLM 응답
 python run_generate_completions.py \
   --run_dir runs/figstep_safebench \
-  --model llava_v1_5 --batch_size 1
+  --model_name llava_v1_5 --batch_size 1
 
 # 3. 원본 instruction 기준 판정 및 behavior-level ASR
 python run_evaluate_completions.py \
-  --run_dir runs/figstep_safebench --model llava_v1_5 \
+  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
   --judge_batch_size 1
 ```
 
@@ -430,7 +430,7 @@ MML 공식 평가에는 `--protocol mml_official`을 사용합니다.
 ```bash
 python run_generate_completions.py --protocol mml_official \
   --run_dir runs/MML_word_replacement_HADES \
-  --model gpt-4o-2024-08-06 --judge_model gpt-4o-mini-2024-07-18
+  --model_name gpt-4o-2024-08-06 --judge_model gpt-4o-mini-2024-07-18
 ```
 
 최대 5회 시도하며 score 5에서 종료합니다. 소규모 실행은 Stage 1의 샘플 수를 줄이고 `--allow_subset`을 지정합니다.
@@ -463,13 +463,13 @@ bash defense_scripts/setup_jailguard.sh
 
 ```bash
 python run_generate_completions.py \
-  --run_dir runs/figstep_safebench --model llava_v1_5 \
+  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
   --batch_size 1 --defense AdaShield \
   --defense_config configs/defense_configs/AdaShield.yaml \
   --save_path runs/figstep_safebench/completions_llava_v1_5__defense-AdaShield.jsonl
 
 python run_evaluate_completions.py \
-  --run_dir runs/figstep_safebench --model llava_v1_5 \
+  --run_dir runs/figstep_safebench --model_name llava_v1_5 \
   --judge_batch_size 1 \
   --completions_path runs/figstep_safebench/completions_llava_v1_5__defense-AdaShield.jsonl \
   --save_path runs/figstep_safebench/results_llava_v1_5__defense-AdaShield.jsonl
@@ -557,8 +557,8 @@ unzip -n ../3000_samples.zip -d .
 
 ```bash
 RUN_DIR=runs/five_methods_3000_all_records_20261104/full
-python run_generate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --batch_size 1
-python run_evaluate_completions.py --run_dir "$RUN_DIR" --model qwen3_vl_2b --judge_batch_size 1
+python run_generate_completions.py --run_dir "$RUN_DIR" --model_name qwen3_vl_2b --batch_size 1
+python run_evaluate_completions.py --run_dir "$RUN_DIR" --model_name qwen3_vl_2b --judge_batch_size 1
 ```
 
 ### Generate a new dataset
